@@ -3,120 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Tienda Online - Catálogo</title>
+    <title>Mi Tienda Pro | Catálogo Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .category-pill.active { background-color: #2563eb; color: white; }
+        .product-card:hover { transform: translateY(-5px); transition: all 0.3s ease; }
+    </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-10">
+<body class="bg-gray-50 font-sans text-gray-900">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-lg shadow-sm">
-            <h1 class="text-2xl font-bold text-blue-600">MI TIENDA EMPRESA</h1>
-            <div class="text-gray-600 font-semibold">🛒 Carrito: <span id="cart-count">0</span></div>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div id="productos-grid" class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
-
-            <div class="bg-white p-6 rounded-lg shadow-md h-fit sticky top-4">
-                <h2 class="text-xl font-bold mb-4 border-b pb-2">Tu Pedido</h2>
-                <div id="carrito-items" class="mb-4 text-sm text-gray-600">
-                    </div>
-                <div class="border-t pt-4 space-y-2">
-                    <div class="flex justify-between text-gray-600"><span>Subtotal:</span> <span id="subtotal">$0</span></div>
-                    <div class="flex justify-between text-gray-600"><span>Impuesto (19%):</span> <span id="impuesto">$0</span></div>
-                    <div class="flex justify-between text-xl font-bold text-blue-700"><span>Total:</span> <span id="total">$0</span></div>
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h1 class="text-2xl font-black text-blue-600 tracking-tight">MI TIENDA EMPRESA</h1>
+                
+                <div class="relative flex-1 max-w-md">
+                    <input type="text" id="searchInput" onkeyup="filtrarProductos()" 
+                           placeholder="Buscar productos..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <i class="fa fa-search absolute left-4 top-3 text-gray-400"></i>
                 </div>
-                <button onclick="enviarPedido()" class="w-full mt-6 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition shadow-lg">
-                    Finalizar por WhatsApp
+
+                <button onclick="toggleCart()" class="relative p-2 text-gray-600">
+                    <i class="fa fa-shopping-cart text-2xl"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <section id="destacados-section" class="mb-12">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <i class="fa fa-star text-yellow-400"></i> Productos de Temporada
+            </h2>
+            <div id="destacados-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                </div>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-xl font-bold mb-4">Categorías</h2>
+            <div id="categorias-nav" class="flex flex-wrap gap-2">
+                <button onclick="filtrarPorCategoria('todas')" class="category-pill active px-4 py-2 rounded-full border border-gray-200 text-sm font-medium">Todas</button>
+                <button onclick="filtrarPorCategoria('hogar')" class="category-pill px-4 py-2 rounded-full border border-gray-200 text-sm font-medium">Hogar</button>
+                <button onclick="filtrarPorCategoria('tecnologia')" class="category-pill px-4 py-2 rounded-full border border-gray-200 text-sm font-medium">Tecnología</button>
+                <button onclick="filtrarPorCategoria('mascotas')" class="category-pill px-4 py-2 rounded-full border border-gray-200 text-sm font-medium">Mascotas</button>
+                <button onclick="filtrarPorCategoria('higiene')" class="category-pill px-4 py-2 rounded-full border border-gray-200 text-sm font-medium">Higiene</button>
+            </div>
+        </section>
+
+        <section>
+            <h2 id="catalogo-titulo" class="text-xl font-bold mb-6 text-gray-500">Todo el catálogo</h2>
+            <div id="productos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                </div>
+        </section>
+    </main>
+
+    <div id="cart-modal" class="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-[60] transform translate-x-full transition-transform duration-300 ease-in-out border-l">
+        <div class="p-6 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Tu Pedido</h2>
+                <button onclick="toggleCart()" class="text-gray-500 text-2xl">&times;</button>
+            </div>
+            
+            <div id="carrito-items" class="flex-1 overflow-y-auto space-y-4">
+                </div>
+
+            <div class="border-t pt-6 mt-6 space-y-3">
+                <div class="flex justify-between text-gray-600"><span>Subtotal</span> <span id="subtotal">$0</span></div>
+                <div class="flex justify-between text-gray-600"><span>IVA (19%)</span> <span id="impuesto">$0</span></div>
+                <div class="flex justify-between text-2xl font-black text-blue-600"><span>Total</span> <span id="total">$0</span></div>
+                <button onclick="enviarPedido()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 mt-4">
+                    <i class="fab fa-whatsapp text-xl"></i> Finalizar por WhatsApp
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. CONFIGURACIÓN DE TUS PRODUCTOS
+        // CONFIGURACIÓN DE DATOS
+        const WHATSAPP_TLF = "56949513296";
+        const IVA_PORCENTAJE = 0.19;
+
         const productos = [
-            { id: 1, nombre: "Artículo Premium A", precio: 25000, img: "https://via.placeholder.com/150" },
-            { id: 2, nombre: "Artículo B - Oficina", precio: 12000, img: "https://via.placeholder.com/150" },
-            { id: 3, nombre: "Pack Especial C", precio: 45000, img: "https://via.placeholder.com/150" },
+            // CATEGORÍA: TECNOLOGÍA
+            { id: 1, nombre: "Audífonos Bluetooth", precio: 25000, cat: "tecnologia", destacado: true, img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300" },
+            { id: 2, nombre: "Smartwatch Sport", precio: 45000, cat: "tecnologia", destacado: true, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300" },
+            
+            // CATEGORÍA: HOGAR
+            { id: 3, nombre: "Lámpara Minimalista", precio: 19990, cat: "hogar", destacado: true, img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=300" },
+            { id: 4, nombre: "Set de Tazas (4 piezas)", precio: 12500, cat: "hogar", destacado: false, img: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=300" },
+            
+            // CATEGORÍA: MASCOTAS
+            { id: 5, nombre: "Cama Perro Grande", precio: 32000, cat: "mascotas", destacado: true, img: "https://images.unsplash.com/photo-1591584539485-1527023bd84a?w=300" },
+            { id: 6, nombre: "Juguete Interactivo Gato", precio: 8990, cat: "mascotas", destacado: true, img: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=300" },
+            
+            // CATEGORÍA: HIGIENE
+            { id: 7, nombre: "Pack Jabón Artesanal", precio: 15000, cat: "higiene", destacado: false, img: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214?w=300" }
         ];
 
-        let carrito = [];
-        const IVA = 0.19; // Cambia esto según tu país (ej: 0.19 para 19%)
-        const WHATSAPP_TLF = "56949513296"; // Escribe tu número de empresa aquí (con código de país)
+        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 
-        // 2. RENDERIZAR PRODUCTOS
-        function cargarProductos() {
+        // RENDERIZADO INICIAL
+        function init() {
+            renderDestacados();
+            renderProductos(productos);
+            actualizarInterfazCarrito();
+        }
+
+        function renderDestacados() {
+            const grid = document.getElementById('destacados-grid');
+            const destacados = productos.filter(p => p.destacado).slice(0, 5);
+            grid.innerHTML = destacados.map(p => crearCard(p, true)).join('');
+        }
+
+        function renderProductos(lista) {
             const grid = document.getElementById('productos-grid');
-            productos.forEach(p => {
-                grid.innerHTML += `
-                    <div class="bg-white p-4 rounded shadow hover:shadow-md transition">
-                        <img src="${p.img}" class="w-full h-32 object-cover rounded mb-2">
-                        <h3 class="font-bold text-gray-800">${p.nombre}</h3>
-                        <p class="text-blue-600 font-bold">$${p.precio.toLocaleString()}</p>
-                        <button onclick="agregarAlCarrito(${p.id})" class="mt-2 w-full bg-blue-100 text-blue-700 py-1 rounded font-semibold hover:bg-blue-200">+ Agregar</button>
-                    </div>
-                `;
-            });
+            grid.innerHTML = lista.map(p => crearCard(p, false)).join('');
         }
 
-        // 3. LÓGICA DEL CARRITO
+        function crearCard(p, esDestacado) {
+            return `
+                <div class="product-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 p-3">
+                    <img src="${p.img}" class="w-full h-32 object-cover rounded-xl mb-3">
+                    <h3 class="font-bold text-sm text-gray-800 leading-tight h-10">${p.nombre}</h3>
+                    <p class="text-blue-600 font-black mt-1">$${p.precio.toLocaleString()}</p>
+                    <button onclick="agregarAlCarrito(${p.id})" class="mt-3 w-full bg-blue-50 text-blue-600 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors">
+                        <i class="fa fa-plus mr-1"></i> AGREGAR
+                    </button>
+                </div>
+            `;
+        }
+
+        // BUSCADOR Y FILTROS
+        function filtrarProductos() {
+            const busqueda = document.getElementById('searchInput').value.toLowerCase();
+            const filtrados = productos.filter(p => p.nombre.toLowerCase().includes(busqueda));
+            renderProductos(filtrados);
+            document.getElementById('catalogo-titulo').innerText = busqueda ? `Resultados para "${busqueda}"` : "Todo el catálogo";
+        }
+
+        function filtrarPorCategoria(cat) {
+            // Actualizar UI botones
+            document.querySelectorAll('.category-pill').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const filtrados = cat === 'todas' ? productos : productos.filter(p => p.cat === cat);
+            renderProductos(filtrados);
+            document.getElementById('catalogo-titulo').innerText = `Categoría: ${cat.toUpperCase()}`;
+        }
+
+        // LÓGICA CARRITO
         function agregarAlCarrito(id) {
-            const producto = productos.find(p => p.id === id);
-            carrito.push(producto);
-            actualizarInterfaz();
+            const prod = productos.find(p => p.id === id);
+            carrito.push(prod);
+            localStorage.setItem('carrito', JSON.stringify(carrito));
+            actualizarInterfazCarrito();
+            if(window.innerWidth > 768) openCart();
         }
 
-        function actualizarInterfaz() {
+        function actualizarInterfazCarrito() {
             document.getElementById('cart-count').innerText = carrito.length;
-            const lista = document.getElementById('carrito-items');
-            lista.innerHTML = "";
-            
+            const contenedor = document.getElementById('carrito-items');
+            contenedor.innerHTML = "";
+
             let subtotal = 0;
             carrito.forEach((p, index) => {
                 subtotal += p.precio;
-                lista.innerHTML += `<div class="flex justify-between mb-1"><span>${p.nombre}</span> <b>$${p.precio.toLocaleString()}</b></div>`;
+                contenedor.innerHTML += `
+                    <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl">
+                        <img src="${p.img}" class="w-12 h-12 rounded-lg object-cover">
+                        <div class="flex-1 text-sm">
+                            <h4 class="font-bold">${p.nombre}</h4>
+                            <p class="text-blue-600 font-bold">$${p.precio.toLocaleString()}</p>
+                        </div>
+                        <button onclick="eliminarDelCarrito(${index})" class="text-red-400 p-2"><i class="fa fa-trash"></i></button>
+                    </div>
+                `;
             });
 
-            const impuestoCalculado = subtotal * IVA;
-            const totalFinal = subtotal + impuestoCalculado;
+            const iva = subtotal * IVA_PORCENTAJE;
+            const total = subtotal + iva;
 
             document.getElementById('subtotal').innerText = `$${subtotal.toLocaleString()}`;
-            document.getElementById('impuesto').innerText = `$${impuestoCalculado.toLocaleString()}`;
-            document.getElementById('total').innerText = `$${totalFinal.toLocaleString()}`;
+            document.getElementById('impuesto').innerText = `$${iva.toLocaleString()}`;
+            document.getElementById('total').innerText = `$${total.toLocaleString()}`;
         }
 
-        // 4. ENVÍO A WHATSAPP
+        function eliminarDelCarrito(index) {
+            carrito.splice(index, 1);
+            localStorage.setItem('carrito', JSON.stringify(carrito));
+            actualizarInterfazCarrito();
+        }
+
+        function toggleCart() {
+            const modal = document.getElementById('cart-modal');
+            modal.classList.toggle('translate-x-full');
+        }
+
+        function openCart() { document.getElementById('cart-modal').classList.remove('translate-x-full'); }
+
+        // ENVÍO WHATSAPP
         function enviarPedido() {
             if (carrito.length === 0) return alert("El carrito está vacío");
-
-            const nroOrden = "ORD-" + Math.floor(Date.now() / 1000); // Nro único basado en tiempo
-            let listaProductos = "";
+            const nroOrden = "ORD-" + Math.floor(Date.now() / 1000);
+            let lista = "";
             let subtotal = 0;
-
+            
             carrito.forEach(p => {
-                listaProductos += `- ${p.nombre} ($${p.precio})\n`;
+                lista += `• ${p.nombre} ($${p.precio.toLocaleString()})\n`;
                 subtotal += p.precio;
             });
 
-            const impuesto = subtotal * IVA;
-            const total = subtotal + impuesto;
+            const iva = subtotal * IVA_PORCENTAJE;
+            const total = subtotal + iva;
 
-            const mensaje = `*NUEVO PEDIDO DE COMPRA*\n` +
-                            `--------------------------\n` +
-                            `*Orden:* #${nroOrden}\n` +
-                            `--------------------------\n` +
-                            `${listaProductos}\n` +
-                            `*Subtotal:* $${subtotal.toLocaleString()}\n` +
-                            `*Impuesto:* $${impuesto.toLocaleString()}\n` +
-                            `*TOTAL A PAGAR:* $${total.toLocaleString()}\n\n` +
-                            `_Por favor, envíeme los datos de transferencia para concretar el pago._`;
-
-            const url = `https://wa.me/${WHATSAPP_TLF}?text=${encodeURIComponent(mensaje)}`;
-            window.open(url, '_blank');
+            const mensaje = `*PEDIDO: ${nroOrden}*\n\n${lista}\n*Subtotal:* $${subtotal.toLocaleString()}\n*IVA:* $${iva.toLocaleString()}\n*TOTAL:* $${total.toLocaleString()}\n\n_Aguardo sus datos de transferencia para el pago._`;
+            
+            window.open(`https://wa.me/${WHATSAPP_TLF}?text=${encodeURIComponent(mensaje)}`, '_blank');
         }
 
-        cargarProductos();
+        init();
     </script>
 </body>
 </html>
