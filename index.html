@@ -85,9 +85,9 @@
                 </div>
                 <nav class="space-y-3">
                     <button onclick="filtrar('todas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-border-all text-beige group-hover:scale-110 transition"></i> Todo el Catálogo</button>
-                    <button onclick="filtrar('tecnologia')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-mobile-alt text-beige w-5 group-hover:scale-110 transition"></i> Tecnología</button>
-                    <button onclick="filtrar('hogar')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-couch text-beige w-5 group-hover:scale-110 transition"></i> Hogar</button>
-                    <button onclick="filtrar('mascotas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-paw text-beige w-5 group-hover:scale-110 transition"></i> Mascotas</button>
+                    <button onclick="filtrar('hogar')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-home text-beige w-5 group-hover:scale-110 transition"></i> Hogar</button>
+                    <button onclick="filtrar('aseo')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-soap text-beige w-5 group-hover:scale-110 transition"></i> Aseo</button>
+                    <button onclick="filtrar('salud')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-heartbeat text-beige w-5 group-hover:scale-110 transition"></i> Salud</button>
                 </nav>
             </div>
             <div class="mb-10">
@@ -171,11 +171,48 @@
         const WHATSAPP_NUM = "56949513296";
         const IVA = 1.19;
 
+        // --- AQUÍ ESTÁN TUS PRODUCTOS CARGADOS DEL EXCEL ---
         const db = [
-            { id: 1, nombre: "Smartwatch Elite Series Gold", precio: 45000, cat: "tecnologia", destacado: true, img: "https://images.unsplash.com/photo-1544117518-306373059149?w=800", desc: "Acabado premium en aluminio y correa de silicona hipoalergénica.", specs: ["Pantalla Retina", "Batería 24h", "Resistente al agua"] },
-            { id: 2, nombre: "Set Cuchillos Chef Minimal", precio: 32990, cat: "hogar", destacado: true, img: "https://images.unsplash.com/photo-1593618998160-e34014e67546?w=800", desc: "Diseño monobloque en acero inoxidable de alto carbono.", specs: ["Acero Japonés", "Filo Láser", "Mango Ergonómico"] },
-            { id: 3, nombre: "Cama Mascota Nórdica", precio: 28000, cat: "mascotas", destacado: true, img: "https://images.unsplash.com/photo-1591584539485-1527023bd84a?w=800", desc: "Textiles naturales y diseño que combina con tu hogar.", specs: ["Algodón Orgánico", "Lavable a máquina", "Extra suave"] },
-            { id: 4, nombre: "Audífonos Studio Beige", precio: 55000, cat: "tecnologia", destacado: false, img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", desc: "Sonido de alta fidelidad con cancelación de ruido activa.", specs: ["ANC Híbrido", "40h Reproducción", "Carga Rápida"] }
+            {
+                id: 1,
+                nombre: "Detergente Omo Piel Sensible 500 mL",
+                precio: 5000,
+                cat: "aseo",
+                destacado: true,
+                img: "imagenes/omo-piel-sensible-main.webp",
+                desc: "Jabón para lavados de ropa a mano con fragancia a bebé. Dermatológicamente testeado para pieles sensibles.",
+                specs: "Unidades por pack: 1, Volumen neto: 500 mL, Hipoalergénico"
+            },
+            {
+                id: 2,
+                nombre: "12 Tabletas Descalcificador Cafeteras",
+                precio: 8500,
+                cat: "hogar",
+                destacado: true,
+                img: "imagenes/pastillas-descalcificadoras-main.webp",
+                desc: "Anti-sarro efectivo para eliminar cal en cafeteras, hervidores y teteras. Biodegradable y seguro.",
+                specs: "Unidades: 12, Biodegradable, Uso: Cafeteras y Hervidores"
+            },
+            {
+                id: 3,
+                nombre: "Papel Aluminio 10 Metros con Dispensador",
+                precio: 3500,
+                cat: "hogar",
+                destacado: false,
+                img: "imagenes/papel-aluminio-main.webp",
+                desc: "Papel de aluminio ultra resistente, ideal para cocinar, hornear y asar. Incluye sierra de corte.",
+                specs: "Longitud: 10m, Con dispensador, Resistente al calor"
+            },
+            {
+                id: 4,
+                nombre: "Nebulizador Portátil Mesh para Niños",
+                precio: 32000,
+                cat: "salud",
+                destacado: true,
+                img: "imagenes/nebulizador-portatil-main.webp",
+                desc: "Nebulizador tipo Mesh eficiente y silencioso. Ideal para niños, funciona con pilas o USB.",
+                specs: "Tecnología Mesh, Silencioso, Capacidad 10ml, Portátil"
+            }
         ];
 
         let cart = [];
@@ -244,7 +281,7 @@
             
             if (cart.length === 0) {
                 list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-7xl mb-6 opacity-20"></i><p class="font-medium text-lg">Tu carrito está vacío</p></div>`;
-                stickyBar.classList.add('hidden'); // Ocultar siempre si está vacío
+                stickyBar.classList.add('hidden'); 
             } else {
                 list.innerHTML = cart.map((p, i) => `
                     <div class="flex gap-5 items-center bg-white p-2 rounded-2xl relative group">
@@ -258,7 +295,6 @@
                     </div>
                 `).join('');
                 
-                // MOSTRAR BARRA MÓVIL (Solo si el carrito NO está abierto)
                 const sidebar = document.getElementById('cart-sidebar');
                 if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) {
                     stickyBar.classList.remove('hidden');
@@ -283,20 +319,14 @@
             const stickyBar = document.getElementById('mobile-sticky-bar');
 
             if (sidebar.classList.contains('translate-x-full')) {
-                // ABRIR CARRITO
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
                 if(window.innerWidth >= 1024) main.classList.add('cart-open');
-                
-                // OCULTAR BARRA MÓVIL AL ABRIR
                 stickyBar.classList.add('hidden');
             } else {
-                // CERRAR CARRITO
                 sidebar.classList.remove('translate-x-0');
                 sidebar.classList.add('translate-x-full');
                 if(window.innerWidth >= 1024) main.classList.remove('cart-open');
-                
-                // MOSTRAR BARRA MÓVIL AL CERRAR (Si hay productos)
                 if(cart.length > 0 && window.innerWidth < 1024) {
                     stickyBar.classList.remove('hidden');
                 }
@@ -317,6 +347,10 @@
         function openProduct(id) {
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
+            
+            // CORRECCIÓN: Convertir el texto de specs (ej: "A, B, C") en lista para que se vea bonito
+            let specsList = Array.isArray(p.specs) ? p.specs : p.specs.split(',').map(s => s.trim());
+
             document.getElementById('modal-content').innerHTML = `
                 <div class="max-w-7xl mx-auto p-6 md:p-12 lg:flex gap-16 pt-24">
                     <div class="lg:w-1/2 mb-10 lg:mb-0">
@@ -329,7 +363,7 @@
                         <div class="bg-gray-50/80 p-8 rounded-[2rem] mb-10 border border-gray-100">
                             <h3 class="font-black mb-6 uppercase text-xs text-beige tracking-widest">Características Clave</h3>
                             <ul class="space-y-4">
-                                ${p.specs.map(s => `<li class="flex items-center gap-4 font-bold text-gray-700"><i class="fa fa-check-circle text-beige text-xl"></i> ${s}</li>`).join('')}
+                                ${specsList.map(s => `<li class="flex items-center gap-4 font-bold text-gray-700"><i class="fa fa-check-circle text-beige text-xl"></i> ${s}</li>`).join('')}
                             </ul>
                         </div>
                         <div class="flex items-center justify-between border-t border-gray-100 pt-10">
