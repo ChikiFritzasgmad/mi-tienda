@@ -5,272 +5,340 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papajose SPA | Tienda Oficial</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --beige: #D2B48C; --light-beige: #F5F5DC; }
+        /* --- PALETA DE COLORES PREMIUM --- */
+        :root { 
+            --beige: #D2B48C;
+            --beige-light: #F5F5DC; 
+            --dark-text: #2D2D2D;
+        }
         .text-beige { color: var(--beige); }
         .bg-beige { background-color: var(--beige); }
         .border-beige { border-color: var(--beige); }
+        
+        body { background-color: #ffffff; color: var(--dark-text); }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #E0E0E0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--beige); }
 
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: var(--beige); border-radius: 10px; }
-
-        /* Animación para el carrito persistente en PC */
+        /* --- LAYOUT LÓGICO --- */
+        /* En PC, empujamos el contenido principal a la derecha */
         @media (min-width: 1024px) {
-            .main-content { transition: margin-right 0.3s ease; }
-            .content-with-cart { margin-right: 380px; }
+            .layout-desktop { margin-left: 280px; transition: margin-right 0.3s ease; }
+            .layout-desktop.cart-open { margin-right: 400px; }
+            .header-desktop-adjust { padding-left: 280px; } /* CORRECCIÓN CLAVE */
+            .responsive-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
         }
+        
+        @media (max-width: 1023px) {
+            .mobile-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; padding-bottom: 1rem; scrollbar-width: none; }
+            .mobile-slider::-webkit-scrollbar { display: none; }
+            .slider-card { min-width: 85%; scroll-snap-align: center; }
+        }
+        .fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-white font-sans antialiased overflow-x-hidden">
+<body class="font-sans antialiased overflow-x-hidden">
 
-    <header class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-[100] border-b border-gray-100 px-6 py-4">
-        <div class="flex justify-between items-center max-w-[1800px] mx-auto">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleMenu()" class="text-2xl p-2 hover:bg-gray-100 rounded-lg transition">
-                    <i class="fa fa-bars text-beige"></i>
-                </button>
-                <h1 class="text-2xl font-black tracking-tighter text-beige uppercase">Papajose SPA</h1>
-            </div>
+    <header class="fixed top-0 w-full bg-white z-[50] border-b border-gray-50 h-20 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] transition-all duration-300 header-desktop-adjust">
+        <div class="h-full flex justify-between items-center px-6 md:px-10 relative">
             
-            <div class="flex items-center gap-4">
-                <div class="hidden md:block relative">
-                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar productos..." class="bg-gray-50 border-none rounded-full px-6 py-2 w-64 text-sm focus:ring-2 focus:ring-beige/50">
+            <div class="flex items-center z-20">
+                <button onclick="toggleMobileMenu()" class="lg:hidden text-2xl text-beige hover:text-black transition"><i class="fa fa-bars"></i></button>
+            </div>
+
+            <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none">
+                <h1 class="text-2xl md:text-3xl font-black tracking-wider text-beige uppercase pointer-events-auto inline-block" style="font-family: 'Arial Black', sans-serif;">
+                    Papajose SPA
+                </h1>
+            </div>
+
+            <div class="flex items-center gap-6 z-20 bg-white pl-4">
+                <div class="hidden lg:block relative group">
+                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar..." 
+                           class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all duration-300">
+                    <i class="fa fa-search absolute right-4 top-3 text-beige group-focus-within:text-black transition"></i>
                 </div>
-                <button onclick="toggleCart()" class="p-2 relative bg-gray-50 rounded-full">
-                    <i class="fa fa-shopping-cart text-xl text-gray-700"></i>
-                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold px-1.5 rounded-full">0</span>
+
+                <button onclick="toggleCart()" class="relative p-2 group">
+                    <i class="fa fa-shopping-bag text-2xl text-beige group-hover:text-black transition-colors duration-300"></i>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white">0</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <aside id="menu-sidebar" class="fixed inset-y-0 left-0 w-72 bg-white z-[110] transform -translate-x-full transition-transform duration-300 shadow-2xl border-r">
-        <div class="p-8 flex flex-col h-full">
-            <div class="flex justify-between items-center mb-10">
-                <span class="font-black text-beige uppercase tracking-widest">Navegación</span>
-                <button onclick="toggleMenu()" class="text-gray-400">✕</button>
+    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[60] pt-24 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 shadow-[2px_0_20px_-5px_rgba(0,0,0,0.05)]">
+        <div class="p-8 h-full overflow-y-auto flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-10 lg:hidden">
+                    <span class="font-bold text-beige uppercase tracking-widest text-xs">Menú</span>
+                    <button onclick="toggleMobileMenu()" class="text-2xl text-beige">✕</button>
+                </div>
+
+                <nav class="space-y-3">
+                    <button onclick="filtrar('todas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group">
+                        <i class="fa fa-border-all text-beige group-hover:scale-110 transition"></i> Todo el Catálogo
+                    </button>
+                    <button onclick="filtrar('tecnologia')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group">
+                        <i class="fa fa-mobile-alt text-beige w-5 group-hover:scale-110 transition"></i> Tecnología
+                    </button>
+                    <button onclick="filtrar('hogar')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group">
+                        <i class="fa fa-couch text-beige w-5 group-hover:scale-110 transition"></i> Hogar
+                    </button>
+                    <button onclick="filtrar('mascotas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group">
+                        <i class="fa fa-paw text-beige w-5 group-hover:scale-110 transition"></i> Mascotas
+                    </button>
+                </nav>
             </div>
-            <nav class="space-y-4 flex-1">
-                <button onclick="filtrar('todas')" class="w-full text-left p-4 rounded-xl hover:bg-beige/10 font-bold transition flex items-center gap-3">
-                    <i class="fa fa-home text-beige"></i> Todo el Catálogo
-                </button>
-                <button onclick="filtrar('tecnologia')" class="w-full text-left p-4 rounded-xl hover:bg-beige/10 font-bold transition flex items-center gap-3">
-                    <i class="fa fa-laptop text-beige"></i> Tecnología
-                </button>
-                <button onclick="filtrar('hogar')" class="w-full text-left p-4 rounded-xl hover:bg-beige/10 font-bold transition flex items-center gap-3">
-                    <i class="fa fa-couch text-beige"></i> Hogar
-                </button>
-                <button onclick="filtrar('mascotas')" class="w-full text-left p-4 rounded-xl hover:bg-beige/10 font-bold transition flex items-center gap-3">
-                    <i class="fa fa-paw text-beige"></i> Mascotas
-                </button>
-            </nav>
-            <div class="pt-6 border-t space-y-2">
-                <p class="text-[10px] text-gray-400 font-bold uppercase">Contacto Empresa</p>
-                <p class="text-sm font-bold text-gray-600">+56 9 4951 3296</p>
+
+            <div class="mb-10">
+                <h4 class="text-xs font-black uppercase text-beige mb-6 tracking-widest">Síguenos</h4>
+                <div class="flex gap-6 text-2xl text-beige/70">
+                    <a href="#" class="hover:text-beige transition hover:scale-110"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="hover:text-beige transition hover:scale-110"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" class="hover:text-beige transition hover:scale-110"><i class="fab fa-whatsapp"></i></a>
+                </div>
             </div>
         </div>
     </aside>
 
-    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[380px] bg-white z-[110] transform translate-x-full transition-transform duration-300 shadow-2xl border-l flex flex-col">
-        <div class="p-6 border-b flex justify-between items-center bg-gray-50">
-            <h2 class="text-xl font-black italic">Tu Carrito</h2>
-            <button onclick="toggleCart()" class="text-gray-400 hover:text-black">✕ Cerrar</button>
+    <main id="main-content" class="pt-28 pb-32 px-6 md:px-12 layout-desktop min-h-screen">
+        
+        <div class="lg:hidden mb-10 relative">
+            <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué estás buscando?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
+            <i class="fa fa-search absolute left-5 top-5 text-beige"></i>
         </div>
-        <div id="cart-content" class="flex-1 overflow-y-auto p-6 space-y-4">
+
+        <section class="mb-16">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-1.5 h-8 bg-beige rounded-full"></div>
+                <h2 class="text-3xl font-black uppercase tracking-tight text-gray-800">Destacados</h2>
             </div>
-        <div class="p-6 border-t bg-white">
-            <div class="flex justify-between text-xl font-black mb-6">
-                <span>Total:</span>
-                <span id="total-price" class="text-blue-600">$0</span>
+            
+            <div id="grid-destacados" class="mobile-slider responsive-grid pb-4"></div>
+        </section>
+
+        <section>
+            <div class="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
+                <h2 id="titulo-grid" class="text-xl font-bold text-beige uppercase tracking-widest">Catálogo Completo</h2>
             </div>
-            <button onclick="irAWhatsapp()" class="w-full bg-black text-white py-4 rounded-2xl font-bold flex justify-center items-center gap-3 hover:bg-gray-900 transition active:scale-95">
-                <i class="fab fa-whatsapp text-2xl"></i> Enviar Pedido
+            <div id="grid-productos" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-10"></div>
+        </section>
+
+    </main>
+
+    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-[-5px_0_30px_-10px_rgba(0,0,0,0.1)] transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-8 border-b border-gray-50 flex justify-between items-center">
+            <h2 class="text-2xl font-black uppercase text-gray-800">Tu Carrito</h2>
+            <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl">✕</button>
+        </div>
+        
+        <div id="cart-items" class="flex-1 overflow-y-auto p-8 space-y-8"></div>
+
+        <div class="p-8 bg-white border-t border-gray-50">
+            <div class="space-y-3 mb-8 text-sm font-medium">
+                <div class="flex justify-between text-gray-500"><span>Subtotal</span> <span id="cart-subtotal">$0</span></div>
+                <div class="flex justify-between text-gray-500"><span>IVA (19%)</span> <span id="cart-iva">$0</span></div>
+                <div class="flex justify-between text-3xl font-black text-gray-900 mt-4 pt-4 border-t border-dashed"><span>Total</span> <span id="cart-total">$0</span></div>
+            </div>
+            <button onclick="enviarPedido()" class="w-full bg-black text-white py-5 rounded-2xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg hover:shadow-beige/50 flex items-center justify-center gap-3 text-sm">
+                Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>
             </button>
         </div>
     </aside>
 
-    <main id="main-area" class="main-content mt-24 px-6 md:px-12 pb-20">
-        <section id="sec-destacados" class="mb-16">
-            <h2 class="text-3xl font-black mb-8 border-l-4 border-beige pl-4">Destacados de Temporada</h2>
-            <div id="grid-destacados" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
-        </section>
-
-        <section>
-            <h2 id="titulo-seccion" class="text-xl font-bold text-gray-400 mb-8 uppercase tracking-widest italic">Catálogo Completo</h2>
-            <div id="grid-productos" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-10"></div>
-        </section>
-    </main>
-
-    <footer class="bg-gray-50 border-t border-gray-100 py-16 px-6 main-content">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
-            <div class="col-span-1 md:col-span-2">
-                <h3 class="text-2xl font-black text-beige mb-4 uppercase">Papajose SPA</h3>
-                <p class="text-gray-500 max-w-sm">Venta de productos premium con despacho a todo Chile. Calidad y confianza en cada pedido.</p>
-            </div>
-            <div>
-                <h4 class="font-bold mb-6">Síguenos</h4>
-                <div class="flex gap-6 text-2xl text-gray-400">
-                    <a href="#" class="hover:text-pink-500 transition"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="hover:text-black transition"><i class="fab fa-tiktok"></i></a>
-                    <a href="mailto:contacto@papajose.cl" class="hover:text-red-500 transition"><i class="fa fa-envelope"></i></a>
-                </div>
-            </div>
-            <div>
-                <h4 class="font-bold mb-6">Redes</h4>
-                <p class="text-sm text-gray-500 mb-2">WhatsApp: +56 9 4951 3296</p>
-                <p class="text-sm text-gray-500">Ubicación: Santiago, Chile</p>
-            </div>
+    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-100 p-4 z-[55] shadow-[0_-5px_20px_rgba(0,0,0,0.05)] flex justify-between items-center lg:hidden hidden fade-in-up">
+        <div>
+            <p class="text-[10px] text-beige font-bold uppercase tracking-wider">Total a pagar</p>
+            <p id="mobile-total-sticky" class="text-2xl font-black text-gray-900">$0</p>
         </div>
-    </footer>
+        <button onclick="toggleCart()" class="bg-black text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition flex items-center gap-2">
+            Ver Carrito <i class="fa fa-arrow-right"></i>
+        </button>
+    </div>
 
-    <div id="modal-detalle" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-5xl rounded-[40px] overflow-hidden relative shadow-2xl flex flex-col md:flex-row h-[90vh] md:h-auto">
-            <button onclick="cerrarModal()" class="absolute top-6 right-6 z-10 bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center">✕</button>
-            <div id="modal-inner" class="flex flex-col md:flex-row w-full h-full"></div>
+    <div id="toast-modal" class="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm hidden flex items-end md:items-center justify-center p-4 transition-all">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center transform transition-all scale-100 mb-4 md:mb-0 border border-white/50">
+            <div class="w-20 h-20 bg-beige/20 text-beige rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-sm"><i class="fa fa-check"></i></div>
+            <h3 class="text-2xl font-black text-gray-800 mb-3">¡Excelente elección!</h3>
+            <p class="text-gray-500 font-medium mb-8">Producto agregado correctamente.</p>
+            <div class="flex gap-4">
+                <button onclick="cerrarToast()" class="flex-1 py-4 rounded-2xl border-2 border-gray-100 font-bold text-gray-600 hover:border-beige hover:text-beige transition">Seguir Viendo</button>
+                <button onclick="cerrarToast(); toggleCart()" class="flex-1 py-4 rounded-2xl bg-black text-white font-bold shadow-xl hover:bg-beige transition">Ir al Carrito</button>
+            </div>
         </div>
     </div>
 
+    <div id="product-modal" class="fixed inset-0 z-[200] bg-white hidden overflow-y-auto">
+        <button onclick="closeProductModal()" class="fixed top-6 right-6 z-50 bg-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-xl hover:rotate-90 transition border border-gray-100">✕</button>
+        <div id="modal-content" class="min-h-screen"></div>
+    </div>
+
     <script>
-        const WHATSAPP_NUMBER = "56949513296";
+        const WHATSAPP_NUM = "56949513296";
         const IVA = 1.19;
 
-        const data = [
-            { id: 1, nombre: "Smartwatch Elite Pro", precio: 45000, cat: "tecnologia", destacado: true, img: "https://images.unsplash.com/photo-1544117518-306373059149?w=800", desc: "Monitoreo avanzado de salud y notificaciones inteligentes en tiempo real.", specs: ["Pantalla AMOLED", "Batería 14 días", "Resistente al agua"] },
-            { id: 2, nombre: "Set Hogar Moderno", precio: 32990, cat: "hogar", destacado: true, img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800", desc: "Elegancia y funcionalidad para tu cocina con materiales de grado alimenticio.", specs: ["Silicona BPA Free", "Mango de Madera", "Resistente 230°C"] },
-            { id: 3, nombre: "Cama Mascota Comfort", precio: 25000, cat: "mascotas", destacado: false, img: "https://images.unsplash.com/photo-1591584539485-1527023bd84a?w=800", desc: "El mejor descanso para tu mejor amigo con materiales ultra suaves.", specs: ["Lavable", "Base antideslizante", "Extra acolchado"] }
+        const db = [
+            { id: 1, nombre: "Smartwatch Elite Series Gold", precio: 45000, cat: "tecnologia", destacado: true, img: "https://images.unsplash.com/photo-1544117518-306373059149?w=800", desc: "Acabado premium en aluminio y correa de silicona hipoalergénica.", specs: ["Pantalla Retina", "Batería 24h", "Resistente al agua"] },
+            { id: 2, nombre: "Set Cuchillos Chef Minimal", precio: 32990, cat: "hogar", destacado: true, img: "https://images.unsplash.com/photo-1593618998160-e34014e67546?w=800", desc: "Diseño monobloque en acero inoxidable de alto carbono.", specs: ["Acero Japonés", "Filo Láser", "Mango Ergonómico"] },
+            { id: 3, nombre: "Cama Mascota Nórdica", precio: 28000, cat: "mascotas", destacado: true, img: "https://images.unsplash.com/photo-1591584539485-1527023bd84a?w=800", desc: "Textiles naturales y diseño que combina con tu hogar.", specs: ["Algodón Orgánico", "Lavable a máquina", "Extra suave"] },
+            { id: 4, nombre: "Audífonos Studio Beige", precio: 55000, cat: "tecnologia", destacado: false, img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", desc: "Sonido de alta fidelidad con cancelación de ruido activa.", specs: ["ANC Híbrido", "40h Reproducción", "Carga Rápida"] }
         ];
 
-        let carrito = [];
+        let cart = [];
 
-        function renderShop(productosParaMostrar = data) {
-            const gridDest = document.getElementById('grid-destacados');
-            const gridGral = document.getElementById('grid-productos');
-            
-            gridDest.innerHTML = data.filter(p => p.destacado).map(p => crearTarjeta(p)).join('');
-            gridGral.innerHTML = productosParaMostrar.map(p => crearTarjeta(p)).join('');
-        }
+        function init() { renderGrid(db); renderDestacados(db); }
 
-        function crearTarjeta(p) {
-            return `
-                <div class="bg-white rounded-[30px] border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                    <div class="relative overflow-hidden cursor-pointer" onclick="verMas(${p.id})">
-                        <img src="${p.img}" class="w-full h-64 object-cover group-hover:scale-110 transition duration-700">
-                        <div class="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-full text-[10px] font-black uppercase text-beige border border-beige/20">${p.cat}</div>
+        function renderGrid(lista) { document.getElementById('grid-productos').innerHTML = lista.map(p => cardHTML(p)).join(''); }
+
+        function renderDestacados(lista) {
+            const destacados = lista.filter(p => p.destacado);
+            document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
+                <div class="slider-card bg-white rounded-[2rem] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-[0_10px_30px_-10px_rgba(210,180,140,0.3)] transition-all duration-500 relative">
+                    <div class="relative h-64 overflow-hidden" onclick="openProduct(${p.id})">
+                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-beige tracking-widest shadow-sm border border-beige/20">Top Venta</div>
                     </div>
                     <div class="p-6">
-                        <h3 class="font-bold text-gray-800 mb-2 h-12 overflow-hidden leading-tight">${p.nombre}</h3>
-                        <div class="flex justify-between items-center mt-4">
-                            <span class="text-xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
-                            <button onclick="agregar(${p.id})" class="bg-beige text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-black transition">
-                                <i class="fa fa-plus"></i>
-                            </button>
+                        <h3 class="font-bold text-gray-800 text-lg h-12 leading-tight mb-4">${p.nombre}</h3>
+                        <div class="flex justify-between items-end">
+                            <span class="text-2xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
+                            <button onclick="addToCart(${p.id})" class="bg-black text-white w-12 h-12 rounded-2xl hover:bg-beige transition-all flex items-center justify-center shadow-md active:scale-95"><i class="fa fa-plus"></i></button>
                         </div>
                     </div>
                 </div>
-            `;
+            `).join('');
         }
 
-        function verMas(id) {
-            const p = data.find(x => x.id === id);
-            const inner = document.getElementById('modal-inner');
-            inner.innerHTML = `
-                <div class="w-full md:w-1/2 bg-gray-50 flex items-center justify-center p-8">
-                    <img src="${p.img}" class="max-h-full rounded-3xl shadow-2xl">
-                </div>
-                <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
-                    <span class="text-beige font-black uppercase tracking-widest text-xs">${p.cat}</span>
-                    <h2 class="text-4xl font-black text-gray-900 mt-2 mb-6">${p.nombre}</h2>
-                    <p class="text-gray-500 leading-relaxed mb-8 text-lg">${p.desc}</p>
-                    <div class="space-y-3 mb-10">
-                        ${p.specs.map(s => `<div class="bg-gray-50 p-4 rounded-2xl text-sm font-bold border border-gray-100 italic">⭐ ${s}</div>`).join('')}
+        function cardHTML(p) {
+            return `
+                <div class="bg-white rounded-3xl border border-gray-50 p-4 hover:border-beige/30 transition-all duration-300 group hover:shadow-xl relative">
+                    <div class="relative h-48 rounded-2xl overflow-hidden mb-4 cursor-pointer" onclick="openProduct(${p.id})">
+                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <span class="absolute bottom-3 left-3 bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase text-beige tracking-widest">${p.cat}</span>
                     </div>
-                    <div class="flex items-center justify-between pt-6 border-t">
-                        <span class="text-4xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
-                        <button onclick="agregar(${p.id}); cerrarModal()" class="bg-black text-white px-10 py-5 rounded-[20px] font-bold shadow-xl hover:bg-beige transition">Agregar al Pedido</button>
+                    <h4 class="font-bold text-gray-900 text-base h-12 line-clamp-2 leading-tight mb-2">${p.nombre}</h4>
+                    <div class="flex items-center justify-between">
+                        <span class="font-black text-xl text-gray-900">$${p.precio.toLocaleString()}</span>
+                        <button onclick="addToCart(${p.id})" class="text-xs font-black bg-gray-100 text-gray-900 px-5 py-3 rounded-xl hover:bg-black hover:text-white transition uppercase tracking-wide">Agregar</button>
                     </div>
                 </div>
             `;
-            document.getElementById('modal-detalle').classList.remove('hidden');
         }
 
-        function agregar(id) {
-            const p = data.find(x => x.id === id);
-            carrito.push(p);
-            actualizarUI();
-            
-            // Si es PC, abrir carrito automáticamente al agregar
+        function addToCart(id) {
+            const p = db.find(x => x.id === id);
+            cart.push(p);
+            updateCartUI();
             if (window.innerWidth >= 1024) {
                 const sidebar = document.getElementById('cart-sidebar');
-                if (sidebar.classList.contains('translate-x-full')) {
-                    toggleCart();
+                const main = document.getElementById('main-content');
+                if (!sidebar.classList.contains('translate-x-0')) {
+                    sidebar.classList.remove('translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    main.classList.add('cart-open');
                 }
-            }
+            } else { document.getElementById('toast-modal').classList.remove('hidden'); }
         }
 
-        function actualizarUI() {
-            const content = document.getElementById('cart-content');
-            const badge = document.getElementById('cart-badge');
-            let sub = 0;
-
-            content.innerHTML = carrito.map((p, i) => {
-                sub += p.precio;
-                return `
-                    <div class="flex gap-4 items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                        <img src="${p.img}" class="w-16 h-16 rounded-xl object-cover">
+        function updateCartUI() {
+            document.getElementById('cart-badge').innerText = cart.length;
+            const list = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-7xl mb-6 opacity-20"></i><p class="font-medium text-lg">Tu carrito está vacío</p></div>`;
+                document.getElementById('mobile-sticky-bar').classList.add('hidden');
+            } else {
+                list.innerHTML = cart.map((p, i) => `
+                    <div class="flex gap-5 items-center bg-white p-2 rounded-2xl relative group">
+                        <img src="${p.img}" class="w-20 h-20 rounded-xl object-cover shadow-sm">
                         <div class="flex-1">
-                            <h4 class="font-bold text-sm leading-none mb-1">${p.nombre}</h4>
-                            <p class="text-beige font-black">$${p.precio.toLocaleString()}</p>
+                            <p class="text-[10px] font-bold text-beige uppercase tracking-widest mb-1">${p.cat}</p>
+                            <h4 class="font-bold text-sm text-gray-800 leading-tight">${p.nombre}</h4>
+                            <p class="text-lg font-black text-gray-900 mt-1">$${p.precio.toLocaleString()}</p>
                         </div>
-                        <button onclick="quitar(${i})" class="text-red-400">✕</button>
+                        <button onclick="remove(${i})" class="absolute top-0 right-0 p-3 text-gray-300 hover:text-red-500 transition">✕</button>
                     </div>
-                `;
-            }).join('');
-
-            badge.innerText = carrito.length;
-            document.getElementById('total-price').innerText = `$${(sub * IVA).toLocaleString()}`;
+                `).join('');
+                if(window.innerWidth < 1024) document.getElementById('mobile-sticky-bar').classList.remove('hidden');
+            }
+            let subtotal = cart.reduce((sum, item) => sum + item.precio, 0);
+            let total = subtotal * IVA;
+            document.getElementById('cart-subtotal').innerText = `$${subtotal.toLocaleString()}`;
+            document.getElementById('cart-iva').innerText = `$${(total - subtotal).toLocaleString()}`;
+            document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`;
+            document.getElementById('mobile-total-sticky').innerText = `$${total.toLocaleString()}`;
         }
 
-        function filtrar(cat) {
-            const filtered = cat === 'todas' ? data : data.filter(p => p.cat === cat);
-            document.getElementById('titulo-seccion').innerText = `Sección: ${cat}`;
-            renderShop(filtered);
-            toggleMenu();
-            // Scroll suave arriba
-            window.scrollTo({top: 500, behavior: 'smooth'});
-        }
-
-        function toggleMenu() { document.getElementById('menu-sidebar').classList.toggle('-translate-x-full'); }
-        
+        function remove(index) { cart.splice(index, 1); updateCartUI(); }
         function toggleCart() {
             const sidebar = document.getElementById('cart-sidebar');
-            const mainArea = document.getElementById('main-area');
-            const footer = document.querySelector('footer');
-            
-            sidebar.classList.toggle('translate-x-full');
-            
-            // Efecto persistente solo en PC
-            if (window.innerWidth >= 1024) {
-                mainArea.classList.toggle('content-with-cart');
-                footer.classList.toggle('content-with-cart');
+            const main = document.getElementById('main-content');
+            if (sidebar.classList.contains('translate-x-full')) {
+                sidebar.classList.remove('translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                if(window.innerWidth >= 1024) main.classList.add('cart-open');
+            } else {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('translate-x-full');
+                if(window.innerWidth >= 1024) main.classList.remove('cart-open');
             }
         }
-
-        function irAWhatsapp() {
-            if (carrito.length === 0) return alert("El carrito está vacío");
-            const msg = `*Papajose SPA - Pedido*\n\n${carrito.map(p => `• ${p.nombre}`).join('\n')}\n\n*TOTAL (IVA inc):* ${document.getElementById('total-price').innerText}`;
-            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
+        function toggleMobileMenu() { document.getElementById('left-sidebar').classList.toggle('-translate-x-full'); }
+        function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
+        function filtrar(cat) {
+            const f = cat === 'todas' ? db : db.filter(p => p.cat === cat);
+            document.getElementById('titulo-grid').innerText = cat === 'todas' ? 'Catálogo Completo' : `Categoría: ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
+            renderGrid(f);
+            if(window.innerWidth < 1024) toggleMobileMenu();
         }
-
-        function cerrarModal() { document.getElementById('modal-detalle').classList.add('hidden'); }
-        function quitar(i) { carrito.splice(i, 1); actualizarUI(); }
-        function buscar(v) {
-            const filtered = data.filter(p => p.nombre.toLowerCase().includes(v.toLowerCase()));
-            renderShop(filtered);
+        function buscar(query) {
+            const f = db.filter(p => p.nombre.toLowerCase().includes(query.toLowerCase()));
+            renderGrid(f);
         }
-
-        renderShop();
+        function openProduct(id) {
+            const p = db.find(x => x.id === id);
+            const modal = document.getElementById('product-modal');
+            document.getElementById('modal-content').innerHTML = `
+                <div class="max-w-7xl mx-auto p-6 md:p-12 lg:flex gap-16 pt-24">
+                    <div class="lg:w-1/2 mb-10 lg:mb-0">
+                        <img src="${p.img}" class="w-full rounded-[2.5rem] shadow-2xl">
+                    </div>
+                    <div class="lg:w-1/2 flex flex-col justify-center">
+                        <span class="text-beige font-black uppercase tracking-widest mb-4 text-sm flex items-center gap-2"><i class="fa fa-tag"></i> ${p.cat}</span>
+                        <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
+                        <p class="text-xl text-gray-500 leading-relaxed mb-10 font-medium">${p.desc}</p>
+                        <div class="bg-gray-50/80 p-8 rounded-[2rem] mb-10 border border-gray-100">
+                            <h3 class="font-black mb-6 uppercase text-xs text-beige tracking-widest">Características Clave</h3>
+                            <ul class="space-y-4">
+                                ${p.specs.map(s => `<li class="flex items-center gap-4 font-bold text-gray-700"><i class="fa fa-check-circle text-beige text-xl"></i> ${s}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-gray-100 pt-10">
+                            <div>
+                                <span class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Precio Total</span>
+                                <span class="text-5xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
+                            </div>
+                            <button onclick="addToCart(${p.id}); closeProductModal()" class="bg-black text-white px-12 py-6 rounded-[2rem] font-bold uppercase tracking-widest hover:bg-beige transition shadow-xl hover:shadow-beige/50 text-sm">Agregar al Carrito</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+        function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+        function enviarPedido() {
+            if(cart.length === 0) return alert("Tu carrito está vacío");
+            const totalText = document.getElementById('cart-total').innerText;
+            const itemsList = cart.map(p => `• ${p.nombre}`).join('\n');
+            const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*TOTAL FINAL:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
+        }
+        init();
     </script>
 </body>
 </html>
