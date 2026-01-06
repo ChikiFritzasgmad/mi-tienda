@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- PALETA DE COLORES PREMIUM --- */
+        /* --- PALETA DE COLORES --- */
         :root { 
             --beige: #D2B48C;
             --beige-light: #F5F5DC; 
@@ -19,25 +19,44 @@
         
         body { background-color: #ffffff; color: var(--dark-text); }
         
-        /* Scrollbar */
+        /* Scrollbar PC */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #E0E0E0; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--beige); }
 
-        /* --- LAYOUT LÓGICO --- */
-        /* En PC, empujamos el contenido principal a la derecha */
+        /* --- LÓGICA DE LAYOUT DE ESCRITORIO (INTACTA) --- */
         @media (min-width: 1024px) {
             .layout-desktop { margin-left: 280px; transition: margin-right 0.3s ease; }
             .layout-desktop.cart-open { margin-right: 400px; }
-            .header-desktop-adjust { padding-left: 280px; } /* CORRECCIÓN CLAVE */
+            .header-desktop-adjust { padding-left: 280px; }
+            /* En PC esto es una grilla normal */
             .responsive-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
         }
         
+        /* --- LÓGICA DE MÓVIL (SLIDERS Y AJUSTES) --- */
         @media (max-width: 1023px) {
-            .mobile-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; padding-bottom: 1rem; scrollbar-width: none; }
-            .mobile-slider::-webkit-scrollbar { display: none; }
-            .slider-card { min-width: 85%; scroll-snap-align: center; }
+            /* Contenedor del Slider */
+            .mobile-slider { 
+                display: flex; 
+                overflow-x: auto; 
+                scroll-snap-type: x mandatory; 
+                gap: 1rem; 
+                padding-bottom: 1.5rem; 
+                scrollbar-width: none; /* Ocultar scrollbar Firefox */
+                -webkit-overflow-scrolling: touch; /* Scroll suave iOS */
+            }
+            .mobile-slider::-webkit-scrollbar { display: none; } /* Ocultar scrollbar Chrome/Safari */
+            
+            /* Tarjeta Individual del Slider */
+            .slider-card { 
+                flex: 0 0 85%; /* Ocupa el 85% del ancho de la pantalla */
+                scroll-snap-align: center; /* Se detiene en el centro */
+            }
+
+            /* Espacio extra abajo para que la barra del carrito no tape el contenido */
+            body { padding-bottom: 80px; }
         }
+
         .fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -46,24 +65,17 @@
 
     <header class="fixed top-0 w-full bg-white z-[50] border-b border-gray-50 h-20 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] transition-all duration-300 header-desktop-adjust">
         <div class="h-full flex justify-between items-center px-6 md:px-10 relative">
-            
             <div class="flex items-center z-20">
                 <button onclick="toggleMobileMenu()" class="lg:hidden text-2xl text-beige hover:text-black transition"><i class="fa fa-bars"></i></button>
             </div>
-
             <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none">
-                <h1 class="text-2xl md:text-3xl font-black tracking-wider text-beige uppercase pointer-events-auto inline-block" style="font-family: 'Arial Black', sans-serif;">
-                    Papajose SPA
-                </h1>
+                <h1 class="text-2xl md:text-3xl font-black tracking-wider text-beige uppercase pointer-events-auto inline-block" style="font-family: 'Arial Black', sans-serif;">Papajose SPA</h1>
             </div>
-
             <div class="flex items-center gap-6 z-20 bg-white pl-4">
                 <div class="hidden lg:block relative group">
-                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar..." 
-                           class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all duration-300">
+                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all duration-300">
                     <i class="fa fa-search absolute right-4 top-3 text-beige group-focus-within:text-black transition"></i>
                 </div>
-
                 <button onclick="toggleCart()" class="relative p-2 group">
                     <i class="fa fa-shopping-bag text-2xl text-beige group-hover:text-black transition-colors duration-300"></i>
                     <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white">0</span>
@@ -79,23 +91,13 @@
                     <span class="font-bold text-beige uppercase tracking-widest text-xs">Menú</span>
                     <button onclick="toggleMobileMenu()" class="text-2xl text-beige">✕</button>
                 </div>
-
                 <nav class="space-y-3">
-                    <button onclick="filtrar('todas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group">
-                        <i class="fa fa-border-all text-beige group-hover:scale-110 transition"></i> Todo el Catálogo
-                    </button>
-                    <button onclick="filtrar('tecnologia')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group">
-                        <i class="fa fa-mobile-alt text-beige w-5 group-hover:scale-110 transition"></i> Tecnología
-                    </button>
-                    <button onclick="filtrar('hogar')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group">
-                        <i class="fa fa-couch text-beige w-5 group-hover:scale-110 transition"></i> Hogar
-                    </button>
-                    <button onclick="filtrar('mascotas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group">
-                        <i class="fa fa-paw text-beige w-5 group-hover:scale-110 transition"></i> Mascotas
-                    </button>
+                    <button onclick="filtrar('todas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-border-all text-beige group-hover:scale-110 transition"></i> Todo el Catálogo</button>
+                    <button onclick="filtrar('tecnologia')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-mobile-alt text-beige w-5 group-hover:scale-110 transition"></i> Tecnología</button>
+                    <button onclick="filtrar('hogar')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-couch text-beige w-5 group-hover:scale-110 transition"></i> Hogar</button>
+                    <button onclick="filtrar('mascotas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-paw text-beige w-5 group-hover:scale-110 transition"></i> Mascotas</button>
                 </nav>
             </div>
-
             <div class="mb-10">
                 <h4 class="text-xs font-black uppercase text-beige mb-6 tracking-widest">Síguenos</h4>
                 <div class="flex gap-6 text-2xl text-beige/70">
@@ -119,7 +121,6 @@
                 <div class="w-1.5 h-8 bg-beige rounded-full"></div>
                 <h2 class="text-3xl font-black uppercase tracking-tight text-gray-800">Destacados</h2>
             </div>
-            
             <div id="grid-destacados" class="mobile-slider responsive-grid pb-4"></div>
         </section>
 
@@ -129,7 +130,6 @@
             </div>
             <div id="grid-productos" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-10"></div>
         </section>
-
     </main>
 
     <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-[-5px_0_30px_-10px_rgba(0,0,0,0.1)] transform translate-x-full transition-transform duration-300 flex flex-col">
@@ -137,36 +137,32 @@
             <h2 class="text-2xl font-black uppercase text-gray-800">Tu Carrito</h2>
             <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl">✕</button>
         </div>
-        
         <div id="cart-items" class="flex-1 overflow-y-auto p-8 space-y-8"></div>
-
         <div class="p-8 bg-white border-t border-gray-50">
             <div class="space-y-3 mb-8 text-sm font-medium">
                 <div class="flex justify-between text-gray-500"><span>Subtotal</span> <span id="cart-subtotal">$0</span></div>
                 <div class="flex justify-between text-gray-500"><span>IVA (19%)</span> <span id="cart-iva">$0</span></div>
                 <div class="flex justify-between text-3xl font-black text-gray-900 mt-4 pt-4 border-t border-dashed"><span>Total</span> <span id="cart-total">$0</span></div>
             </div>
-            <button onclick="enviarPedido()" class="w-full bg-black text-white py-5 rounded-2xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg hover:shadow-beige/50 flex items-center justify-center gap-3 text-sm">
-                Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>
-            </button>
+            <button onclick="enviarPedido()" class="w-full bg-black text-white py-5 rounded-2xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg hover:shadow-beige/50 flex items-center justify-center gap-3 text-sm">Ir a Pagar <i class="fab fa-whatsapp text-lg"></i></button>
         </div>
     </aside>
 
-    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-100 p-4 z-[55] shadow-[0_-5px_20px_rgba(0,0,0,0.05)] flex justify-between items-center lg:hidden hidden fade-in-up">
-        <div>
-            <p class="text-[10px] text-beige font-bold uppercase tracking-wider">Total a pagar</p>
-            <p id="mobile-total-sticky" class="text-2xl font-black text-gray-900">$0</p>
+    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[90] shadow-[0_-5px_20px_rgba(0,0,0,0.1)] flex justify-between items-center lg:hidden hidden fade-in-up">
+        <div class="flex flex-col">
+            <span class="text-[10px] text-beige font-bold uppercase tracking-wider">Total a pagar</span>
+            <span id="mobile-total-sticky" class="text-2xl font-black text-gray-900">$0</span>
         </div>
-        <button onclick="toggleCart()" class="bg-black text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition flex items-center gap-2">
-            Ver Carrito <i class="fa fa-arrow-right"></i>
+        <button onclick="toggleCart()" class="bg-black text-white px-8 py-3 rounded-xl font-bold text-sm shadow-xl active:scale-95 transition flex items-center gap-2">
+            Ver Carrito <i class="fa fa-shopping-cart"></i>
         </button>
     </div>
 
     <div id="toast-modal" class="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm hidden flex items-end md:items-center justify-center p-4 transition-all">
-        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center transform transition-all scale-100 mb-4 md:mb-0 border border-white/50">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center transform transition-all scale-100 mb-20 md:mb-0 border border-white/50">
             <div class="w-20 h-20 bg-beige/20 text-beige rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-sm"><i class="fa fa-check"></i></div>
-            <h3 class="text-2xl font-black text-gray-800 mb-3">¡Excelente elección!</h3>
-            <p class="text-gray-500 font-medium mb-8">Producto agregado correctamente.</p>
+            <h3 class="text-2xl font-black text-gray-800 mb-3">¡Agregado!</h3>
+            <p class="text-gray-500 font-medium mb-8">El producto está en tu carrito.</p>
             <div class="flex gap-4">
                 <button onclick="cerrarToast()" class="flex-1 py-4 rounded-2xl border-2 border-gray-100 font-bold text-gray-600 hover:border-beige hover:text-beige transition">Seguir Viendo</button>
                 <button onclick="cerrarToast(); toggleCart()" class="flex-1 py-4 rounded-2xl bg-black text-white font-bold shadow-xl hover:bg-beige transition">Ir al Carrito</button>
@@ -198,14 +194,16 @@
 
         function renderDestacados(lista) {
             const destacados = lista.filter(p => p.destacado);
+            /* AQUÍ ESTÁ EL TRUCO PARA EL SLIDER MÓVIL */
+            /* En móvil se usa la clase 'slider-card' para que mida el 85% de la pantalla */
             document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
-                <div class="slider-card bg-white rounded-[2rem] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-[0_10px_30px_-10px_rgba(210,180,140,0.3)] transition-all duration-500 relative">
+                <div class="slider-card bg-white rounded-[2rem] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-[0_10px_30px_-10px_rgba(210,180,140,0.3)] transition-all duration-500 relative mr-4 md:mr-0">
                     <div class="relative h-64 overflow-hidden" onclick="openProduct(${p.id})">
                         <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                         <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-beige tracking-widest shadow-sm border border-beige/20">Top Venta</div>
                     </div>
                     <div class="p-6">
-                        <h3 class="font-bold text-gray-800 text-lg h-12 leading-tight mb-4">${p.nombre}</h3>
+                        <h3 class="font-bold text-gray-800 text-lg h-12 leading-tight mb-4 line-clamp-2">${p.nombre}</h3>
                         <div class="flex justify-between items-end">
                             <span class="text-2xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
                             <button onclick="addToCart(${p.id})" class="bg-black text-white w-12 h-12 rounded-2xl hover:bg-beige transition-all flex items-center justify-center shadow-md active:scale-95"><i class="fa fa-plus"></i></button>
@@ -235,6 +233,8 @@
             const p = db.find(x => x.id === id);
             cart.push(p);
             updateCartUI();
+            
+            // Lógica Diferenciada: PC abre carrito, Móvil abre Toast
             if (window.innerWidth >= 1024) {
                 const sidebar = document.getElementById('cart-sidebar');
                 const main = document.getElementById('main-content');
@@ -243,14 +243,18 @@
                     sidebar.classList.add('translate-x-0');
                     main.classList.add('cart-open');
                 }
-            } else { document.getElementById('toast-modal').classList.remove('hidden'); }
+            } else { 
+                document.getElementById('toast-modal').classList.remove('hidden'); 
+            }
         }
 
         function updateCartUI() {
             document.getElementById('cart-badge').innerText = cart.length;
             const list = document.getElementById('cart-items');
+            
             if (cart.length === 0) {
                 list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-7xl mb-6 opacity-20"></i><p class="font-medium text-lg">Tu carrito está vacío</p></div>`;
+                // Ocultar barra móvil si no hay items
                 document.getElementById('mobile-sticky-bar').classList.add('hidden');
             } else {
                 list.innerHTML = cart.map((p, i) => `
@@ -264,13 +268,17 @@
                         <button onclick="remove(${i})" class="absolute top-0 right-0 p-3 text-gray-300 hover:text-red-500 transition">✕</button>
                     </div>
                 `).join('');
+                
+                // Mostrar barra móvil (PERSISTENTE) si hay items
                 if(window.innerWidth < 1024) document.getElementById('mobile-sticky-bar').classList.remove('hidden');
             }
+            
             let subtotal = cart.reduce((sum, item) => sum + item.precio, 0);
             let total = subtotal * IVA;
             document.getElementById('cart-subtotal').innerText = `$${subtotal.toLocaleString()}`;
             document.getElementById('cart-iva').innerText = `$${(total - subtotal).toLocaleString()}`;
             document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`;
+            // Actualizar también el precio de la barra móvil
             document.getElementById('mobile-total-sticky').innerText = `$${total.toLocaleString()}`;
         }
 
