@@ -24,7 +24,7 @@
         ::-webkit-scrollbar-thumb { background: #E0E0E0; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--beige); }
 
-        /* --- LÓGICA DE LAYOUT DE ESCRITORIO (INTACTA) --- */
+        /* --- LÓGICA DE LAYOUT DE ESCRITORIO --- */
         @media (min-width: 1024px) {
             .layout-desktop { margin-left: 280px; transition: margin-right 0.3s ease; }
             .layout-desktop.cart-open { margin-right: 400px; }
@@ -32,7 +32,7 @@
             .responsive-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
         }
         
-        /* --- LÓGICA DE MÓVIL (SLIDERS Y AJUSTES) --- */
+        /* --- LÓGICA DE MÓVIL --- */
         @media (max-width: 1023px) {
             .mobile-slider { 
                 display: flex; 
@@ -45,7 +45,6 @@
             }
             .mobile-slider::-webkit-scrollbar { display: none; } 
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
-            /* Padding extra abajo para que la barra móvil no tape el contenido */
             body { padding-bottom: 80px; }
         }
 
@@ -132,8 +131,6 @@
         <div id="cart-items" class="flex-1 overflow-y-auto p-8 space-y-8"></div>
         <div class="p-8 bg-white border-t border-gray-50">
             <div class="space-y-3 mb-8 text-sm font-medium">
-                <div class="flex justify-between text-gray-500"><span>Subtotal</span> <span id="cart-subtotal">$0</span></div>
-                <div class="flex justify-between text-gray-500"><span>IVA (19%)</span> <span id="cart-iva">$0</span></div>
                 <div class="flex justify-between text-3xl font-black text-gray-900 mt-4 pt-4 border-t border-dashed"><span>Total</span> <span id="cart-total">$0</span></div>
             </div>
             <button onclick="enviarPedido()" class="w-full bg-black text-white py-5 rounded-2xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg hover:shadow-beige/50 flex items-center justify-center gap-3 text-sm">Ir a Pagar <i class="fab fa-whatsapp text-lg"></i></button>
@@ -169,49 +166,69 @@
 
     <script>
         const WHATSAPP_NUM = "56949513296";
-        const IVA = 1.19;
 
-        // --- AQUÍ ESTÁN TUS PRODUCTOS CARGADOS DEL EXCEL ---
+        // --- TUS DATOS DEL EXCEL (Corregidos) ---
         const db = [
             {
-                id: 1,
-                nombre: "Detergente Omo Piel Sensible 500 mL",
-                precio: 7190,
-                cat: "aseo",
-                destacado: true,
-                img: "imagenes/omo-piel-sensible-main.webp",
-                desc: "Jabón para lavados de ropa a mano con fragancia a bebé. Dermatológicamente testeado para pieles sensibles.",
-                specs: "Unidades por pack: 1, Volumen neto: 500 mL, Hipoalergénico"
+                "id": 1,
+                "nombre": "Detergente Omo Piel Sensible 500 mL",
+                "precio": 7190,
+                "cat": "aseo",
+                "destacado": true,
+                "img": "imagenes/omo-piel-sensible-main.webp",
+                "fotos": [
+                    "imagenes/omo-piel-sensible-main.webp",
+                    "imagenes/omo-piel-sensible-1.webp",
+                    "imagenes/omo-piel-sensible-2.webp",
+                    "imagenes/omo-piel-sensible-3.webp"
+                ],
+                "desc": "Cuidado experto para las prendas más delicadas. Este jabón líquido especializado para lavado a mano elimina las manchas difíciles mientras protege las fibras. Su fórmula dermatológicamente testeada es segura para pieles sensibles y deja una suave y tierna fragancia a bebé.",
+                "specs": "Unidades por pack: 1, Volumen neto: 500 mL, Tipo de envase: Botella, Fragancia: Bebé, Hipoalergénico"
             },
             {
-                id: 2,
-                nombre: "12 Tabletas Descalcificador Cafeteras",
-                precio: 3480,
-                cat: "hogar",
-                destacado: true,
-                img: "imagenes/pastillas-descalcificadoras-main.webp",
-                desc: "Anti-sarro efectivo para eliminar cal en cafeteras, hervidores y teteras. Biodegradable y seguro.",
-                specs: "Unidades: 12, Biodegradable, Uso: Cafeteras y Hervidores"
+                "id": 2,
+                "nombre": "12 Tabletas Descalcificador Cafeteras Espresso",
+                "precio": 3480,
+                "cat": "hogar",
+                "destacado": true,
+                "img": "imagenes/pastillas-descalcificadoras-main.webp",
+                "fotos": [
+                    "imagenes/pastillas-descalcificadoras-main.webp",
+                    "imagenes/pastillas-descalcificadoras-1.webp",
+                    "imagenes/pastillas-descalcificadoras-2.webp"
+                ],
+                "desc": "Potente anti-sarro biodegradable diseñado para eliminar eficazmente la cal en cafeteras, hervidores y teteras. Su fórmula de acción rápida limpia en minutos, mejorando el funcionamiento de tus electrodomésticos y previniendo residuos minerales.",
+                "specs": "Unidades por pack: 12, Peso neto: 5 g, Acción anti-sarro efectiva, Biodegradable, Uso seguro en electrodomésticos"
             },
             {
-                id: 3,
-                nombre: "Papel Aluminio 10 Metros con Dispensador",
-                precio: 2290,
-                cat: "hogar",
-                destacado: true,
-                img: "imagenes/papel-aluminio-main.webp",
-                desc: "Papel de aluminio ultra resistente, ideal para cocinar, hornear y asar. Incluye sierra de corte.",
-                specs: "Longitud: 10m, Con dispensador, Resistente al calor"
+                "id": 3,
+                "nombre": "Papel Aluminio 10 Metros con Dispensador",
+                "precio": 2290,
+                "cat": "hogar",
+                "destacado": true,
+                "img": "imagenes/papel-aluminio-main.webp",
+                "fotos": [
+                    "imagenes/papel-aluminio-main.webp",
+                    "imagenes/papel-aluminio-1.webp",
+                    "imagenes/papel-aluminio-2.webp"
+                ],
+                "desc": "Papel de aluminio ultra resistente, ideal para cocinar, hornear y asar alimentos manteniendo su frescura y sabor. Su práctica caja con dispensador permite un corte limpio y rápido.",
+                "specs": "Longitud: 10 metros, Con dispensador, Resistente a altas temperaturas, Multiuso en cocina"
             },
             {
-                id: 4,
-                nombre: "Nebulizador Portátil Mesh para Niños",
-                precio: 7990,
-                cat: "salud",
-                destacado: true,
-                img: "imagenes/nebulizador-portatil-main.webp",
-                desc: "Nebulizador tipo Mesh eficiente y silencioso. Ideal para niños, funciona con pilas o USB.",
-                specs: "Tecnología Mesh, Silencioso, Capacidad 10ml, Portátil"
+                "id": 4,
+                "nombre": "Nebulizador Portátil Mesh para Niños",
+                "precio": 7990,
+                "cat": "salud",
+                "destacado": true,
+                "img": "imagenes/nebulizador-portatil-main.webp",
+                "fotos": [
+                    "imagenes/nebulizador-portatil-main.webp",
+                    "imagenes/nebulizador-portatil-1.webp",
+                    "imagenes/nebulizador-portatil-2.webp"
+                ],
+                "desc": "Nebulizador portátil con tecnología Mesh de última generación, diseñado especialmente para niños. Su funcionamiento ultra silencioso y rapidez en la administración del medicamento lo hacen ideal para tratamientos sin estrés.",
+                "specs": "Tecnología Mesh, Silencioso, Capacidad 10ml, Portátil, Pilas o USB, Incluye mascarilla pediátrica"
             }
         ];
 
@@ -224,13 +241,13 @@
         function renderDestacados(lista) {
             const destacados = lista.filter(p => p.destacado);
             document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
-                <div class="slider-card bg-white rounded-[2rem] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-[0_10px_30px_-10px_rgba(210,180,140,0.3)] transition-all duration-500 relative mr-4 md:mr-0">
-                    <div class="relative h-64 overflow-hidden" onclick="openProduct(${p.id})">
+                <div class="slider-card bg-white rounded-[2rem] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-[0_10px_30px_-10px_rgba(210,180,140,0.3)] transition-all duration-500 relative mr-4 md:mr-0 h-full flex flex-col">
+                    <div class="relative h-64 overflow-hidden shrink-0" onclick="openProduct(${p.id})">
                         <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                         <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-beige tracking-widest shadow-sm border border-beige/20">Top Venta</div>
                     </div>
-                    <div class="p-6">
-                        <h3 class="font-bold text-gray-800 text-lg h-12 leading-tight mb-4 line-clamp-2">${p.nombre}</h3>
+                    <div class="p-6 flex flex-col flex-1 justify-between">
+                        <h3 class="font-bold text-gray-800 text-lg mb-4 leading-tight">${p.nombre}</h3>
                         <div class="flex justify-between items-end">
                             <span class="text-2xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
                             <button onclick="addToCart(${p.id})" class="bg-black text-white w-12 h-12 rounded-2xl hover:bg-beige transition-all flex items-center justify-center shadow-md active:scale-95"><i class="fa fa-plus"></i></button>
@@ -242,15 +259,16 @@
 
         function cardHTML(p) {
             return `
-                <div class="bg-white rounded-3xl border border-gray-50 p-4 hover:border-beige/30 transition-all duration-300 group hover:shadow-xl relative">
-                    <div class="relative h-48 rounded-2xl overflow-hidden mb-4 cursor-pointer" onclick="openProduct(${p.id})">
+                <div class="bg-white rounded-3xl border border-gray-50 p-4 hover:border-beige/30 transition-all duration-300 group hover:shadow-xl relative flex flex-col h-full">
+                    <div class="relative h-48 rounded-2xl overflow-hidden mb-4 cursor-pointer shrink-0" onclick="openProduct(${p.id})">
                         <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         <span class="absolute bottom-3 left-3 bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase text-beige tracking-widest">${p.cat}</span>
                     </div>
-                    <h4 class="font-bold text-gray-900 text-base h-12 line-clamp-2 leading-tight mb-2">${p.nombre}</h4>
-                    <div class="flex items-center justify-between">
+                    <h4 class="font-bold text-gray-900 text-base mb-4 leading-tight grow">${p.nombre}</h4>
+                    
+                    <div class="flex items-center justify-between mt-auto">
                         <span class="font-black text-xl text-gray-900">$${p.precio.toLocaleString()}</span>
-                        <button onclick="addToCart(${p.id})" class="text-xs font-black bg-gray-100 text-gray-900 px-5 py-3 rounded-xl hover:bg-black hover:text-white transition uppercase tracking-wide">Agregar</button>
+                        <button onclick="addToCart(${p.id})" class="text-xs font-black bg-gray-100 text-gray-900 px-4 py-3 rounded-xl hover:bg-black hover:text-white transition uppercase tracking-wide">Agregar</button>
                     </div>
                 </div>
             `;
@@ -303,10 +321,9 @@
                 }
             }
             
-            let subtotal = cart.reduce((sum, item) => sum + item.precio, 0);
-            let total = subtotal * IVA;
-            document.getElementById('cart-subtotal').innerText = `$${subtotal.toLocaleString()}`;
-            document.getElementById('cart-iva').innerText = `$${(total - subtotal).toLocaleString()}`;
+            // CÁLCULO TOTAL SIN IVA (PRECIO FINAL)
+            let total = cart.reduce((sum, item) => sum + item.precio, 0);
+            
             document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`;
             document.getElementById('mobile-total-sticky').innerText = `$${total.toLocaleString()}`;
         }
@@ -344,21 +361,35 @@
             const f = db.filter(p => p.nombre.toLowerCase().includes(query.toLowerCase()));
             renderGrid(f);
         }
+        
+        // --- FUNCIÓN PARA ABRIR PRODUCTO CON GALERÍA ---
         function openProduct(id) {
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
             
-            // CORRECCIÓN: Convertir el texto de specs (ej: "A, B, C") en lista para que se vea bonito
             let specsList = Array.isArray(p.specs) ? p.specs : p.specs.split(',').map(s => s.trim());
 
             document.getElementById('modal-content').innerHTML = `
                 <div class="max-w-7xl mx-auto p-6 md:p-12 lg:flex gap-16 pt-24">
                     <div class="lg:w-1/2 mb-10 lg:mb-0">
-                        <img src="${p.img}" class="w-full rounded-[2.5rem] shadow-2xl">
+                        <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl mb-6 aspect-square bg-gray-50">
+                            <img id="main-image" src="${p.img}" class="w-full h-full object-cover">
+                        </div>
+                        
+                        ${p.fotos.length > 1 ? `
+                            <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                                ${p.fotos.map(foto => `
+                                    <button onclick="document.getElementById('main-image').src='${foto}'" class="shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-2 border-transparent hover:border-beige focus:border-beige transition-all">
+                                        <img src="${foto}" class="w-full h-full object-cover">
+                                    </button>
+                                `).join('')}
+                            </div>
+                        ` : ''}
                     </div>
+
                     <div class="lg:w-1/2 flex flex-col justify-center">
                         <span class="text-beige font-black uppercase tracking-widest mb-4 text-sm flex items-center gap-2"><i class="fa fa-tag"></i> ${p.cat}</span>
-                        <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
+                        <h1 class="text-3xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
                         <p class="text-xl text-gray-500 leading-relaxed mb-10 font-medium">${p.desc}</p>
                         <div class="bg-gray-50/80 p-8 rounded-[2rem] mb-10 border border-gray-100">
                             <h3 class="font-black mb-6 uppercase text-xs text-beige tracking-widest">Características Clave</h3>
@@ -368,10 +399,10 @@
                         </div>
                         <div class="flex items-center justify-between border-t border-gray-100 pt-10">
                             <div>
-                                <span class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Precio Total</span>
+                                <span class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Precio</span>
                                 <span class="text-5xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
                             </div>
-                            <button onclick="addToCart(${p.id}); closeProductModal()" class="bg-black text-white px-12 py-6 rounded-[2rem] font-bold uppercase tracking-widest hover:bg-beige transition shadow-xl hover:shadow-beige/50 text-sm">Agregar al Carrito</button>
+                            <button onclick="addToCart(${p.id}); closeProductModal()" class="bg-black text-white px-8 md:px-12 py-6 rounded-[2rem] font-bold uppercase tracking-widest hover:bg-beige transition shadow-xl hover:shadow-beige/50 text-sm">Agregar al Carrito</button>
                         </div>
                     </div>
                 </div>
@@ -379,15 +410,15 @@
             modal.classList.remove('hidden');
         }
         function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+        
         function enviarPedido() {
             if(cart.length === 0) return alert("Tu carrito está vacío");
             const totalText = document.getElementById('cart-total').innerText;
-            const itemsList = cart.map(p => `• ${p.nombre}`).join('\n');
-            const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*TOTAL FINAL:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
+            const itemsList = cart.map(p => `• ${p.nombre} ($${p.precio.toLocaleString()})`).join('\n');
+            const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
         }
         init();
     </script>
 </body>
 </html>
-
