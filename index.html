@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papajose SPA | Tienda Oficial</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* --- PALETA DE COLORES --- */
         :root { 
@@ -84,10 +84,7 @@
                 </div>
                 <nav class="space-y-3">
                     <button onclick="filtrar('todas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-border-all text-beige group-hover:scale-110 transition"></i> Todo el Catálogo</button>
-                    <button onclick="filtrar('hogar')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-home text-beige w-5 group-hover:scale-110 transition"></i> Hogar</button>
-                    <button onclick="filtrar('aseo')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-soap text-beige w-5 group-hover:scale-110 transition"></i> Aseo</button>
-                    <button onclick="filtrar('salud')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-heartbeat text-beige w-5 group-hover:scale-110 transition"></i> Salud</button>
-                </nav>
+                    </nav>
             </div>
             <div class="mb-10">
                 <h4 class="text-xs font-black uppercase text-beige mb-6 tracking-widest">Síguenos</h4>
@@ -107,7 +104,12 @@
             <i class="fa fa-search absolute left-5 top-5 text-beige"></i>
         </div>
 
-        <section class="mb-16">
+        <div id="loading-msg" class="text-center py-20">
+            <i class="fa fa-circle-notch fa-spin text-4xl text-beige mb-4"></i>
+            <p class="text-gray-500 font-bold">Cargando catálogo...</p>
+        </div>
+
+        <section class="mb-16 hidden" id="seccion-destacados">
             <div class="flex items-center gap-4 mb-8">
                 <div class="w-1.5 h-8 bg-beige rounded-full"></div>
                 <h2 class="text-3xl font-black uppercase tracking-tight text-gray-800">Destacados</h2>
@@ -115,7 +117,7 @@
             <div id="grid-destacados" class="mobile-slider responsive-grid pb-4"></div>
         </section>
 
-        <section>
+        <section id="seccion-catalogo" class="hidden">
             <div class="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
                 <h2 id="titulo-grid" class="text-xl font-bold text-beige uppercase tracking-widest">Catálogo Completo</h2>
             </div>
@@ -166,84 +168,82 @@
 
     <script>
         const WHATSAPP_NUM = "56949513296";
-
-        // --- TUS DATOS DEL EXCEL (Corregidos) ---
-        const db = [
-            {
-                "id": 1,
-                "nombre": "Detergente Omo Piel Sensible 500 mL",
-                "precio": 7190,
-                "cat": "aseo",
-                "destacado": true,
-                "img": "imagenes/omo-piel-sensible-main.webp",
-                "fotos": [
-                    "imagenes/omo-piel-sensible-main.webp",
-                    "imagenes/omo-piel-sensible-1.webp",
-                    "imagenes/omo-piel-sensible-2.webp",
-                    "imagenes/omo-piel-sensible-3.webp"
-                ],
-                "desc": "Cuidado experto para las prendas más delicadas. Este jabón líquido especializado para lavado a mano elimina las manchas difíciles mientras protege las fibras. Su fórmula dermatológicamente testeada es segura para pieles sensibles y deja una suave y tierna fragancia a bebé.",
-                "specs": "Unidades por pack: 1, Volumen neto: 500 mL, Tipo de envase: Botella, Fragancia: Bebé, Hipoalergénico"
-            },
-            {
-                "id": 2,
-                "nombre": "12 Tabletas Descalcificador Cafeteras Espresso",
-                "precio": 3480,
-                "cat": "hogar",
-                "destacado": true,
-                "img": "imagenes/pastillas-descalcificadoras-main.webp",
-                "fotos": [
-                    "imagenes/pastillas-descalcificadoras-main.webp",
-                    "imagenes/pastillas-descalcificadoras-1.webp",
-                    "imagenes/pastillas-descalcificadoras-2.webp"
-                ],
-                "desc": "Potente anti-sarro biodegradable diseñado para eliminar eficazmente la cal en cafeteras, hervidores y teteras. Su fórmula de acción rápida limpia en minutos, mejorando el funcionamiento de tus electrodomésticos y previniendo residuos minerales.",
-                "specs": "Unidades por pack: 12, Peso neto: 5 g, Acción anti-sarro efectiva, Biodegradable, Uso seguro en electrodomésticos"
-            },
-            {
-                "id": 3,
-                "nombre": "Papel Aluminio 10 Metros con Dispensador",
-                "precio": 2290,
-                "cat": "hogar",
-                "destacado": true,
-                "img": "imagenes/papel-aluminio-main.webp",
-                "fotos": [
-                    "imagenes/papel-aluminio-main.webp",
-                    "imagenes/papel-aluminio-1.webp",
-                    "imagenes/papel-aluminio-2.webp"
-                ],
-                "desc": "Papel de aluminio ultra resistente, ideal para cocinar, hornear y asar alimentos manteniendo su frescura y sabor. Su práctica caja con dispensador permite un corte limpio y rápido.",
-                "specs": "Longitud: 10 metros, Con dispensador, Resistente a altas temperaturas, Multiuso en cocina"
-            },
-            {
-                "id": 4,
-                "nombre": "Nebulizador Portátil Mesh para Niños",
-                "precio": 7990,
-                "cat": "salud",
-                "destacado": true,
-                "img": "imagenes/nebulizador-portatil-main.webp",
-                "fotos": [
-                    "imagenes/nebulizador-portatil-main.webp",
-                    "imagenes/nebulizador-portatil-1.webp",
-                    "imagenes/nebulizador-portatil-2.webp"
-                ],
-                "desc": "Nebulizador portátil con tecnología Mesh de última generación, diseñado especialmente para niños. Su funcionamiento ultra silencioso y rapidez en la administración del medicamento lo hacen ideal para tratamientos sin estrés.",
-                "specs": "Tecnología Mesh, Silencioso, Capacidad 10ml, Portátil, Pilas o USB, Incluye mascarilla pediátrica"
-            }
-        ];
-
+        
+        // -------------------------------------------------------------
+        // URL DEL ARCHIVO CSV (EXCEL)
+        // Cuando subas tu archivo a GitHub, dale click al botón "Raw" 
+        // y pega ese link aquí.
+        // -------------------------------------------------------------
+        const CSV_URL = "productos.csv"; // Si está en la misma carpeta se llama así.
+        
+        let db = []; // Aquí se guardarán los datos leídos del Excel
         let cart = [];
 
-        function init() { renderGrid(db); renderDestacados(db); }
+        // INICIAR CARGA DE DATOS
+        window.addEventListener('DOMContentLoaded', () => {
+            cargarProductosDesdeCSV();
+        });
 
-        function renderGrid(lista) { document.getElementById('grid-productos').innerHTML = lista.map(p => cardHTML(p)).join(''); }
+        function cargarProductosDesdeCSV() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true, // Importante: Usa la primera fila del Excel como nombres
+                skipEmptyLines: true,
+                complete: function(results) {
+                    console.log("Datos crudos del CSV:", results.data);
+                    
+                    // PROCESAR DATOS: Convertir texto a números y limpiar
+                    db = results.data.map((fila, index) => {
+                        return {
+                            id: index + 1,
+                            nombre: fila['productos'] || "Sin Nombre", // Debe coincidir con tu columna Excel
+                            precio: parseInt(fila['precio']) || 0,
+                            cat: fila['categoria'] || "General",
+                            desc: fila['descripcion'] || "Sin descripción disponible.",
+                            // Si tienes una columna imagen en el excel, úsala, si no, usa placeholder
+                            img: fila['imagen'] && fila['imagen'].length > 5 ? fila['imagen'] : "https://via.placeholder.com/400x400?text=Sin+Foto",
+                            // Asumimos que la primera foto es la misma que img por ahora
+                            fotos: fila['imagen'] ? [fila['imagen']] : [],
+                            specs: fila['specs'] || "Producto de alta calidad" // Si tienes columna specs
+                        };
+                    });
+
+                    // Una vez cargados, mostrar la tienda
+                    document.getElementById('loading-msg').classList.add('hidden');
+                    document.getElementById('seccion-destacados').classList.remove('hidden');
+                    document.getElementById('seccion-catalogo').classList.remove('hidden');
+                    
+                    init();
+                },
+                error: function(err) {
+                    console.error("Error leyendo CSV:", err);
+                    alert("Error cargando los productos. Revisa la consola.");
+                }
+            });
+        }
+
+        function init() { 
+            renderGrid(db); 
+            renderDestacados(db); 
+        }
+
+        function renderGrid(lista) { 
+            const contenedor = document.getElementById('grid-productos');
+            if(lista.length === 0) {
+                contenedor.innerHTML = '<p class="col-span-full text-center text-gray-400">No se encontraron productos.</p>';
+                return;
+            }
+            contenedor.innerHTML = lista.map(p => cardHTML(p)).join(''); 
+        }
 
         function renderDestacados(lista) {
-            const destacados = lista.filter(p => p.destacado);
+            // Puedes crear una columna "destacado" en tu Excel (si/no) para filtrar mejor
+            // Por ahora mostramos los primeros 5
+            const destacados = lista.slice(0, 5); 
             document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
                 <div class="slider-card bg-white rounded-[2rem] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-[0_10px_30px_-10px_rgba(210,180,140,0.3)] transition-all duration-500 relative mr-4 md:mr-0 h-full flex flex-col">
                     <div class="relative h-64 overflow-hidden shrink-0" onclick="openProduct(${p.id})">
-                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
                         <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-beige tracking-widest shadow-sm border border-beige/20">Top Venta</div>
                     </div>
                     <div class="p-6 flex flex-col flex-1 justify-between">
@@ -261,7 +261,7 @@
             return `
                 <div class="bg-white rounded-3xl border border-gray-50 p-4 hover:border-beige/30 transition-all duration-300 group hover:shadow-xl relative flex flex-col h-full">
                     <div class="relative h-48 rounded-2xl overflow-hidden mb-4 cursor-pointer shrink-0" onclick="openProduct(${p.id})">
-                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
                         <span class="absolute bottom-3 left-3 bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase text-beige tracking-widest">${p.cat}</span>
                     </div>
                     <h4 class="font-bold text-gray-900 text-base mb-4 leading-tight grow">${p.nombre}</h4>
@@ -303,7 +303,7 @@
             } else {
                 list.innerHTML = cart.map((p, i) => `
                     <div class="flex gap-5 items-center bg-white p-2 rounded-2xl relative group">
-                        <img src="${p.img}" class="w-20 h-20 rounded-xl object-cover shadow-sm">
+                        <img src="${p.img}" class="w-20 h-20 rounded-xl object-cover shadow-sm" onerror="this.src='https://via.placeholder.com/100'">
                         <div class="flex-1">
                             <p class="text-[10px] font-bold text-beige uppercase tracking-widest mb-1">${p.cat}</p>
                             <h4 class="font-bold text-sm text-gray-800 leading-tight">${p.nombre}</h4>
@@ -321,7 +321,7 @@
                 }
             }
             
-            // CÁLCULO TOTAL SIN IVA (PRECIO FINAL)
+            // CÁLCULO TOTAL
             let total = cart.reduce((sum, item) => sum + item.precio, 0);
             
             document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`;
@@ -352,7 +352,7 @@
         function toggleMobileMenu() { document.getElementById('left-sidebar').classList.toggle('-translate-x-full'); }
         function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
         function filtrar(cat) {
-            const f = cat === 'todas' ? db : db.filter(p => p.cat === cat);
+            const f = cat === 'todas' ? db : db.filter(p => p.cat.toLowerCase() === cat.toLowerCase());
             document.getElementById('titulo-grid').innerText = cat === 'todas' ? 'Catálogo Completo' : `Categoría: ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
             renderGrid(f);
             if(window.innerWidth < 1024) toggleMobileMenu();
@@ -367,24 +367,20 @@
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
             
-            let specsList = Array.isArray(p.specs) ? p.specs : p.specs.split(',').map(s => s.trim());
+            // Manejo seguro de specs
+            let specsHTML = "";
+            if (p.specs) {
+                // Si es texto, tratamos de separarlo, si no, lo mostramos directo
+                const listaSpecs = p.specs.includes(',') ? p.specs.split(',') : [p.specs];
+                specsHTML = listaSpecs.map(s => `<li class="flex items-center gap-4 font-bold text-gray-700"><i class="fa fa-check-circle text-beige text-xl"></i> ${s.trim()}</li>`).join('');
+            }
 
             document.getElementById('modal-content').innerHTML = `
                 <div class="max-w-7xl mx-auto p-6 md:p-12 lg:flex gap-16 pt-24">
                     <div class="lg:w-1/2 mb-10 lg:mb-0">
                         <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl mb-6 aspect-square bg-gray-50">
-                            <img id="main-image" src="${p.img}" class="w-full h-full object-cover">
+                            <img id="main-image" src="${p.img}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
                         </div>
-                        
-                        ${p.fotos.length > 1 ? `
-                            <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                                ${p.fotos.map(foto => `
-                                    <button onclick="document.getElementById('main-image').src='${foto}'" class="shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-2 border-transparent hover:border-beige focus:border-beige transition-all">
-                                        <img src="${foto}" class="w-full h-full object-cover">
-                                    </button>
-                                `).join('')}
-                            </div>
-                        ` : ''}
                     </div>
 
                     <div class="lg:w-1/2 flex flex-col justify-center">
@@ -392,9 +388,9 @@
                         <h1 class="text-3xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
                         <p class="text-xl text-gray-500 leading-relaxed mb-10 font-medium">${p.desc}</p>
                         <div class="bg-gray-50/80 p-8 rounded-[2rem] mb-10 border border-gray-100">
-                            <h3 class="font-black mb-6 uppercase text-xs text-beige tracking-widest">Características Clave</h3>
+                            <h3 class="font-black mb-6 uppercase text-xs text-beige tracking-widest">Características</h3>
                             <ul class="space-y-4">
-                                ${specsList.map(s => `<li class="flex items-center gap-4 font-bold text-gray-700"><i class="fa fa-check-circle text-beige text-xl"></i> ${s}</li>`).join('')}
+                                ${specsHTML}
                             </ul>
                         </div>
                         <div class="flex items-center justify-between border-t border-gray-100 pt-10">
@@ -418,7 +414,6 @@
             const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
         }
-        init();
     </script>
 </body>
 </html>
