@@ -169,12 +169,13 @@
         </div>
     </div>
 
-    <script>
+<script>
         const WHATSAPP_NUM = "56949513296"; 
-        const CSV_URL = "productos.csv"; // REVISA QUE EL NOMBRE SEA EXACTO
+        const CSV_URL = "productos.csv"; 
         
         let db = [];
         let cart = [];
+        let searchTimeout; // Para controlar el tiempo de escritura
 
         window.addEventListener('DOMContentLoaded', () => { cargarProductosDesdeCSV(); });
 
@@ -185,21 +186,19 @@
                 skipEmptyLines: true,
                 complete: function(results) {
                     db = results.data.map((fila, index) => {
-                        // Lógica para detectar foto
                         let imagenUrl = fila['foto'] || fila['imagen']; 
                         return {
                             id: index + 1,
                             nombre: fila['productos'] || "Producto Sin Nombre",
                             precio: parseInt(fila['precio']) || 0,
-                            cat: fila['categoria'] ? fila['categoria'].trim() : "Varios", // Limpiamos espacios
-                            desc: fila['descripcion'] || "Sin descripción.",
+                            cat: fila['categoria'] ? fila['categoria'].trim() : "Varios",
+                            desc: fila['descripcion'] || "", // Importante para el buscador
                             img: imagenUrl && imagenUrl.length > 5 ? imagenUrl : "https://via.placeholder.com/400x400?text=Sin+Foto",
                             specs: fila['specs'] || ""
                         };
                     });
 
-                    // INICIALIZAR LA TIENDA
-                    generarMenuCategorias(); // Magia automática
+                    generarMenuCategorias();
                     document.getElementById('loading-msg').classList.add('hidden');
                     document.getElementById('seccion-destacados').classList.remove('hidden');
                     document.getElementById('seccion-catalogo').classList.remove('hidden');
@@ -213,15 +212,21 @@
             });
         }
 
-        // --- FUNCIÓN NUEVA: Genera el menú leyendo el Excel ---
         function generarMenuCategorias() {
             const nav = document.getElementById('nav-categorias');
-            // Sacamos categorías únicas del Excel
-            const categoriasUnicas = [...new Set(db.map(p => p.cat))].sort();
+            nav.innerHTML = ''; // Limpiar menú previo
+            
+            // Botón Todas
+            const btnTodas = document.createElement('button');
+            btnTodas.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
+            btnTodas.id = "btn-todas";
+            btnTodas.onclick = () => filtrar('todas', btnTodas);
+            btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
+            nav.appendChild(btnTodas);
+
+            const categoriasUnicas = [...new Set(db.map(p => p.cat))].filter(c => c).sort();
             
             categoriasUnicas.forEach(cat => {
-                if(!cat) return; // Si está vacío saltar
-                // Crear botón HTML
                 const btn = document.createElement('button');
                 btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
                 btn.onclick = () => filtrar(cat, btn);
@@ -232,7 +237,8 @@
 
         function renderGrid(lista) { 
             const contenedor = document.getElementById('grid-productos');
-            document.getElementById('cantidad-productos').innerText = `${lista.length} productos`;
+            const contador = document.getElementById('cantidad-productos');
+            if(contador) contador.innerText = `${lista.length} productos`;
             
             if(lista.length === 0) { 
                 contenedor.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 flex flex-col items-center"><i class="fa fa-box-open text-4xl mb-2 opacity-50"></i><p>No se encontraron productos.</p></div>'; 
@@ -242,7 +248,6 @@
         }
 
         function renderDestacados(lista) {
-            // Mostrar los primeros 6 como destacados por defecto
             const destacados = lista.slice(0, 6); 
             document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
                 <div class="slider-card bg-white rounded-2xl border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 relative h-full flex flex-col">
@@ -268,7 +273,6 @@
                         <img src="${p.img}" class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
                         <span class="absolute bottom-0 left-0 bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider rounded-tr-lg">${p.cat.substring(0,15)}</span>
                     </div>
-                    
                     <div class="p-4 flex flex-col grow">
                         <h4 class="font-medium text-gray-700 text-sm mb-3 leading-snug line-clamp-2 grow">${p.nombre}</h4>
                         <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
@@ -280,38 +284,56 @@
             `;
         }
 
-        // --- FUNCIONES INTERACCIÓN ---
-        function filtrar(cat, btnElement) {
-            // Quitar clase activa a todos
-            document.querySelectorAll('nav button').forEach(b => b.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group");
+        // --- BUSCADOR INTELIGENTE Y SCROLL ---
+        function buscar(query) {
+            clearTimeout(searchTimeout); // Reiniciar el reloj si sigue escribiendo
             
-            // Poner clase activa al clickeado
+            // Esperar 300ms después de que deje de escribir para buscar y scrollear
+            searchTimeout = setTimeout(() => {
+                const texto = query.toLowerCase();
+                
+                // Lógica "Inteligente": Busca en Nombre O Descripción O Categoría
+                const f = db.filter(p => 
+                    p.nombre.toLowerCase().includes(texto) || 
+                    p.desc.toLowerCase().includes(texto) || 
+                    p.cat.toLowerCase().includes(texto)
+                );
+                
+                renderGrid(f);
+
+                // FUNCIONALIDAD SCROLL: Si escribió algo, bajar al catálogo
+                if(query.length > 0) {
+                    const catalogo = document.getElementById('seccion-catalogo');
+                    catalogo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
+        }
+
+        function filtrar(cat, btnElement) {
+            document.querySelectorAll('#nav-categorias button').forEach(b => b.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group");
+            
             if(btnElement) {
                 btnElement.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
             } else {
-                document.getElementById('btn-todas').className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
+                const btnTodas = document.getElementById('btn-todas');
+                if(btnTodas) btnTodas.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
             }
 
             const f = cat === 'todas' ? db : db.filter(p => p.cat === cat);
             
-            // Actualizar título
             document.getElementById('titulo-grid').innerText = cat === 'todas' ? 'Catálogo Completo' : cat;
             renderGrid(f);
             
             if(window.innerWidth < 1024) toggleMobileMenu();
+            
+            // Scroll al filtrar también
+            document.getElementById('seccion-catalogo').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function buscar(query) {
-            const f = db.filter(p => p.nombre.toLowerCase().includes(query.toLowerCase()));
-            renderGrid(f);
-        }
-
-        // --- CARRITO & MODALES ---
         function addToCart(id) {
             const p = db.find(x => x.id === id);
             cart.push(p);
             updateCartUI();
-            
             if (window.innerWidth >= 1024) {
                 const sidebar = document.getElementById('cart-sidebar');
                 if (!sidebar.classList.contains('translate-x-0')) toggleCart();
@@ -375,7 +397,6 @@
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
             
-            // Procesar specs
             let specsHTML = "";
             if (p.specs && p.specs.length > 2) {
                 specsHTML = `<div class="bg-gray-50 p-6 rounded-2xl mb-8 border border-gray-100"><h3 class="font-bold mb-3 text-xs uppercase text-gray-400 tracking-wider">Detalles</h3><p class="text-sm text-gray-600 leading-relaxed">${p.specs}</p></div>`;
@@ -392,9 +413,7 @@
                         <span class="text-beige font-bold uppercase tracking-widest mb-2 text-xs">${p.cat}</span>
                         <h1 class="text-2xl md:text-4xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
                         <p class="text-lg text-gray-600 leading-relaxed mb-8 font-medium">${p.desc}</p>
-                        
                         ${specsHTML}
-                        
                         <div class="fixed bottom-0 left-0 w-full bg-white p-4 border-t border-gray-100 lg:static lg:bg-transparent lg:p-0 lg:border-none flex items-center justify-between gap-4 z-50">
                             <div class="flex flex-col lg:block">
                                 <span class="text-xs text-gray-400 font-bold uppercase lg:hidden">Total</span>
@@ -419,5 +438,7 @@
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
         }
     </script>
+    
 </body>
 </html>
+
