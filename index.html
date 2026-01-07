@@ -8,27 +8,47 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- ESTILOS --- */
+        /* --- ESTILOS GENERALES --- */
         :root { --beige: #D2B48C; --dark-text: #2D2D2D; }
         body { font-family: 'Segoe UI', sans-serif; background-color: #ffffff; color: var(--dark-text); }
         .text-beige { color: var(--beige); }
         .bg-beige { background-color: var(--beige); }
         
-        /* Layout Desktop */
+        /* --- LAYOUT ESCRITORIO --- */
         @media (min-width: 1024px) {
             .layout-desktop { margin-left: 280px; transition: margin-right 0.3s ease; }
             .layout-desktop.cart-open { margin-right: 400px; }
             .header-desktop-adjust { padding-left: 280px; }
+            
+            /* Ajuste de Productos Destacados en PC */
+            .destacados-grid-pc {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr); /* 3 columnas en PC */
+                gap: 20px;
+            }
         }
         
-        /* Slider Movil */
+        /* --- LAYOUT MÓVIL --- */
         @media (max-width: 1023px) {
-            .mobile-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; padding-bottom: 1.5rem; scrollbar-width: none; }
+            .mobile-slider { 
+                display: flex; 
+                overflow-x: auto; 
+                scroll-snap-type: x mandatory; 
+                gap: 1rem; 
+                padding-bottom: 1.5rem; 
+                scrollbar-width: none; 
+            }
+            .mobile-slider::-webkit-scrollbar { display: none; }
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
-            body { padding-bottom: 80px; }
+            body { padding-bottom: 80px; } /* Espacio para barra inferior */
         }
+
+        /* Animaciones */
         .fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Estilo Botón Categoría Activo */
+        .cat-btn-active { background-color: #f3f4f6; color: var(--beige); border-left: 4px solid var(--beige); }
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
@@ -54,85 +74,104 @@
         </div>
     </header>
 
-    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[60] pt-24 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 shadow-md">
-        <div class="p-8 h-full overflow-y-auto flex flex-col justify-between">
-            <div>
-                <div class="flex justify-between items-center mb-10 lg:hidden">
-                    <span class="font-bold text-beige uppercase tracking-widest text-xs">Menú</span>
-                    <button onclick="toggleMobileMenu()" class="text-2xl text-beige">✕</button>
-                </div>
-                <nav class="space-y-3">
-                    <button onclick="filtrar('todas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-border-all text-beige group-hover:scale-110 transition"></i> Todo el Catálogo</button>
-                </nav>
+    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[60] pt-24 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 shadow-xl flex flex-col justify-between h-full">
+        
+        <div class="p-6 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8 lg:hidden">
+                <span class="font-bold text-beige uppercase tracking-widest text-xs">Menú</span>
+                <button onclick="toggleMobileMenu()" class="text-2xl text-beige">✕</button>
             </div>
+            
+            <nav class="space-y-2" id="nav-categorias">
+                <button onclick="filtrar('todas')" class="w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-bold text-gray-700 flex items-center gap-3 transition-all group cat-btn-active" id="btn-todas">
+                    <i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo
+                </button>
+                </nav>
+        </div>
+
+        <div class="p-8 border-t border-gray-50 bg-gray-50/30">
+            <h4 class="text-xs font-black uppercase text-beige mb-4 tracking-widest">Síguenos</h4>
+            <div class="flex gap-6 text-2xl text-gray-400">
+                <a href="#" class="hover:text-beige transition hover:-translate-y-1"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-beige transition hover:-translate-y-1"><i class="fab fa-tiktok"></i></a>
+                <a href="#" class="hover:text-beige transition hover:-translate-y-1"><i class="fab fa-whatsapp"></i></a>
+            </div>
+            <p class="text-[10px] text-gray-300 mt-4">© 2026 Papajose SPA</p>
         </div>
     </aside>
 
-    <main id="main-content" class="pt-28 pb-32 px-6 md:px-12 layout-desktop min-h-screen">
-        <div class="lg:hidden mb-10 relative">
-            <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué estás buscando?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
+    <main id="main-content" class="pt-28 pb-32 px-4 md:px-12 layout-desktop min-h-screen">
+        
+        <div class="lg:hidden mb-8 relative">
+            <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué buscas hoy?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
             <i class="fa fa-search absolute left-5 top-5 text-beige"></i>
         </div>
 
         <div id="loading-msg" class="text-center py-20">
             <i class="fa fa-circle-notch fa-spin text-4xl text-beige mb-4"></i>
-            <p class="text-gray-500 font-bold">Cargando catálogo...</p>
+            <p class="text-gray-500 font-bold">Cargando productos...</p>
         </div>
 
-        <section class="mb-16 hidden" id="seccion-destacados">
-            <div class="flex items-center gap-4 mb-8">
+        <section class="mb-12 hidden" id="seccion-destacados">
+            <div class="flex items-center gap-3 mb-6">
                 <div class="w-1.5 h-8 bg-beige rounded-full"></div>
-                <h2 class="text-3xl font-black uppercase tracking-tight text-gray-800">Destacados</h2>
+                <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-gray-800">Destacados</h2>
             </div>
-            <div id="grid-destacados" class="mobile-slider responsive-grid pb-4"></div>
+            
+            <div id="grid-destacados" class="mobile-slider destacados-grid-pc pb-4">
+                </div>
         </section>
 
         <section id="seccion-catalogo" class="hidden">
-            <div class="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
+            <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
                 <h2 id="titulo-grid" class="text-xl font-bold text-beige uppercase tracking-widest">Catálogo Completo</h2>
+                <span id="cantidad-productos" class="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">0 productos</span>
             </div>
-            <div id="grid-productos" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-10"></div>
+            <div id="grid-productos" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+                </div>
         </section>
     </main>
 
-    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-lg transform translate-x-full transition-transform duration-300 flex flex-col">
-        <div class="p-8 border-b border-gray-50 flex justify-between items-center">
-            <h2 class="text-2xl font-black uppercase text-gray-800">Tu Carrito</h2>
-            <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl">✕</button>
+    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+            <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
+            <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
         </div>
-        <div id="cart-items" class="flex-1 overflow-y-auto p-8 space-y-8"></div>
-        <div class="p-8 bg-white border-t border-gray-50">
-            <div class="flex justify-between text-3xl font-black text-gray-900 mt-4 pt-4 border-t border-dashed mb-8"><span>Total</span> <span id="cart-total">$0</span></div>
-            <button onclick="enviarPedido()" class="w-full bg-black text-white py-5 rounded-2xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg flex items-center justify-center gap-3 text-sm">Ir a Pagar <i class="fab fa-whatsapp text-lg"></i></button>
+        <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
+        <div class="p-6 bg-white border-t border-gray-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+            <div class="flex justify-between text-2xl font-black text-gray-900 mb-6"><span>Total</span> <span id="cart-total">$0</span></div>
+            <button onclick="enviarPedido()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg flex items-center justify-center gap-3 text-sm">Ir a Pagar <i class="fab fa-whatsapp text-lg"></i></button>
         </div>
     </aside>
 
-    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[90] shadow-lg flex justify-between items-center lg:hidden hidden fade-in-up">
+    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[90] shadow-[0_-5px_15px_rgba(0,0,0,0.05)] flex justify-between items-center lg:hidden hidden fade-in-up">
         <div class="flex flex-col">
-            <span class="text-[10px] text-beige font-bold uppercase tracking-wider">Total a pagar</span>
-            <span id="mobile-total-sticky" class="text-2xl font-black text-gray-900">$0</span>
+            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total</span>
+            <span id="mobile-total-sticky" class="text-xl font-black text-gray-900">$0</span>
         </div>
-        <button onclick="toggleCart()" class="bg-black text-white px-8 py-3 rounded-xl font-bold text-sm shadow-xl active:scale-95 transition flex items-center gap-2">Ver Carrito <i class="fa fa-shopping-cart"></i></button>
+        <button onclick="toggleCart()" class="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm shadow-xl active:scale-95 transition flex items-center gap-2">
+            Ver Carrito <i class="fa fa-shopping-cart"></i>
+        </button>
     </div>
 
-    <div id="product-modal" class="fixed inset-0 z-[200] bg-white hidden overflow-y-auto">
-        <button onclick="closeProductModal()" class="fixed top-6 right-6 z-50 bg-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-xl hover:rotate-90 transition border border-gray-100">✕</button>
+    <div id="product-modal" class="fixed inset-0 z-[200] bg-white hidden overflow-y-auto animate-fade-in">
+        <button onclick="closeProductModal()" class="fixed top-4 right-4 z-50 bg-gray-100 w-10 h-10 rounded-full flex items-center justify-center shadow-sm text-lg hover:bg-red-100 hover:text-red-500 transition">✕</button>
         <div id="modal-content" class="min-h-screen"></div>
     </div>
     
-    <div id="toast-modal" class="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm hidden flex items-end md:items-center justify-center p-4 transition-all">
-        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center transform transition-all scale-100 mb-20 md:mb-0 border border-white/50">
-            <h3 class="text-2xl font-black text-gray-800 mb-3">¡Agregado!</h3>
-            <div class="flex gap-4">
-                <button onclick="cerrarToast()" class="flex-1 py-4 rounded-2xl border-2 border-gray-100 font-bold text-gray-600 hover:border-beige transition">Seguir Viendo</button>
-                <button onclick="cerrarToast(); toggleCart()" class="flex-1 py-4 rounded-2xl bg-black text-white font-bold shadow-xl hover:bg-beige transition">Ir al Carrito</button>
+    <div id="toast-modal" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[100] hidden transition-all w-11/12 max-w-sm">
+        <div class="bg-gray-900 text-white rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-xs"><i class="fa fa-check"></i></div>
+                <span class="font-bold text-sm">¡Agregado al carrito!</span>
             </div>
+            <button onclick="toggleCart(); cerrarToast()" class="text-xs font-bold text-beige hover:text-white underline">Ver</button>
         </div>
     </div>
 
     <script>
         const WHATSAPP_NUM = "56949513296"; 
-        const CSV_URL = "productos.csv"; // ASEGÚRATE QUE TU ARCHIVO EN GITHUB SE LLAME EXACTAMENTE ASÍ
+        const CSV_URL = "productos.csv"; // REVISA QUE EL NOMBRE SEA EXACTO
         
         let db = [];
         let cart = [];
@@ -145,55 +184,77 @@
                 header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    console.log("Datos del CSV:", results.data);
-                    
                     db = results.data.map((fila, index) => {
-                        // AQUÍ ESTABA EL ERROR: Cambié 'imagen' por 'foto'
+                        // Lógica para detectar foto
                         let imagenUrl = fila['foto'] || fila['imagen']; 
-
                         return {
                             id: index + 1,
                             nombre: fila['productos'] || "Producto Sin Nombre",
                             precio: parseInt(fila['precio']) || 0,
-                            cat: fila['categoria'] || "General",
+                            cat: fila['categoria'] ? fila['categoria'].trim() : "Varios", // Limpiamos espacios
                             desc: fila['descripcion'] || "Sin descripción.",
                             img: imagenUrl && imagenUrl.length > 5 ? imagenUrl : "https://via.placeholder.com/400x400?text=Sin+Foto",
-                            specs: fila['specs'] || "Calidad Garantizada"
+                            specs: fila['specs'] || ""
                         };
                     });
 
+                    // INICIALIZAR LA TIENDA
+                    generarMenuCategorias(); // Magia automática
                     document.getElementById('loading-msg').classList.add('hidden');
                     document.getElementById('seccion-destacados').classList.remove('hidden');
                     document.getElementById('seccion-catalogo').classList.remove('hidden');
-                    init();
+                    renderGrid(db);
+                    renderDestacados(db);
                 },
                 error: function(err) {
-                    console.error("Error CSV:", err);
-                    alert("Error cargando productos. Verifica que el archivo productos.csv esté subido.");
+                    console.error(err);
+                    alert("Error leyendo productos.csv");
                 }
             });
         }
 
-        function init() { renderGrid(db); renderDestacados(db); }
+        // --- FUNCIÓN NUEVA: Genera el menú leyendo el Excel ---
+        function generarMenuCategorias() {
+            const nav = document.getElementById('nav-categorias');
+            // Sacamos categorías únicas del Excel
+            const categoriasUnicas = [...new Set(db.map(p => p.cat))].sort();
+            
+            categoriasUnicas.forEach(cat => {
+                if(!cat) return; // Si está vacío saltar
+                // Crear botón HTML
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
+                btn.onclick = () => filtrar(cat, btn);
+                btn.innerHTML = `<i class="fa fa-chevron-right text-gray-300 text-xs group-hover:text-beige transition"></i> ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
+                nav.appendChild(btn);
+            });
+        }
 
         function renderGrid(lista) { 
             const contenedor = document.getElementById('grid-productos');
-            if(lista.length === 0) { contenedor.innerHTML = '<p class="col-span-full text-center text-gray-400">No hay productos disponibles.</p>'; return; }
+            document.getElementById('cantidad-productos').innerText = `${lista.length} productos`;
+            
+            if(lista.length === 0) { 
+                contenedor.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 flex flex-col items-center"><i class="fa fa-box-open text-4xl mb-2 opacity-50"></i><p>No se encontraron productos.</p></div>'; 
+                return; 
+            }
             contenedor.innerHTML = lista.map(p => cardHTML(p)).join(''); 
         }
 
         function renderDestacados(lista) {
-            const destacados = lista.slice(0, 5); 
+            // Mostrar los primeros 6 como destacados por defecto
+            const destacados = lista.slice(0, 6); 
             document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
-                <div class="slider-card bg-white rounded-[2rem] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-500 relative mr-4 md:mr-0 h-full flex flex-col">
-                    <div class="relative h-64 overflow-hidden shrink-0" onclick="openProduct(${p.id})">
-                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
+                <div class="slider-card bg-white rounded-2xl border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 relative h-full flex flex-col">
+                    <div class="relative h-56 md:h-64 overflow-hidden bg-white p-2" onclick="openProduct(${p.id})">
+                        <img src="${p.img}" class="w-full h-full object-contain group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
+                        <div class="absolute top-2 left-2 bg-beige text-white px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-sm">Destacado</div>
                     </div>
-                    <div class="p-6 flex flex-col flex-1 justify-between">
-                        <h3 class="font-bold text-gray-800 text-lg mb-4 leading-tight">${p.nombre}</h3>
-                        <div class="flex justify-between items-end">
-                            <span class="text-2xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
-                            <button onclick="addToCart(${p.id})" class="bg-black text-white w-12 h-12 rounded-2xl hover:bg-beige transition-all flex items-center justify-center shadow-md"><i class="fa fa-plus"></i></button>
+                    <div class="p-4 flex flex-col flex-1 justify-between">
+                        <h3 class="font-bold text-gray-800 text-sm md:text-base mb-2 leading-snug line-clamp-2">${p.nombre}</h3>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-lg md:text-xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
+                            <button onclick="addToCart(${p.id})" class="bg-gray-900 text-white w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-beige transition-all flex items-center justify-center shadow-md"><i class="fa fa-plus text-xs md:text-sm"></i></button>
                         </div>
                     </div>
                 </div>
@@ -202,33 +263,63 @@
 
         function cardHTML(p) {
             return `
-                <div class="bg-white rounded-3xl border border-gray-50 p-4 hover:border-beige/30 transition-all duration-300 group hover:shadow-xl relative flex flex-col h-full">
-                    <div class="relative h-48 rounded-2xl overflow-hidden mb-4 cursor-pointer shrink-0" onclick="openProduct(${p.id})">
-                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
-                        <span class="absolute bottom-3 left-3 bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase text-beige tracking-widest">${p.cat}</span>
+                <div class="bg-white rounded-2xl border border-gray-50 hover:border-beige/30 transition-all duration-300 group hover:shadow-lg relative flex flex-col h-full overflow-hidden">
+                    <div class="relative h-48 md:h-56 bg-white p-2 cursor-pointer" onclick="openProduct(${p.id})">
+                        <img src="${p.img}" class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
+                        <span class="absolute bottom-0 left-0 bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider rounded-tr-lg">${p.cat.substring(0,15)}</span>
                     </div>
-                    <h4 class="font-bold text-gray-900 text-base mb-4 leading-tight grow">${p.nombre}</h4>
-                    <div class="flex items-center justify-between mt-auto">
-                        <span class="font-black text-xl text-gray-900">$${p.precio.toLocaleString()}</span>
-                        <button onclick="addToCart(${p.id})" class="text-xs font-black bg-gray-100 text-gray-900 px-4 py-3 rounded-xl hover:bg-black hover:text-white transition uppercase tracking-wide">Agregar</button>
+                    
+                    <div class="p-4 flex flex-col grow">
+                        <h4 class="font-medium text-gray-700 text-sm mb-3 leading-snug line-clamp-2 grow">${p.nombre}</h4>
+                        <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
+                            <span class="font-black text-lg text-gray-900">$${p.precio.toLocaleString()}</span>
+                            <button onclick="addToCart(${p.id})" class="text-xs font-bold bg-gray-50 text-gray-900 px-3 py-2 rounded-lg hover:bg-black hover:text-white transition uppercase">Agregar</button>
+                        </div>
                     </div>
                 </div>
             `;
         }
 
+        // --- FUNCIONES INTERACCIÓN ---
+        function filtrar(cat, btnElement) {
+            // Quitar clase activa a todos
+            document.querySelectorAll('nav button').forEach(b => b.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group");
+            
+            // Poner clase activa al clickeado
+            if(btnElement) {
+                btnElement.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
+            } else {
+                document.getElementById('btn-todas').className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
+            }
+
+            const f = cat === 'todas' ? db : db.filter(p => p.cat === cat);
+            
+            // Actualizar título
+            document.getElementById('titulo-grid').innerText = cat === 'todas' ? 'Catálogo Completo' : cat;
+            renderGrid(f);
+            
+            if(window.innerWidth < 1024) toggleMobileMenu();
+        }
+
+        function buscar(query) {
+            const f = db.filter(p => p.nombre.toLowerCase().includes(query.toLowerCase()));
+            renderGrid(f);
+        }
+
+        // --- CARRITO & MODALES ---
         function addToCart(id) {
             const p = db.find(x => x.id === id);
             cart.push(p);
             updateCartUI();
+            
             if (window.innerWidth >= 1024) {
                 const sidebar = document.getElementById('cart-sidebar');
-                const main = document.getElementById('main-content');
-                if (!sidebar.classList.contains('translate-x-0')) {
-                    sidebar.classList.remove('translate-x-full');
-                    sidebar.classList.add('translate-x-0');
-                    main.classList.add('cart-open');
-                }
-            } else { document.getElementById('toast-modal').classList.remove('hidden'); }
+                if (!sidebar.classList.contains('translate-x-0')) toggleCart();
+            } else { 
+                const toast = document.getElementById('toast-modal');
+                toast.classList.remove('hidden');
+                setTimeout(() => cerrarToast(), 3000);
+            }
         }
 
         function updateCartUI() {
@@ -237,19 +328,20 @@
             const stickyBar = document.getElementById('mobile-sticky-bar');
             
             if (cart.length === 0) {
-                list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-7xl mb-6 opacity-20"></i><p class="font-medium text-lg">Tu carrito está vacío</p></div>`;
+                list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-5xl mb-4 opacity-20"></i><p class="text-sm">Tu carrito está vacío</p></div>`;
                 stickyBar.classList.add('hidden'); 
             } else {
                 list.innerHTML = cart.map((p, i) => `
-                    <div class="flex gap-5 items-center bg-white p-2 rounded-2xl relative group">
-                        <img src="${p.img}" class="w-20 h-20 rounded-xl object-cover shadow-sm" onerror="this.src='https://via.placeholder.com/100'">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-sm text-gray-800 leading-tight">${p.nombre}</h4>
-                            <p class="text-lg font-black text-gray-900 mt-1">$${p.precio.toLocaleString()}</p>
+                    <div class="flex gap-4 items-center bg-gray-50 p-3 rounded-xl relative group border border-transparent hover:border-beige/20 hover:bg-white transition-all shadow-sm">
+                        <img src="${p.img}" class="w-16 h-16 rounded-lg object-contain bg-white border border-gray-100" onerror="this.src='https://via.placeholder.com/100'">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-xs text-gray-700 leading-tight truncate">${p.nombre}</h4>
+                            <p class="text-sm font-black text-gray-900 mt-1">$${p.precio.toLocaleString()}</p>
                         </div>
-                        <button onclick="remove(${i})" class="absolute top-0 right-0 p-3 text-gray-300 hover:text-red-500 transition">✕</button>
+                        <button onclick="remove(${i})" class="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-500 transition hover:bg-red-50 rounded-full">✕</button>
                     </div>
                 `).join('');
+                
                 const sidebar = document.getElementById('cart-sidebar');
                 if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) stickyBar.classList.remove('hidden');
                 else stickyBar.classList.add('hidden');
@@ -260,10 +352,12 @@
         }
 
         function remove(index) { cart.splice(index, 1); updateCartUI(); }
+
         function toggleCart() {
             const sidebar = document.getElementById('cart-sidebar');
             const main = document.getElementById('main-content');
             const stickyBar = document.getElementById('mobile-sticky-bar');
+            
             if (sidebar.classList.contains('translate-x-full')) {
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
@@ -276,46 +370,52 @@
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('hidden');
             }
         }
-        function toggleMobileMenu() { document.getElementById('left-sidebar').classList.toggle('-translate-x-full'); }
-        function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
-        function filtrar(cat) {
-            const f = cat === 'todas' ? db : db.filter(p => p.cat.toLowerCase() === cat.toLowerCase());
-            document.getElementById('titulo-grid').innerText = cat === 'todas' ? 'Catálogo Completo' : `Categoría: ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
-            renderGrid(f);
-            if(window.innerWidth < 1024) toggleMobileMenu();
-        }
-        function buscar(query) {
-            const f = db.filter(p => p.nombre.toLowerCase().includes(query.toLowerCase()));
-            renderGrid(f);
-        }
+
         function openProduct(id) {
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
+            
+            // Procesar specs
+            let specsHTML = "";
+            if (p.specs && p.specs.length > 2) {
+                specsHTML = `<div class="bg-gray-50 p-6 rounded-2xl mb-8 border border-gray-100"><h3 class="font-bold mb-3 text-xs uppercase text-gray-400 tracking-wider">Detalles</h3><p class="text-sm text-gray-600 leading-relaxed">${p.specs}</p></div>`;
+            }
+
             document.getElementById('modal-content').innerHTML = `
-                <div class="max-w-7xl mx-auto p-6 md:p-12 lg:flex gap-16 pt-24">
-                    <div class="lg:w-1/2 mb-10 lg:mb-0">
-                        <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl mb-6 aspect-square bg-gray-50">
-                            <img src="${p.img}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
+                <div class="max-w-6xl mx-auto p-4 md:p-12 lg:flex gap-12 pt-20">
+                    <div class="lg:w-1/2 mb-8 lg:mb-0">
+                        <div class="relative rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-sm aspect-square flex items-center justify-center p-8">
+                            <img src="${p.img}" class="max-w-full max-h-full object-contain" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
                         </div>
                     </div>
                     <div class="lg:w-1/2 flex flex-col justify-center">
-                        <span class="text-beige font-black uppercase tracking-widest mb-4 text-sm flex items-center gap-2"><i class="fa fa-tag"></i> ${p.cat}</span>
-                        <h1 class="text-3xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
-                        <p class="text-xl text-gray-500 leading-relaxed mb-10 font-medium">${p.desc}</p>
-                        <div class="flex items-center justify-between border-t border-gray-100 pt-10">
-                            <div><span class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Precio</span><span class="text-5xl font-black text-gray-900">$${p.precio.toLocaleString()}</span></div>
-                            <button onclick="addToCart(${p.id}); closeProductModal()" class="bg-black text-white px-8 md:px-12 py-6 rounded-[2rem] font-bold uppercase tracking-widest hover:bg-beige transition shadow-xl text-sm">Agregar al Carrito</button>
+                        <span class="text-beige font-bold uppercase tracking-widest mb-2 text-xs">${p.cat}</span>
+                        <h1 class="text-2xl md:text-4xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
+                        <p class="text-lg text-gray-600 leading-relaxed mb-8 font-medium">${p.desc}</p>
+                        
+                        ${specsHTML}
+                        
+                        <div class="fixed bottom-0 left-0 w-full bg-white p-4 border-t border-gray-100 lg:static lg:bg-transparent lg:p-0 lg:border-none flex items-center justify-between gap-4 z-50">
+                            <div class="flex flex-col lg:block">
+                                <span class="text-xs text-gray-400 font-bold uppercase lg:hidden">Total</span>
+                                <span class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
+                            </div>
+                            <button onclick="addToCart(${p.id}); closeProductModal()" class="bg-black text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm flex-1 lg:flex-none text-center">Agregar</button>
                         </div>
                     </div>
                 </div>`;
             modal.classList.remove('hidden');
         }
+
+        function toggleMobileMenu() { document.getElementById('left-sidebar').classList.toggle('-translate-x-full'); }
+        function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
         function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+        
         function enviarPedido() {
             if(cart.length === 0) return alert("Tu carrito está vacío");
             const totalText = document.getElementById('cart-total').innerText;
             const itemsList = cart.map(p => `• ${p.nombre} ($${p.precio.toLocaleString()})`).join('\n');
-            const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
+            const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos.`;
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
         }
     </script>
