@@ -5,77 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papajose SPA | Tienda Oficial</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- PALETA DE COLORES --- */
-        :root { 
-            --beige: #D2B48C;
-            --beige-light: #F5F5DC; 
-            --dark-text: #2D2D2D;
-        }
+        /* --- ESTILOS --- */
+        :root { --beige: #D2B48C; --dark-text: #2D2D2D; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #ffffff; color: var(--dark-text); }
         .text-beige { color: var(--beige); }
         .bg-beige { background-color: var(--beige); }
-        .border-beige { border-color: var(--beige); }
         
-        body { background-color: #ffffff; color: var(--dark-text); }
-        
-        /* Scrollbar PC */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-thumb { background: #E0E0E0; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--beige); }
-
-        /* --- LÓGICA DE LAYOUT DE ESCRITORIO --- */
+        /* Layout Desktop */
         @media (min-width: 1024px) {
             .layout-desktop { margin-left: 280px; transition: margin-right 0.3s ease; }
             .layout-desktop.cart-open { margin-right: 400px; }
             .header-desktop-adjust { padding-left: 280px; }
-            .responsive-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
         }
         
-        /* --- LÓGICA DE MÓVIL --- */
+        /* Slider Movil */
         @media (max-width: 1023px) {
-            .mobile-slider { 
-                display: flex; 
-                overflow-x: auto; 
-                scroll-snap-type: x mandatory; 
-                gap: 1rem; 
-                padding-bottom: 1.5rem; 
-                scrollbar-width: none; 
-                -webkit-overflow-scrolling: touch; 
-            }
-            .mobile-slider::-webkit-scrollbar { display: none; } 
+            .mobile-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; padding-bottom: 1.5rem; scrollbar-width: none; }
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
             body { padding-bottom: 80px; }
         }
-
         .fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
 
-    <header class="fixed top-0 w-full bg-white z-[50] border-b border-gray-50 h-20 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] transition-all duration-300 header-desktop-adjust">
+    <header class="fixed top-0 w-full bg-white z-[50] border-b border-gray-50 h-20 shadow-sm transition-all duration-300 header-desktop-adjust">
         <div class="h-full flex justify-between items-center px-6 md:px-10 relative">
             <div class="flex items-center z-20">
                 <button onclick="toggleMobileMenu()" class="lg:hidden text-2xl text-beige hover:text-black transition"><i class="fa fa-bars"></i></button>
             </div>
             <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none">
-                <h1 class="text-2xl md:text-3xl font-black tracking-wider text-beige uppercase pointer-events-auto inline-block" style="font-family: 'Arial Black', sans-serif;">Papajose SPA</h1>
+                <h1 class="text-2xl md:text-3xl font-black tracking-wider text-beige uppercase pointer-events-auto inline-block">Papajose SPA</h1>
             </div>
             <div class="flex items-center gap-6 z-20 bg-white pl-4">
                 <div class="hidden lg:block relative group">
-                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all duration-300">
-                    <i class="fa fa-search absolute right-4 top-3 text-beige group-focus-within:text-black transition"></i>
+                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
+                    <i class="fa fa-search absolute right-4 top-3 text-beige"></i>
                 </div>
                 <button onclick="toggleCart()" class="relative p-2 group">
-                    <i class="fa fa-shopping-bag text-2xl text-beige group-hover:text-black transition-colors duration-300"></i>
+                    <i class="fa fa-shopping-bag text-2xl text-beige group-hover:text-black transition"></i>
                     <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white">0</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[60] pt-24 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 shadow-[2px_0_20px_-5px_rgba(0,0,0,0.05)]">
+    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[60] pt-24 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 shadow-md">
         <div class="p-8 h-full overflow-y-auto flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-center mb-10 lg:hidden">
@@ -84,21 +63,12 @@
                 </div>
                 <nav class="space-y-3">
                     <button onclick="filtrar('todas')" class="w-full text-left px-5 py-4 rounded-2xl hover:bg-beige/10 font-bold text-gray-700 flex items-center gap-4 transition-all group"><i class="fa fa-border-all text-beige group-hover:scale-110 transition"></i> Todo el Catálogo</button>
-                    </nav>
-            </div>
-            <div class="mb-10">
-                <h4 class="text-xs font-black uppercase text-beige mb-6 tracking-widest">Síguenos</h4>
-                <div class="flex gap-6 text-2xl text-beige/70">
-                    <a href="#" class="hover:text-beige transition hover:scale-110"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="hover:text-beige transition hover:scale-110"><i class="fab fa-tiktok"></i></a>
-                    <a href="#" class="hover:text-beige transition hover:scale-110"><i class="fab fa-whatsapp"></i></a>
-                </div>
+                </nav>
             </div>
         </div>
     </aside>
 
     <main id="main-content" class="pt-28 pb-32 px-6 md:px-12 layout-desktop min-h-screen">
-        
         <div class="lg:hidden mb-10 relative">
             <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué estás buscando?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
             <i class="fa fa-search absolute left-5 top-5 text-beige"></i>
@@ -125,132 +95,105 @@
         </section>
     </main>
 
-    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-[-5px_0_30px_-10px_rgba(0,0,0,0.1)] transform translate-x-full transition-transform duration-300 flex flex-col">
+    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-lg transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-8 border-b border-gray-50 flex justify-between items-center">
             <h2 class="text-2xl font-black uppercase text-gray-800">Tu Carrito</h2>
             <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl">✕</button>
         </div>
         <div id="cart-items" class="flex-1 overflow-y-auto p-8 space-y-8"></div>
         <div class="p-8 bg-white border-t border-gray-50">
-            <div class="space-y-3 mb-8 text-sm font-medium">
-                <div class="flex justify-between text-3xl font-black text-gray-900 mt-4 pt-4 border-t border-dashed"><span>Total</span> <span id="cart-total">$0</span></div>
-            </div>
-            <button onclick="enviarPedido()" class="w-full bg-black text-white py-5 rounded-2xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg hover:shadow-beige/50 flex items-center justify-center gap-3 text-sm">Ir a Pagar <i class="fab fa-whatsapp text-lg"></i></button>
+            <div class="flex justify-between text-3xl font-black text-gray-900 mt-4 pt-4 border-t border-dashed mb-8"><span>Total</span> <span id="cart-total">$0</span></div>
+            <button onclick="enviarPedido()" class="w-full bg-black text-white py-5 rounded-2xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg flex items-center justify-center gap-3 text-sm">Ir a Pagar <i class="fab fa-whatsapp text-lg"></i></button>
         </div>
     </aside>
 
-    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[90] shadow-[0_-5px_20px_rgba(0,0,0,0.1)] flex justify-between items-center lg:hidden hidden fade-in-up">
+    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[90] shadow-lg flex justify-between items-center lg:hidden hidden fade-in-up">
         <div class="flex flex-col">
             <span class="text-[10px] text-beige font-bold uppercase tracking-wider">Total a pagar</span>
             <span id="mobile-total-sticky" class="text-2xl font-black text-gray-900">$0</span>
         </div>
-        <button onclick="toggleCart()" class="bg-black text-white px-8 py-3 rounded-xl font-bold text-sm shadow-xl active:scale-95 transition flex items-center gap-2">
-            Ver Carrito <i class="fa fa-shopping-cart"></i>
-        </button>
-    </div>
-
-    <div id="toast-modal" class="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm hidden flex items-end md:items-center justify-center p-4 transition-all">
-        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center transform transition-all scale-100 mb-20 md:mb-0 border border-white/50">
-            <div class="w-20 h-20 bg-beige/20 text-beige rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-sm"><i class="fa fa-check"></i></div>
-            <h3 class="text-2xl font-black text-gray-800 mb-3">¡Agregado!</h3>
-            <p class="text-gray-500 font-medium mb-8">El producto está en tu carrito.</p>
-            <div class="flex gap-4">
-                <button onclick="cerrarToast()" class="flex-1 py-4 rounded-2xl border-2 border-gray-100 font-bold text-gray-600 hover:border-beige hover:text-beige transition">Seguir Viendo</button>
-                <button onclick="cerrarToast(); toggleCart()" class="flex-1 py-4 rounded-2xl bg-black text-white font-bold shadow-xl hover:bg-beige transition">Ir al Carrito</button>
-            </div>
-        </div>
+        <button onclick="toggleCart()" class="bg-black text-white px-8 py-3 rounded-xl font-bold text-sm shadow-xl active:scale-95 transition flex items-center gap-2">Ver Carrito <i class="fa fa-shopping-cart"></i></button>
     </div>
 
     <div id="product-modal" class="fixed inset-0 z-[200] bg-white hidden overflow-y-auto">
         <button onclick="closeProductModal()" class="fixed top-6 right-6 z-50 bg-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-xl hover:rotate-90 transition border border-gray-100">✕</button>
         <div id="modal-content" class="min-h-screen"></div>
     </div>
+    
+    <div id="toast-modal" class="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm hidden flex items-end md:items-center justify-center p-4 transition-all">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center transform transition-all scale-100 mb-20 md:mb-0 border border-white/50">
+            <h3 class="text-2xl font-black text-gray-800 mb-3">¡Agregado!</h3>
+            <div class="flex gap-4">
+                <button onclick="cerrarToast()" class="flex-1 py-4 rounded-2xl border-2 border-gray-100 font-bold text-gray-600 hover:border-beige transition">Seguir Viendo</button>
+                <button onclick="cerrarToast(); toggleCart()" class="flex-1 py-4 rounded-2xl bg-black text-white font-bold shadow-xl hover:bg-beige transition">Ir al Carrito</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const WHATSAPP_NUM = "56949513296";
+        const WHATSAPP_NUM = "56949513296"; 
+        const CSV_URL = "productos.csv"; // ASEGÚRATE QUE TU ARCHIVO EN GITHUB SE LLAME EXACTAMENTE ASÍ
         
-        // -------------------------------------------------------------
-        // URL DEL ARCHIVO CSV (EXCEL)
-        // Cuando subas tu archivo a GitHub, dale click al botón "Raw" 
-        // y pega ese link aquí.
-        // -------------------------------------------------------------
-        const CSV_URL = "productos.csv"; // Si está en la misma carpeta se llama así.
-        
-        let db = []; // Aquí se guardarán los datos leídos del Excel
+        let db = [];
         let cart = [];
 
-        // INICIAR CARGA DE DATOS
-        window.addEventListener('DOMContentLoaded', () => {
-            cargarProductosDesdeCSV();
-        });
+        window.addEventListener('DOMContentLoaded', () => { cargarProductosDesdeCSV(); });
 
         function cargarProductosDesdeCSV() {
             Papa.parse(CSV_URL, {
                 download: true,
-                header: true, // Importante: Usa la primera fila del Excel como nombres
+                header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    console.log("Datos crudos del CSV:", results.data);
+                    console.log("Datos del CSV:", results.data);
                     
-                    // PROCESAR DATOS: Convertir texto a números y limpiar
                     db = results.data.map((fila, index) => {
+                        // AQUÍ ESTABA EL ERROR: Cambié 'imagen' por 'foto'
+                        let imagenUrl = fila['foto'] || fila['imagen']; 
+
                         return {
                             id: index + 1,
-                            nombre: fila['productos'] || "Sin Nombre", // Debe coincidir con tu columna Excel
+                            nombre: fila['productos'] || "Producto Sin Nombre",
                             precio: parseInt(fila['precio']) || 0,
                             cat: fila['categoria'] || "General",
-                            desc: fila['descripcion'] || "Sin descripción disponible.",
-                            // Si tienes una columna imagen en el excel, úsala, si no, usa placeholder
-                            img: fila['imagen'] && fila['imagen'].length > 5 ? fila['imagen'] : "https://via.placeholder.com/400x400?text=Sin+Foto",
-                            // Asumimos que la primera foto es la misma que img por ahora
-                            fotos: fila['imagen'] ? [fila['imagen']] : [],
-                            specs: fila['specs'] || "Producto de alta calidad" // Si tienes columna specs
+                            desc: fila['descripcion'] || "Sin descripción.",
+                            img: imagenUrl && imagenUrl.length > 5 ? imagenUrl : "https://via.placeholder.com/400x400?text=Sin+Foto",
+                            specs: fila['specs'] || "Calidad Garantizada"
                         };
                     });
 
-                    // Una vez cargados, mostrar la tienda
                     document.getElementById('loading-msg').classList.add('hidden');
                     document.getElementById('seccion-destacados').classList.remove('hidden');
                     document.getElementById('seccion-catalogo').classList.remove('hidden');
-                    
                     init();
                 },
                 error: function(err) {
-                    console.error("Error leyendo CSV:", err);
-                    alert("Error cargando los productos. Revisa la consola.");
+                    console.error("Error CSV:", err);
+                    alert("Error cargando productos. Verifica que el archivo productos.csv esté subido.");
                 }
             });
         }
 
-        function init() { 
-            renderGrid(db); 
-            renderDestacados(db); 
-        }
+        function init() { renderGrid(db); renderDestacados(db); }
 
         function renderGrid(lista) { 
             const contenedor = document.getElementById('grid-productos');
-            if(lista.length === 0) {
-                contenedor.innerHTML = '<p class="col-span-full text-center text-gray-400">No se encontraron productos.</p>';
-                return;
-            }
+            if(lista.length === 0) { contenedor.innerHTML = '<p class="col-span-full text-center text-gray-400">No hay productos disponibles.</p>'; return; }
             contenedor.innerHTML = lista.map(p => cardHTML(p)).join(''); 
         }
 
         function renderDestacados(lista) {
-            // Puedes crear una columna "destacado" en tu Excel (si/no) para filtrar mejor
-            // Por ahora mostramos los primeros 5
             const destacados = lista.slice(0, 5); 
             document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
-                <div class="slider-card bg-white rounded-[2rem] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-[0_10px_30px_-10px_rgba(210,180,140,0.3)] transition-all duration-500 relative mr-4 md:mr-0 h-full flex flex-col">
+                <div class="slider-card bg-white rounded-[2rem] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-500 relative mr-4 md:mr-0 h-full flex flex-col">
                     <div class="relative h-64 overflow-hidden shrink-0" onclick="openProduct(${p.id})">
                         <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
-                        <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-beige tracking-widest shadow-sm border border-beige/20">Top Venta</div>
                     </div>
                     <div class="p-6 flex flex-col flex-1 justify-between">
                         <h3 class="font-bold text-gray-800 text-lg mb-4 leading-tight">${p.nombre}</h3>
                         <div class="flex justify-between items-end">
                             <span class="text-2xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
-                            <button onclick="addToCart(${p.id})" class="bg-black text-white w-12 h-12 rounded-2xl hover:bg-beige transition-all flex items-center justify-center shadow-md active:scale-95"><i class="fa fa-plus"></i></button>
+                            <button onclick="addToCart(${p.id})" class="bg-black text-white w-12 h-12 rounded-2xl hover:bg-beige transition-all flex items-center justify-center shadow-md"><i class="fa fa-plus"></i></button>
                         </div>
                     </div>
                 </div>
@@ -265,7 +208,6 @@
                         <span class="absolute bottom-3 left-3 bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase text-beige tracking-widest">${p.cat}</span>
                     </div>
                     <h4 class="font-bold text-gray-900 text-base mb-4 leading-tight grow">${p.nombre}</h4>
-                    
                     <div class="flex items-center justify-between mt-auto">
                         <span class="font-black text-xl text-gray-900">$${p.precio.toLocaleString()}</span>
                         <button onclick="addToCart(${p.id})" class="text-xs font-black bg-gray-100 text-gray-900 px-4 py-3 rounded-xl hover:bg-black hover:text-white transition uppercase tracking-wide">Agregar</button>
@@ -278,7 +220,6 @@
             const p = db.find(x => x.id === id);
             cart.push(p);
             updateCartUI();
-            
             if (window.innerWidth >= 1024) {
                 const sidebar = document.getElementById('cart-sidebar');
                 const main = document.getElementById('main-content');
@@ -287,9 +228,7 @@
                     sidebar.classList.add('translate-x-0');
                     main.classList.add('cart-open');
                 }
-            } else { 
-                document.getElementById('toast-modal').classList.remove('hidden'); 
-            }
+            } else { document.getElementById('toast-modal').classList.remove('hidden'); }
         }
 
         function updateCartUI() {
@@ -305,36 +244,26 @@
                     <div class="flex gap-5 items-center bg-white p-2 rounded-2xl relative group">
                         <img src="${p.img}" class="w-20 h-20 rounded-xl object-cover shadow-sm" onerror="this.src='https://via.placeholder.com/100'">
                         <div class="flex-1">
-                            <p class="text-[10px] font-bold text-beige uppercase tracking-widest mb-1">${p.cat}</p>
                             <h4 class="font-bold text-sm text-gray-800 leading-tight">${p.nombre}</h4>
                             <p class="text-lg font-black text-gray-900 mt-1">$${p.precio.toLocaleString()}</p>
                         </div>
                         <button onclick="remove(${i})" class="absolute top-0 right-0 p-3 text-gray-300 hover:text-red-500 transition">✕</button>
                     </div>
                 `).join('');
-                
                 const sidebar = document.getElementById('cart-sidebar');
-                if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) {
-                    stickyBar.classList.remove('hidden');
-                } else {
-                    stickyBar.classList.add('hidden');
-                }
+                if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) stickyBar.classList.remove('hidden');
+                else stickyBar.classList.add('hidden');
             }
-            
-            // CÁLCULO TOTAL
             let total = cart.reduce((sum, item) => sum + item.precio, 0);
-            
             document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`;
             document.getElementById('mobile-total-sticky').innerText = `$${total.toLocaleString()}`;
         }
 
         function remove(index) { cart.splice(index, 1); updateCartUI(); }
-
         function toggleCart() {
             const sidebar = document.getElementById('cart-sidebar');
             const main = document.getElementById('main-content');
             const stickyBar = document.getElementById('mobile-sticky-bar');
-
             if (sidebar.classList.contains('translate-x-full')) {
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
@@ -344,9 +273,7 @@
                 sidebar.classList.remove('translate-x-0');
                 sidebar.classList.add('translate-x-full');
                 if(window.innerWidth >= 1024) main.classList.remove('cart-open');
-                if(cart.length > 0 && window.innerWidth < 1024) {
-                    stickyBar.classList.remove('hidden');
-                }
+                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('hidden');
             }
         }
         function toggleMobileMenu() { document.getElementById('left-sidebar').classList.toggle('-translate-x-full'); }
@@ -361,52 +288,29 @@
             const f = db.filter(p => p.nombre.toLowerCase().includes(query.toLowerCase()));
             renderGrid(f);
         }
-        
-        // --- FUNCIÓN PARA ABRIR PRODUCTO CON GALERÍA ---
         function openProduct(id) {
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
-            
-            // Manejo seguro de specs
-            let specsHTML = "";
-            if (p.specs) {
-                // Si es texto, tratamos de separarlo, si no, lo mostramos directo
-                const listaSpecs = p.specs.includes(',') ? p.specs.split(',') : [p.specs];
-                specsHTML = listaSpecs.map(s => `<li class="flex items-center gap-4 font-bold text-gray-700"><i class="fa fa-check-circle text-beige text-xl"></i> ${s.trim()}</li>`).join('');
-            }
-
             document.getElementById('modal-content').innerHTML = `
                 <div class="max-w-7xl mx-auto p-6 md:p-12 lg:flex gap-16 pt-24">
                     <div class="lg:w-1/2 mb-10 lg:mb-0">
                         <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl mb-6 aspect-square bg-gray-50">
-                            <img id="main-image" src="${p.img}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
+                            <img src="${p.img}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
                         </div>
                     </div>
-
                     <div class="lg:w-1/2 flex flex-col justify-center">
                         <span class="text-beige font-black uppercase tracking-widest mb-4 text-sm flex items-center gap-2"><i class="fa fa-tag"></i> ${p.cat}</span>
                         <h1 class="text-3xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
                         <p class="text-xl text-gray-500 leading-relaxed mb-10 font-medium">${p.desc}</p>
-                        <div class="bg-gray-50/80 p-8 rounded-[2rem] mb-10 border border-gray-100">
-                            <h3 class="font-black mb-6 uppercase text-xs text-beige tracking-widest">Características</h3>
-                            <ul class="space-y-4">
-                                ${specsHTML}
-                            </ul>
-                        </div>
                         <div class="flex items-center justify-between border-t border-gray-100 pt-10">
-                            <div>
-                                <span class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Precio</span>
-                                <span class="text-5xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
-                            </div>
-                            <button onclick="addToCart(${p.id}); closeProductModal()" class="bg-black text-white px-8 md:px-12 py-6 rounded-[2rem] font-bold uppercase tracking-widest hover:bg-beige transition shadow-xl hover:shadow-beige/50 text-sm">Agregar al Carrito</button>
+                            <div><span class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Precio</span><span class="text-5xl font-black text-gray-900">$${p.precio.toLocaleString()}</span></div>
+                            <button onclick="addToCart(${p.id}); closeProductModal()" class="bg-black text-white px-8 md:px-12 py-6 rounded-[2rem] font-bold uppercase tracking-widest hover:bg-beige transition shadow-xl text-sm">Agregar al Carrito</button>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
             modal.classList.remove('hidden');
         }
         function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
-        
         function enviarPedido() {
             if(cart.length === 0) return alert("Tu carrito está vacío");
             const totalText = document.getElementById('cart-total').innerText;
