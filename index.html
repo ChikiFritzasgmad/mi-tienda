@@ -23,7 +23,7 @@
             /* Ajuste de Productos Destacados en PC */
             .destacados-grid-pc {
                 display: grid;
-                grid-template-columns: repeat(3, 1fr); /* 3 columnas en PC */
+                grid-template-columns: repeat(3, 1fr);
                 gap: 20px;
             }
         }
@@ -40,7 +40,19 @@
             }
             .mobile-slider::-webkit-scrollbar { display: none; }
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
-            body { padding-bottom: 80px; } /* Espacio para barra inferior */
+            body { padding-bottom: 80px; } 
+
+            /* NUEVO: Buscador Pegajoso */
+            .sticky-search {
+                position: sticky;
+                top: 0;
+                z-index: 40; /* Por encima del contenido */
+                background-color: white; /* Fondo blanco para tapar lo que pasa por debajo */
+                padding-top: 15px;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.05);
+            }
         }
 
         /* Animaciones */
@@ -83,9 +95,6 @@
             </div>
             
             <nav class="space-y-2" id="nav-categorias">
-                <button onclick="filtrar('todas')" class="w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-bold text-gray-700 flex items-center gap-3 transition-all group cat-btn-active" id="btn-todas">
-                    <i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo
-                </button>
                 </nav>
         </div>
 
@@ -102,9 +111,9 @@
 
     <main id="main-content" class="pt-28 pb-32 px-4 md:px-12 layout-desktop min-h-screen">
         
-        <div class="lg:hidden mb-8 relative">
+        <div class="lg:hidden sticky-search px-1">
             <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué buscas hoy?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
-            <i class="fa fa-search absolute left-5 top-5 text-beige"></i>
+            <i class="fa fa-search absolute left-6 top-1/2 transform -translate-y-1/2 text-beige"></i>
         </div>
 
         <div id="loading-msg" class="text-center py-20">
@@ -169,13 +178,14 @@
         </div>
     </div>
 
-<script>
+    <script>
         const WHATSAPP_NUM = "56949513296"; 
+        // IMPORTANTE: Aquí he puesto el nombre con doble 's' porque así lo subiste a GitHub.
         const CSV_URL = "productos.csv"; 
         
         let db = [];
         let cart = [];
-        let searchTimeout; // Para controlar el tiempo de escritura
+        let searchTimeout; 
 
         window.addEventListener('DOMContentLoaded', () => { cargarProductosDesdeCSV(); });
 
@@ -192,7 +202,7 @@
                             nombre: fila['productos'] || "Producto Sin Nombre",
                             precio: parseInt(fila['precio']) || 0,
                             cat: fila['categoria'] ? fila['categoria'].trim() : "Varios",
-                            desc: fila['descripcion'] || "", // Importante para el buscador
+                            desc: fila['descripcion'] || "", 
                             img: imagenUrl && imagenUrl.length > 5 ? imagenUrl : "https://via.placeholder.com/400x400?text=Sin+Foto",
                             specs: fila['specs'] || ""
                         };
@@ -207,16 +217,15 @@
                 },
                 error: function(err) {
                     console.error(err);
-                    alert("Error leyendo productos.csv");
+                    alert("Error leyendo el archivo CSV. Revisa el nombre.");
                 }
             });
         }
 
         function generarMenuCategorias() {
             const nav = document.getElementById('nav-categorias');
-            nav.innerHTML = ''; // Limpiar menú previo
+            nav.innerHTML = ''; 
             
-            // Botón Todas
             const btnTodas = document.createElement('button');
             btnTodas.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
             btnTodas.id = "btn-todas";
@@ -284,15 +293,13 @@
             `;
         }
 
-        // --- BUSCADOR INTELIGENTE Y SCROLL ---
+        // --- BUSCADOR CON TIEMPO DE ESPERA (1 Segundo) ---
         function buscar(query) {
-            clearTimeout(searchTimeout); // Reiniciar el reloj si sigue escribiendo
+            clearTimeout(searchTimeout); 
             
-            // Esperar 300ms después de que deje de escribir para buscar y scrollear
+            // Espera 1000ms (1 segundo) antes de ejecutar
             searchTimeout = setTimeout(() => {
                 const texto = query.toLowerCase();
-                
-                // Lógica "Inteligente": Busca en Nombre O Descripción O Categoría
                 const f = db.filter(p => 
                     p.nombre.toLowerCase().includes(texto) || 
                     p.desc.toLowerCase().includes(texto) || 
@@ -301,12 +308,13 @@
                 
                 renderGrid(f);
 
-                // FUNCIONALIDAD SCROLL: Si escribió algo, bajar al catálogo
                 if(query.length > 0) {
                     const catalogo = document.getElementById('seccion-catalogo');
-                    catalogo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Ajuste para scroll considerando el header pegajoso
+                    const y = catalogo.getBoundingClientRect().top + window.pageYOffset - 160; 
+                    window.scrollTo({top: y, behavior: 'smooth'});
                 }
-            }, 300);
+            }, 1000); // 1000ms = 1 segundo
         }
 
         function filtrar(cat, btnElement) {
@@ -320,14 +328,15 @@
             }
 
             const f = cat === 'todas' ? db : db.filter(p => p.cat === cat);
-            
             document.getElementById('titulo-grid').innerText = cat === 'todas' ? 'Catálogo Completo' : cat;
             renderGrid(f);
             
             if(window.innerWidth < 1024) toggleMobileMenu();
             
-            // Scroll al filtrar también
-            document.getElementById('seccion-catalogo').scrollIntoView({ behavior: 'smooth' });
+            // Scroll corregido
+            const catalogo = document.getElementById('seccion-catalogo');
+            const y = catalogo.getBoundingClientRect().top + window.pageYOffset - 100;
+            window.scrollTo({top: y, behavior: 'smooth'});
         }
 
         function addToCart(id) {
@@ -438,7 +447,5 @@
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
         }
     </script>
-    
 </body>
 </html>
-
