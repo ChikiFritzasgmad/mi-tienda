@@ -42,16 +42,19 @@
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
             body { padding-bottom: 80px; } 
 
-            /* NUEVO: Buscador Pegajoso */
+            /* --- CORRECCIÓN BUSCADOR PEGAJOSO --- */
             .sticky-search {
                 position: sticky;
-                top: 0;
-                z-index: 40; /* Por encima del contenido */
-                background-color: white; /* Fondo blanco para tapar lo que pasa por debajo */
-                padding-top: 15px;
+                /* AQUÍ ESTABA EL ERROR: Cambiamos 0 por 75px para que baje y no se esconda tras el menú */
+                top: 75px; 
+                z-index: 40; 
+                background-color: rgba(255, 255, 255, 0.95); /* Un poco transparente para efecto moderno */
+                backdrop-filter: blur(5px);
+                padding-top: 10px;
                 padding-bottom: 15px;
                 margin-bottom: 20px;
                 box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.05);
+                border-bottom: 1px solid #f3f4f6;
             }
         }
 
@@ -180,7 +183,6 @@
 
     <script>
         const WHATSAPP_NUM = "56949513296"; 
-        // IMPORTANTE: Aquí he puesto el nombre con doble 's' porque así lo subiste a GitHub.
         const CSV_URL = "productos.csv"; 
         
         let db = [];
@@ -207,245 +209,3 @@
                             specs: fila['specs'] || ""
                         };
                     });
-
-                    generarMenuCategorias();
-                    document.getElementById('loading-msg').classList.add('hidden');
-                    document.getElementById('seccion-destacados').classList.remove('hidden');
-                    document.getElementById('seccion-catalogo').classList.remove('hidden');
-                    renderGrid(db);
-                    renderDestacados(db);
-                },
-                error: function(err) {
-                    console.error(err);
-                    alert("Error leyendo el archivo CSV. Revisa el nombre.");
-                }
-            });
-        }
-
-        function generarMenuCategorias() {
-            const nav = document.getElementById('nav-categorias');
-            nav.innerHTML = ''; 
-            
-            const btnTodas = document.createElement('button');
-            btnTodas.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
-            btnTodas.id = "btn-todas";
-            btnTodas.onclick = () => filtrar('todas', btnTodas);
-            btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
-            nav.appendChild(btnTodas);
-
-            const categoriasUnicas = [...new Set(db.map(p => p.cat))].filter(c => c).sort();
-            
-            categoriasUnicas.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
-                btn.onclick = () => filtrar(cat, btn);
-                btn.innerHTML = `<i class="fa fa-chevron-right text-gray-300 text-xs group-hover:text-beige transition"></i> ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
-                nav.appendChild(btn);
-            });
-        }
-
-        function renderGrid(lista) { 
-            const contenedor = document.getElementById('grid-productos');
-            const contador = document.getElementById('cantidad-productos');
-            if(contador) contador.innerText = `${lista.length} productos`;
-            
-            if(lista.length === 0) { 
-                contenedor.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 flex flex-col items-center"><i class="fa fa-box-open text-4xl mb-2 opacity-50"></i><p>No se encontraron productos.</p></div>'; 
-                return; 
-            }
-            contenedor.innerHTML = lista.map(p => cardHTML(p)).join(''); 
-        }
-
-        function renderDestacados(lista) {
-            const destacados = lista.slice(0, 6); 
-            document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
-                <div class="slider-card bg-white rounded-2xl border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 relative h-full flex flex-col">
-                    <div class="relative h-56 md:h-64 overflow-hidden bg-white p-2" onclick="openProduct(${p.id})">
-                        <img src="${p.img}" class="w-full h-full object-contain group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
-                        <div class="absolute top-2 left-2 bg-beige text-white px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-sm">Destacado</div>
-                    </div>
-                    <div class="p-4 flex flex-col flex-1 justify-between">
-                        <h3 class="font-bold text-gray-800 text-sm md:text-base mb-2 leading-snug line-clamp-2">${p.nombre}</h3>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-lg md:text-xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
-                            <button onclick="addToCart(${p.id})" class="bg-gray-900 text-white w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-beige transition-all flex items-center justify-center shadow-md"><i class="fa fa-plus text-xs md:text-sm"></i></button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function cardHTML(p) {
-            return `
-                <div class="bg-white rounded-2xl border border-gray-50 hover:border-beige/30 transition-all duration-300 group hover:shadow-lg relative flex flex-col h-full overflow-hidden">
-                    <div class="relative h-48 md:h-56 bg-white p-2 cursor-pointer" onclick="openProduct(${p.id})">
-                        <img src="${p.img}" class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
-                        <span class="absolute bottom-0 left-0 bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider rounded-tr-lg">${p.cat.substring(0,15)}</span>
-                    </div>
-                    <div class="p-4 flex flex-col grow">
-                        <h4 class="font-medium text-gray-700 text-sm mb-3 leading-snug line-clamp-2 grow">${p.nombre}</h4>
-                        <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
-                            <span class="font-black text-lg text-gray-900">$${p.precio.toLocaleString()}</span>
-                            <button onclick="addToCart(${p.id})" class="text-xs font-bold bg-gray-50 text-gray-900 px-3 py-2 rounded-lg hover:bg-black hover:text-white transition uppercase">Agregar</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- BUSCADOR CON TIEMPO DE ESPERA (1 Segundo) ---
-        function buscar(query) {
-            clearTimeout(searchTimeout); 
-            
-            // Espera 1000ms (1 segundo) antes de ejecutar
-            searchTimeout = setTimeout(() => {
-                const texto = query.toLowerCase();
-                const f = db.filter(p => 
-                    p.nombre.toLowerCase().includes(texto) || 
-                    p.desc.toLowerCase().includes(texto) || 
-                    p.cat.toLowerCase().includes(texto)
-                );
-                
-                renderGrid(f);
-
-                if(query.length > 0) {
-                    const catalogo = document.getElementById('seccion-catalogo');
-                    // Ajuste para scroll considerando el header pegajoso
-                    const y = catalogo.getBoundingClientRect().top + window.pageYOffset - 160; 
-                    window.scrollTo({top: y, behavior: 'smooth'});
-                }
-            }, 1000); // 1000ms = 1 segundo
-        }
-
-        function filtrar(cat, btnElement) {
-            document.querySelectorAll('#nav-categorias button').forEach(b => b.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group");
-            
-            if(btnElement) {
-                btnElement.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
-            } else {
-                const btnTodas = document.getElementById('btn-todas');
-                if(btnTodas) btnTodas.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
-            }
-
-            const f = cat === 'todas' ? db : db.filter(p => p.cat === cat);
-            document.getElementById('titulo-grid').innerText = cat === 'todas' ? 'Catálogo Completo' : cat;
-            renderGrid(f);
-            
-            if(window.innerWidth < 1024) toggleMobileMenu();
-            
-            // Scroll corregido
-            const catalogo = document.getElementById('seccion-catalogo');
-            const y = catalogo.getBoundingClientRect().top + window.pageYOffset - 100;
-            window.scrollTo({top: y, behavior: 'smooth'});
-        }
-
-        function addToCart(id) {
-            const p = db.find(x => x.id === id);
-            cart.push(p);
-            updateCartUI();
-            if (window.innerWidth >= 1024) {
-                const sidebar = document.getElementById('cart-sidebar');
-                if (!sidebar.classList.contains('translate-x-0')) toggleCart();
-            } else { 
-                const toast = document.getElementById('toast-modal');
-                toast.classList.remove('hidden');
-                setTimeout(() => cerrarToast(), 3000);
-            }
-        }
-
-        function updateCartUI() {
-            document.getElementById('cart-badge').innerText = cart.length;
-            const list = document.getElementById('cart-items');
-            const stickyBar = document.getElementById('mobile-sticky-bar');
-            
-            if (cart.length === 0) {
-                list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-5xl mb-4 opacity-20"></i><p class="text-sm">Tu carrito está vacío</p></div>`;
-                stickyBar.classList.add('hidden'); 
-            } else {
-                list.innerHTML = cart.map((p, i) => `
-                    <div class="flex gap-4 items-center bg-gray-50 p-3 rounded-xl relative group border border-transparent hover:border-beige/20 hover:bg-white transition-all shadow-sm">
-                        <img src="${p.img}" class="w-16 h-16 rounded-lg object-contain bg-white border border-gray-100" onerror="this.src='https://via.placeholder.com/100'">
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-xs text-gray-700 leading-tight truncate">${p.nombre}</h4>
-                            <p class="text-sm font-black text-gray-900 mt-1">$${p.precio.toLocaleString()}</p>
-                        </div>
-                        <button onclick="remove(${i})" class="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-500 transition hover:bg-red-50 rounded-full">✕</button>
-                    </div>
-                `).join('');
-                
-                const sidebar = document.getElementById('cart-sidebar');
-                if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) stickyBar.classList.remove('hidden');
-                else stickyBar.classList.add('hidden');
-            }
-            let total = cart.reduce((sum, item) => sum + item.precio, 0);
-            document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`;
-            document.getElementById('mobile-total-sticky').innerText = `$${total.toLocaleString()}`;
-        }
-
-        function remove(index) { cart.splice(index, 1); updateCartUI(); }
-
-        function toggleCart() {
-            const sidebar = document.getElementById('cart-sidebar');
-            const main = document.getElementById('main-content');
-            const stickyBar = document.getElementById('mobile-sticky-bar');
-            
-            if (sidebar.classList.contains('translate-x-full')) {
-                sidebar.classList.remove('translate-x-full');
-                sidebar.classList.add('translate-x-0');
-                if(window.innerWidth >= 1024) main.classList.add('cart-open');
-                stickyBar.classList.add('hidden');
-            } else {
-                sidebar.classList.remove('translate-x-0');
-                sidebar.classList.add('translate-x-full');
-                if(window.innerWidth >= 1024) main.classList.remove('cart-open');
-                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('hidden');
-            }
-        }
-
-        function openProduct(id) {
-            const p = db.find(x => x.id === id);
-            const modal = document.getElementById('product-modal');
-            
-            let specsHTML = "";
-            if (p.specs && p.specs.length > 2) {
-                specsHTML = `<div class="bg-gray-50 p-6 rounded-2xl mb-8 border border-gray-100"><h3 class="font-bold mb-3 text-xs uppercase text-gray-400 tracking-wider">Detalles</h3><p class="text-sm text-gray-600 leading-relaxed">${p.specs}</p></div>`;
-            }
-
-            document.getElementById('modal-content').innerHTML = `
-                <div class="max-w-6xl mx-auto p-4 md:p-12 lg:flex gap-12 pt-20">
-                    <div class="lg:w-1/2 mb-8 lg:mb-0">
-                        <div class="relative rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-sm aspect-square flex items-center justify-center p-8">
-                            <img src="${p.img}" class="max-w-full max-h-full object-contain" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
-                        </div>
-                    </div>
-                    <div class="lg:w-1/2 flex flex-col justify-center">
-                        <span class="text-beige font-bold uppercase tracking-widest mb-2 text-xs">${p.cat}</span>
-                        <h1 class="text-2xl md:text-4xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
-                        <p class="text-lg text-gray-600 leading-relaxed mb-8 font-medium">${p.desc}</p>
-                        ${specsHTML}
-                        <div class="fixed bottom-0 left-0 w-full bg-white p-4 border-t border-gray-100 lg:static lg:bg-transparent lg:p-0 lg:border-none flex items-center justify-between gap-4 z-50">
-                            <div class="flex flex-col lg:block">
-                                <span class="text-xs text-gray-400 font-bold uppercase lg:hidden">Total</span>
-                                <span class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
-                            </div>
-                            <button onclick="addToCart(${p.id}); closeProductModal()" class="bg-black text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm flex-1 lg:flex-none text-center">Agregar</button>
-                        </div>
-                    </div>
-                </div>`;
-            modal.classList.remove('hidden');
-        }
-
-        function toggleMobileMenu() { document.getElementById('left-sidebar').classList.toggle('-translate-x-full'); }
-        function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
-        function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
-        
-        function enviarPedido() {
-            if(cart.length === 0) return alert("Tu carrito está vacío");
-            const totalText = document.getElementById('cart-total').innerText;
-            const itemsList = cart.map(p => `• ${p.nombre} ($${p.precio.toLocaleString()})`).join('\n');
-            const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos.`;
-            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
-        }
-    </script>
-</body>
-</html>
