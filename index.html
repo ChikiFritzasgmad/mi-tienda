@@ -68,9 +68,14 @@
             <div class="flex items-center z-20">
                 <button onclick="toggleMobileMenu()" class="lg:hidden text-2xl text-beige hover:text-black transition"><i class="fa fa-bars"></i></button>
             </div>
+            
             <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none">
-                <h1 class="text-2xl md:text-3xl font-black tracking-wider text-beige uppercase pointer-events-auto inline-block">Papajose SPA</h1>
+                <div class="pointer-events-auto inline-flex items-center gap-3">
+                    <img src="logo.png" alt="Logo" class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border border-gray-200 shadow-sm bg-white" onerror="this.style.display='none'"> 
+                    <h1 class="text-2xl md:text-3xl font-black tracking-wider text-beige uppercase">Papajose SPA</h1>
+                </div>
             </div>
+
             <div class="flex items-center gap-6 z-20 bg-white pl-4">
                 <div class="hidden lg:block relative group">
                     <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
@@ -209,7 +214,7 @@
 
     <script>
         const WHATSAPP_NUM = "56949513296"; 
-        const CSV_URL = "productos.csv"; // ASEGÚRATE QUE EN GITHUB SE LLAME "productos.csv"
+        const CSV_URL = "productos.csv"; // RECUERDA: EN GITHUB DEBE LLAMARSE "productos.csv"
         
         let db = [];
         let cart = [];
@@ -308,7 +313,7 @@
                 if(r.checked && r.value === 'regiones') tipoEnvioTexto = "Regiones (Por Pagar)";
             }
 
-            // 2. Obtener Documento (Boleta/Factura)
+            // 2. Obtener Documento
             const radiosDoc = document.getElementsByName('tipo_doc');
             let tipoDocTexto = "Boleta";
             for(const r of radiosDoc) {
@@ -318,7 +323,6 @@
             const totalText = document.getElementById('cart-total').innerText;
             const itemsList = cart.map(p => `• ${p.nombre} ($${p.precio.toLocaleString()})`).join('\n');
             
-            // Mensaje final
             const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*ENVÍO:* ${tipoEnvioTexto}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
             
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
