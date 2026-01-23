@@ -3,13 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Papajose SPA | Tienda Oficial</title>
+    
+    <title>Papajose SPA | Comercializadora</title>
+    <meta name="description" content="Venta de motos, repuestos, accesorios y artículos varios. Envíos a todo Chile. Compra segura vía WhatsApp.">
+    <meta property="og:title" content="Papajose SPA | Catálogo Online">
+    <meta property="og:description" content="Revisa nuestro stock actualizado de motos y accesorios. Precios especiales.">
+    <meta property="og:image" content="https://comercializadora.papajose.cl/imagenes/logo.webp"> <meta property="og:url" content="https://comercializadora.papajose.cl">
+    <meta property="og:type" content="website">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         /* --- ESTILOS GENERALES --- */
-        :root { --beige: #D2B48C; --dark-text: #2D2D2D; }
+        :root { --beige: #D2B48C; --dark-beige: #b0926a; --dark-text: #2D2D2D; }
         body { font-family: 'Segoe UI', sans-serif; background-color: #ffffff; color: var(--dark-text); }
         .text-beige { color: var(--beige); }
         .bg-beige { background-color: var(--beige); }
@@ -17,7 +25,7 @@
         /* --- LAYOUT ESCRITORIO --- */
         @media (min-width: 1024px) {
             .layout-desktop { margin-left: 280px; transition: margin-right 0.3s ease; }
-            .layout-desktop.cart-open { margin-right: 400px; }
+            .layout-desktop.cart-open { margin-right: 420px; } /* Ajustado al ancho del carrito */
             .header-desktop-adjust { padding-left: 280px; }
             
             .destacados-grid-pc {
@@ -59,6 +67,9 @@
         .fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .cat-btn-active { background-color: #f3f4f6; color: var(--beige); border-left: 4px solid var(--beige); }
+        
+        /* Efecto grayscale para productos sin stock */
+        .no-stock { filter: grayscale(100%); opacity: 0.7; }
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
@@ -71,21 +82,19 @@
             
             <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none z-30">
                 <div class="pointer-events-auto inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                    
-                    <img src="imagenes/logo.webp" alt="Logo" class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border border-gray-200 shadow-sm bg-white"> 
-                    
+                    <div class="w-10 h-10 rounded-full bg-beige text-white flex items-center justify-center font-bold text-xl">P</div>
                     <h1 class="text-xl md:text-3xl font-black tracking-wider text-beige uppercase whitespace-nowrap">Papajose SPA</h1>
                 </div>
             </div>
 
             <div class="flex items-center gap-6 z-20 bg-white pl-4">
                 <div class="hidden lg:block relative group">
-                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
+                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar producto..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
                     <i class="fa fa-search absolute right-4 top-3 text-beige"></i>
                 </div>
                 <button onclick="toggleCart()" class="relative p-2 group">
                     <i class="fa fa-shopping-bag text-2xl text-beige group-hover:text-black transition"></i>
-                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white">0</span>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white scale-0 transition-transform duration-300">0</span>
                 </button>
             </div>
         </div>
@@ -117,9 +126,48 @@
             <i class="fa fa-search absolute left-6 top-1/2 transform -translate-y-1/2 text-beige"></i>
         </div>
 
+        <section class="relative bg-gray-900 text-white py-12 px-6 md:px-12 mb-10 rounded-3xl overflow-hidden shadow-2xl fade-in-up">
+            <div class="relative z-10 max-w-2xl">
+                <span class="text-beige font-bold tracking-widest uppercase text-[10px] md:text-xs mb-2 block">Papajose Comercializadora</span>
+                <h2 class="text-3xl md:text-5xl font-black mb-4 leading-tight">Encuentra Motos, <br>Repuestos y <span class="text-beige">Más.</span></h2>
+                <p class="text-gray-400 mb-6 text-sm md:text-base max-w-md">Catálogo actualizado diariamente. Precios directos sin intermediarios bancarios.</p>
+                <button onclick="document.getElementById('seccion-catalogo').scrollIntoView({behavior: 'smooth'})" class="bg-beige text-gray-900 px-6 py-3 rounded-xl font-bold hover:bg-white transition shadow-lg text-sm uppercase tracking-wide">
+                    Ver Catálogo Completo
+                </button>
+            </div>
+            <div class="absolute right-0 top-0 h-full w-2/3 bg-gradient-to-l from-gray-800 to-transparent pointer-events-none skew-x-12 transform translate-x-20 opacity-50"></div>
+            <i class="fa fa-motorcycle absolute -right-10 -bottom-10 text-[200px] text-white opacity-5 transform -rotate-12"></i>
+        </section>
+
+        <section class="mb-12 py-8 border-b border-gray-100">
+            <h3 class="text-center font-bold text-gray-400 text-xs uppercase tracking-widest mb-8">¿Cómo comprar?</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div class="flex flex-col items-center group">
+                    <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-beige text-xl mb-3 group-hover:bg-beige group-hover:text-white transition"><i class="fa fa-hand-pointer"></i></div>
+                    <span class="font-bold text-gray-800 text-sm">1. Elige</span>
+                    <p class="text-xs text-gray-400 mt-1">Selecciona tus productos</p>
+                </div>
+                <div class="flex flex-col items-center group">
+                    <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-beige text-xl mb-3 group-hover:bg-beige group-hover:text-white transition"><i class="fa fa-whatsapp"></i></div>
+                    <span class="font-bold text-gray-800 text-sm">2. Valida</span>
+                    <p class="text-xs text-gray-400 mt-1">Envía pedido por WhatsApp</p>
+                </div>
+                <div class="flex flex-col items-center group">
+                    <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-beige text-xl mb-3 group-hover:bg-beige group-hover:text-white transition"><i class="fa fa-money-bill-transfer"></i></div>
+                    <span class="font-bold text-gray-800 text-sm">3. Transfiere</span>
+                    <p class="text-xs text-gray-400 mt-1">Datos seguros Cuenta RUT/Bancaria</p>
+                </div>
+                <div class="flex flex-col items-center group">
+                    <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-beige text-xl mb-3 group-hover:bg-beige group-hover:text-white transition"><i class="fa fa-truck-fast"></i></div>
+                    <span class="font-bold text-gray-800 text-sm">4. Recibe</span>
+                    <p class="text-xs text-gray-400 mt-1">Despacho a todo Chile</p>
+                </div>
+            </div>
+        </section>
+
         <div id="loading-msg" class="text-center py-20">
             <i class="fa fa-circle-notch fa-spin text-4xl text-beige mb-4"></i>
-            <p class="text-gray-500 font-bold">Cargando productos...</p>
+            <p class="text-gray-500 font-bold">Cargando inventario...</p>
         </div>
 
         <section class="mb-12 hidden" id="seccion-destacados">
@@ -148,9 +196,8 @@
         <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
         
         <div class="p-6 bg-white border-t border-gray-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-            
             <div class="mb-6">
-                <h4 class="font-bold text-xs uppercase text-gray-400 mb-3 tracking-wider">Opciones de Envío</h4>
+                <h4 class="font-bold text-xs uppercase text-gray-400 mb-3 tracking-wider">Envío</h4>
                 <div class="space-y-3">
                     <label class="flex items-center gap-3 cursor-pointer p-3 border border-gray-100 rounded-xl hover:border-beige transition bg-gray-50">
                         <input type="radio" name="tipo_envio" value="rm" checked onchange="calcularTotal()" class="accent-black w-4 h-4">
@@ -170,7 +217,7 @@
             </div>
 
             <div class="mb-6">
-                <h4 class="font-bold text-xs uppercase text-gray-400 mb-3 tracking-wider">Tipo de Documento</h4>
+                <h4 class="font-bold text-xs uppercase text-gray-400 mb-3 tracking-wider">Documento</h4>
                 <div class="flex gap-4">
                     <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer p-3 border border-gray-100 rounded-xl hover:border-beige transition bg-gray-50">
                         <input type="radio" name="tipo_doc" value="Boleta" checked class="accent-black w-4 h-4">
@@ -219,7 +266,7 @@
         const CSV_URL = "productos.csv"; 
         
         let db = [];
-        let cart = [];
+        let cart = []; // Estructura: [{ ...producto, qty: 1 }]
         let searchTimeout; 
         let costoEnvio = 3500; 
 
@@ -229,20 +276,33 @@
             Papa.parse(CSV_URL, {
                 download: true,
                 header: true,
-                delimiter: ";", 
+                delimiter: ";", // Ajuste para Excel CSV común en Latam
                 skipEmptyLines: true,
                 complete: function(results) {
                     try {
+                        console.log("Datos crudos:", results.data[0]); // Debug
                         db = results.data.map((fila, index) => {
-                            let imagenUrl = fila['foto'] || fila['imagen']; 
+                            // Mapeo seguro basado en tu CSV actual
+                            // Columnas esperadas: productos, precio, descripcion, categoria, links, foto
+                            let imagenUrl = fila['foto'] || fila['links'] || "";
+                            
+                            // Lógica de Stock: Si no existe la columna 'stock', asumimos 'si' (disponible).
+                            // Si existe, debe ser distinto de '0', 'no' o 'false'.
+                            let tieneStock = true;
+                            if (fila['stock']) {
+                                let s = fila['stock'].toString().toLowerCase().trim();
+                                if(s === '0' || s === 'no' || s === 'false') tieneStock = false;
+                            }
+
                             return {
                                 id: index + 1,
                                 nombre: fila['productos'] || "Producto Sin Nombre",
-                                precio: parseInt(fila['precio']) || 0,
+                                precio: parseInt(fila['precio'].replace(/[^0-9]/g, '')) || 0, // Limpia el precio de símbolos
                                 cat: fila['categoria'] ? fila['categoria'].trim() : "Varios",
                                 desc: fila['descripcion'] || "", 
                                 img: imagenUrl && imagenUrl.length > 5 ? imagenUrl : "https://via.placeholder.com/400x400?text=Sin+Foto",
-                                specs: fila['specs'] || ""
+                                specs: fila['specs'] || "", // Por si acaso agregas specs después
+                                disponible: tieneStock
                             };
                         });
 
@@ -252,16 +312,108 @@
                         document.getElementById('seccion-catalogo').classList.remove('hidden');
                         renderGrid(db);
                         renderDestacados(db);
+                        
+                        // Si hay productos en el carrito guardados en localStorage, cargarlos (opcional futuro)
                     } catch (error) {
                         console.error("Error procesando datos:", error);
-                        alert("Error interno. Abre la consola para ver detalles.");
+                        alert("Error interno procesando el archivo de productos.");
                     }
                 },
                 error: function(err) {
                     console.error("Error descarga CSV:", err);
-                    alert("Error leyendo el archivo. Verifica que se llame 'productos.csv' en GitHub.");
+                    alert("No se pudo leer el archivo 'productos.csv'.");
                 }
             });
+        }
+
+        /* --- LÓGICA DEL CARRITO (CANTIDADES) --- */
+        function addToCart(id) {
+            const p = db.find(x => x.id === id);
+            if (!p) return;
+            if (!p.disponible) return alert("Producto agotado");
+
+            // Revisar si ya existe
+            let itemEnCarrito = cart.find(item => item.id === id);
+            
+            if (itemEnCarrito) {
+                itemEnCarrito.qty++;
+            } else {
+                cart.push({ ...p, qty: 1 });
+            }
+
+            updateCartUI();
+            
+            // Animación
+            if (window.innerWidth >= 1024) {
+                const sidebar = document.getElementById('cart-sidebar');
+                if (!sidebar.classList.contains('translate-x-0')) toggleCart();
+            } else { 
+                const toast = document.getElementById('toast-modal');
+                toast.classList.remove('hidden');
+                setTimeout(() => cerrarToast(), 3000);
+            }
+            
+            // Animación Badge
+            const badge = document.getElementById('cart-badge');
+            badge.classList.remove('scale-0');
+            badge.classList.add('scale-125');
+            setTimeout(() => badge.classList.remove('scale-125'), 200);
+        }
+
+        function cambiarCantidad(id, cambio) {
+            let item = cart.find(x => x.id === id);
+            if (!item) return;
+
+            item.qty += cambio;
+            if (item.qty <= 0) {
+                removeFromCart(id); // Si baja a 0, se elimina
+            } else {
+                updateCartUI();
+            }
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            // Actualizar Badge
+            const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
+            const badge = document.getElementById('cart-badge');
+            badge.innerText = totalItems;
+            if(totalItems === 0) badge.classList.add('scale-0');
+            else badge.classList.remove('scale-0');
+
+            // Renderizar Lista
+            const list = document.getElementById('cart-items');
+            const stickyBar = document.getElementById('mobile-sticky-bar');
+            
+            if (cart.length === 0) {
+                list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-5xl mb-4 opacity-20"></i><p class="text-sm">Tu carrito está vacío</p></div>`;
+                stickyBar.classList.add('hidden'); 
+            } else {
+                list.innerHTML = cart.map((p) => `
+                    <div class="flex gap-4 items-center bg-gray-50 p-3 rounded-xl relative group border border-transparent hover:border-beige/20 hover:bg-white transition-all shadow-sm">
+                        <img src="${p.img}" class="w-16 h-16 rounded-lg object-contain bg-white border border-gray-100" onerror="this.src='https://via.placeholder.com/100'">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-xs text-gray-700 leading-tight truncate">${p.nombre}</h4>
+                            <p class="text-sm font-black text-gray-900 mt-1">$${(p.precio * p.qty).toLocaleString()}</p>
+                        </div>
+                        
+                        <div class="flex flex-col items-center gap-1 bg-white rounded-lg border border-gray-100 p-1">
+                            <button onclick="cambiarCantidad(${p.id}, 1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-100 rounded text-xs"><i class="fa fa-plus"></i></button>
+                            <span class="text-xs font-bold text-gray-800">${p.qty}</span>
+                            <button onclick="cambiarCantidad(${p.id}, -1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 rounded text-xs"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                const sidebar = document.getElementById('cart-sidebar');
+                if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) stickyBar.classList.remove('hidden');
+                else stickyBar.classList.add('hidden');
+            }
+            calcularTotal();
         }
 
         function calcularTotal() {
@@ -272,37 +424,11 @@
             if(tipoEnvio === 'rm') costoEnvio = 3500;
             else costoEnvio = 0; 
 
-            let totalProductos = cart.reduce((sum, item) => sum + item.precio, 0);
+            let totalProductos = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
             let totalFinal = totalProductos + costoEnvio;
 
             document.getElementById('cart-total').innerText = `$${totalFinal.toLocaleString()}`;
             document.getElementById('mobile-total-sticky').innerText = `$${totalFinal.toLocaleString()}`;
-        }
-
-        function updateCartUI() {
-            document.getElementById('cart-badge').innerText = cart.length;
-            const list = document.getElementById('cart-items');
-            const stickyBar = document.getElementById('mobile-sticky-bar');
-            
-            if (cart.length === 0) {
-                list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-5xl mb-4 opacity-20"></i><p class="text-sm">Tu carrito está vacío</p></div>`;
-                stickyBar.classList.add('hidden'); 
-            } else {
-                list.innerHTML = cart.map((p, i) => `
-                    <div class="flex gap-4 items-center bg-gray-50 p-3 rounded-xl relative group border border-transparent hover:border-beige/20 hover:bg-white transition-all shadow-sm">
-                        <img src="${p.img}" class="w-16 h-16 rounded-lg object-contain bg-white border border-gray-100" onerror="this.src='https://via.placeholder.com/100'">
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-xs text-gray-700 leading-tight truncate">${p.nombre}</h4>
-                            <p class="text-sm font-black text-gray-900 mt-1">$${p.precio.toLocaleString()}</p>
-                        </div>
-                        <button onclick="remove(${i})" class="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-500 transition hover:bg-red-50 rounded-full">✕</button>
-                    </div>
-                `).join('');
-                const sidebar = document.getElementById('cart-sidebar');
-                if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) stickyBar.classList.remove('hidden');
-                else stickyBar.classList.add('hidden');
-            }
-            calcularTotal();
         }
 
         function enviarPedido() {
@@ -323,44 +449,58 @@
             }
 
             const totalText = document.getElementById('cart-total').innerText;
-            const itemsList = cart.map(p => `• ${p.nombre} ($${p.precio.toLocaleString()})`).join('\n');
+            // Formato con cantidades
+            const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre} - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
             
             const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*ENVÍO:* ${tipoEnvioTexto}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
             
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
         }
 
-        // --- FUNCIONES BASE ---
-        function generarMenuCategorias() {
-            const nav = document.getElementById('nav-categorias');
-            nav.innerHTML = ''; 
-            const btnTodas = document.createElement('button');
-            btnTodas.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
-            btnTodas.id = "btn-todas";
-            btnTodas.onclick = () => filtrar('todas', btnTodas);
-            btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
-            nav.appendChild(btnTodas);
-            const categoriasUnicas = [...new Set(db.map(p => p.cat))].filter(c => c).sort();
-            categoriasUnicas.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
-                btn.onclick = () => filtrar(cat, btn);
-                btn.innerHTML = `<i class="fa fa-chevron-right text-gray-300 text-xs group-hover:text-beige transition"></i> ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
-                nav.appendChild(btn);
-            });
+        // --- FUNCIONES RENDERIZADO ---
+        
+        function cardHTML(p) {
+            // Lógica Visual de Stock
+            const btnClass = p.disponible 
+                ? "bg-gray-50 text-gray-900 hover:bg-black hover:text-white" 
+                : "bg-gray-200 text-gray-400 cursor-not-allowed";
+            const btnText = p.disponible ? "Agregar" : "Agotado";
+            const clickAction = p.disponible ? `addToCart(${p.id})` : "";
+            const imageClass = p.disponible ? "" : "no-stock";
+
+            return `
+                <div class="bg-white rounded-2xl border border-gray-50 hover:border-beige/30 transition-all duration-300 group hover:shadow-lg relative flex flex-col h-full overflow-hidden ${p.disponible ? '' : 'opacity-75'}">
+                    <div class="relative h-48 md:h-56 bg-white p-2 cursor-pointer" onclick="openProduct(${p.id})">
+                        <img src="${p.img}" class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition duration-500 ${imageClass}" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
+                        <span class="absolute bottom-0 left-0 bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider rounded-tr-lg">${p.cat.substring(0,15)}</span>
+                        ${!p.disponible ? '<span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-[10px] font-bold rounded">AGOTADO</span>' : ''}
+                    </div>
+                    <div class="p-4 flex flex-col grow">
+                        <h4 class="font-medium text-gray-700 text-sm mb-3 leading-snug line-clamp-2 grow">${p.nombre}</h4>
+                        <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
+                            <span class="font-black text-lg text-gray-900">$${p.precio.toLocaleString()}</span>
+                            <button onclick="${clickAction}" class="text-xs font-bold px-3 py-2 rounded-lg transition uppercase ${btnClass}">${btnText}</button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
+
         function renderGrid(lista) { 
             const contenedor = document.getElementById('grid-productos');
             const contador = document.getElementById('cantidad-productos');
             if(contador) contador.innerText = `${lista.length} productos`;
+            
             if(lista.length === 0) { 
                 contenedor.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 flex flex-col items-center"><i class="fa fa-box-open text-4xl mb-2 opacity-50"></i><p>No se encontraron productos.</p></div>'; 
                 return; 
             }
             contenedor.innerHTML = lista.map(p => cardHTML(p)).join(''); 
         }
+
         function renderDestacados(lista) {
-            const destacados = lista.slice(0, 6); 
+            // Filtramos solo los que tienen stock para destacados
+            const destacados = lista.filter(p => p.disponible).slice(0, 6); 
             document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
                 <div class="slider-card bg-white rounded-2xl border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 relative h-full flex flex-col">
                     <div class="relative h-56 md:h-64 overflow-hidden bg-white p-2" onclick="openProduct(${p.id})">
@@ -377,23 +517,28 @@
                 </div>
             `).join('');
         }
-        function cardHTML(p) {
-            return `
-                <div class="bg-white rounded-2xl border border-gray-50 hover:border-beige/30 transition-all duration-300 group hover:shadow-lg relative flex flex-col h-full overflow-hidden">
-                    <div class="relative h-48 md:h-56 bg-white p-2 cursor-pointer" onclick="openProduct(${p.id})">
-                        <img src="${p.img}" class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
-                        <span class="absolute bottom-0 left-0 bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider rounded-tr-lg">${p.cat.substring(0,15)}</span>
-                    </div>
-                    <div class="p-4 flex flex-col grow">
-                        <h4 class="font-medium text-gray-700 text-sm mb-3 leading-snug line-clamp-2 grow">${p.nombre}</h4>
-                        <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
-                            <span class="font-black text-lg text-gray-900">$${p.precio.toLocaleString()}</span>
-                            <button onclick="addToCart(${p.id})" class="text-xs font-bold bg-gray-50 text-gray-900 px-3 py-2 rounded-lg hover:bg-black hover:text-white transition uppercase">Agregar</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+
+        // --- UTILIDADES ---
+        function generarMenuCategorias() {
+            const nav = document.getElementById('nav-categorias');
+            nav.innerHTML = ''; 
+            const btnTodas = document.createElement('button');
+            btnTodas.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
+            btnTodas.id = "btn-todas";
+            btnTodas.onclick = () => filtrar('todas', btnTodas);
+            btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
+            nav.appendChild(btnTodas);
+            
+            const categoriasUnicas = [...new Set(db.map(p => p.cat))].filter(c => c).sort();
+            categoriasUnicas.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
+                btn.onclick = () => filtrar(cat, btn);
+                btn.innerHTML = `<i class="fa fa-chevron-right text-gray-300 text-xs group-hover:text-beige transition"></i> ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
+                nav.appendChild(btn);
+            });
         }
+
         function buscar(query) {
             clearTimeout(searchTimeout); 
             searchTimeout = setTimeout(() => {
@@ -409,8 +554,9 @@
                     const y = catalogo.getBoundingClientRect().top + window.pageYOffset - 170; 
                     window.scrollTo({top: y, behavior: 'smooth'});
                 }
-            }, 1000); 
+            }, 500); 
         }
+
         function filtrar(cat, btnElement) {
             document.querySelectorAll('#nav-categorias button').forEach(b => b.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group");
             if(btnElement) {
@@ -427,24 +573,12 @@
             const y = catalogo.getBoundingClientRect().top + window.pageYOffset - 110;
             window.scrollTo({top: y, behavior: 'smooth'});
         }
-        function addToCart(id) {
-            const p = db.find(x => x.id === id);
-            cart.push(p);
-            updateCartUI();
-            if (window.innerWidth >= 1024) {
-                const sidebar = document.getElementById('cart-sidebar');
-                if (!sidebar.classList.contains('translate-x-0')) toggleCart();
-            } else { 
-                const toast = document.getElementById('toast-modal');
-                toast.classList.remove('hidden');
-                setTimeout(() => cerrarToast(), 3000);
-            }
-        }
-        function remove(index) { cart.splice(index, 1); updateCartUI(); }
+
         function toggleCart() {
             const sidebar = document.getElementById('cart-sidebar');
             const main = document.getElementById('main-content');
             const stickyBar = document.getElementById('mobile-sticky-bar');
+            
             if (sidebar.classList.contains('translate-x-full')) {
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
@@ -457,18 +591,26 @@
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('hidden');
             }
         }
+
         function openProduct(id) {
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
+            
             let specsHTML = "";
             if (p.specs && p.specs.length > 2) {
                 specsHTML = `<div class="bg-gray-50 p-6 rounded-2xl mb-8 border border-gray-100"><h3 class="font-bold mb-3 text-xs uppercase text-gray-400 tracking-wider">Detalles</h3><p class="text-sm text-gray-600 leading-relaxed">${p.specs}</p></div>`;
             }
+            
+            const btnState = p.disponible ? '' : 'disabled class="opacity-50 cursor-not-allowed bg-gray-300"';
+            const btnTxt = p.disponible ? 'Agregar al Pedido' : 'Agotado';
+            const action = p.disponible ? `addToCart(${p.id}); closeProductModal()` : '';
+
             document.getElementById('modal-content').innerHTML = `
                 <div class="max-w-6xl mx-auto p-4 md:p-12 lg:flex gap-12 pt-20">
                     <div class="lg:w-1/2 mb-8 lg:mb-0">
                         <div class="relative rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-sm aspect-square flex items-center justify-center p-8">
-                            <img src="${p.img}" class="max-w-full max-h-full object-contain" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
+                            <img src="${p.img}" class="max-w-full max-h-full object-contain ${p.disponible ? '' : 'no-stock'}" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
+                            ${!p.disponible ? '<div class="absolute inset-0 flex items-center justify-center bg-black/10"><span class="bg-red-500 text-white px-4 py-2 font-bold rounded-lg transform -rotate-12">SIN STOCK</span></div>' : ''}
                         </div>
                     </div>
                     <div class="lg:w-1/2 flex flex-col justify-center">
@@ -481,12 +623,13 @@
                                 <span class="text-xs text-gray-400 font-bold uppercase lg:hidden">Total</span>
                                 <span class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
                             </div>
-                            <button onclick="addToCart(${p.id}); closeProductModal()" class="bg-black text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm flex-1 lg:flex-none text-center">Agregar</button>
+                            <button onclick="${action}" ${btnState} class="bg-black text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm flex-1 lg:flex-none text-center">${btnTxt}</button>
                         </div>
                     </div>
                 </div>`;
             modal.classList.remove('hidden');
         }
+
         function toggleMobileMenu() { document.getElementById('left-sidebar').classList.toggle('-translate-x-full'); }
         function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
         function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
