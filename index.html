@@ -25,6 +25,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
     
     <style>
         /* --- ESTILOS VISUALES --- */
@@ -44,7 +45,7 @@
             background-color: #f0f0f0;
         }
 
-        /* OPTIMIZACIÓN DE RENDIMIENTO */
+        /* OPTIMIZACIÓN (NO LAG) */
         @media (min-width: 1024px) {
             body { background-attachment: fixed; }
             .layout-desktop { margin-left: 280px; } 
@@ -87,15 +88,20 @@
         details > summary::-webkit-details-marker { display: none; }
         .toast-enter { transform: translate(-50%, 100%); opacity: 0; }
         .toast-visible { transform: translate(-50%, 0); opacity: 1; }
+        
+        /* OVERLAYS */
         .overlay-base {
-            position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); 
+            position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); 
             opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
         }
         .overlay-base.open { opacity: 1; visibility: visible; }
+        
         #menu-overlay { z-index: 145; } 
         #cart-overlay { z-index: 155; } 
+
         #cart-sidebar, #left-sidebar { will-change: transform; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
         #mobile-sticky-bar { transition: transform 0.3s ease; }
+
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
@@ -131,7 +137,7 @@
     </header>
 
     <div id="menu-overlay" class="overlay-base" onclick="handleBackAction()"></div>
-    <div id="cart-overlay" class="overlay-base" onclick="toggleCart()"></div>
+    <div id="cart-overlay" class="overlay-base" onclick="forceCloseCart()"></div>
 
     <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] menu-pastel border-r border-gray-100 z-[150] pt-24 transform -translate-x-full lg:translate-x-0 shadow-2xl flex flex-col justify-between h-full">
         <div class="p-6 overflow-y-auto">
@@ -145,6 +151,7 @@
             <h4 class="text-xs font-black uppercase text-gray-400 mb-4 tracking-widest">Síguenos</h4>
             <div class="flex gap-6 text-2xl text-gray-400">
                 <a href="https://www.instagram.com/comercializadora_papa_jose_spa" target="_blank" class="hover:text-beige transition hover:-translate-y-1"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@papa_jose_spa?_r=1&_t=ZS-93KH3UbAneD" target="_blank" class="hover:text-beige transition hover:-translate-y-1"><i class="fab fa-tiktok"></i></a>
                 <a href="https://wa.me/56936416743" target="_blank" class="hover:text-beige transition hover:-translate-y-1"><i class="fab fa-whatsapp"></i></a>
             </div>
             <p class="text-[10px] text-gray-300 mt-4">© 2026 Papajose SPA</p>
@@ -188,10 +195,26 @@
                 <i class="fa fa-check-circle text-green-500 mr-2"></i> Proceso de Compra Seguro
             </h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                <div class="flex flex-col items-center group"><div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-hand-pointer"></i></div><span class="font-black text-gray-900">1. Elige</span></div>
-                <div class="flex flex-col items-center group"><div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-whatsapp"></i></div><span class="font-black text-gray-900">2. Valida</span></div>
-                <div class="flex flex-col items-center group"><div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-building-columns"></i></div><span class="font-black text-gray-900">3. Paga</span></div>
-                <div class="flex flex-col items-center group"><div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-box"></i></div><span class="font-black text-gray-900">4. Recibe</span></div>
+                <div class="flex flex-col items-center group">
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-hand-pointer"></i></div>
+                    <span class="font-black text-gray-900 text-base">1. Elige</span>
+                    <p class="text-xs font-bold text-gray-500 mt-2 px-2">Selecciona tus productos favoritos.</p>
+                </div>
+                <div class="flex flex-col items-center group">
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-whatsapp"></i></div>
+                    <span class="font-black text-gray-900 text-base">2. Valida</span>
+                    <p class="text-xs font-bold text-gray-500 mt-2 px-2">Confirma stock vía WhatsApp.</p>
+                </div>
+                <div class="flex flex-col items-center group">
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-building-columns"></i></div>
+                    <span class="font-black text-gray-900 text-base">3. Paga</span>
+                    <p class="text-xs font-bold text-gray-500 mt-2 px-2">A <strong>Cuenta Empresa</strong> directo.</p>
+                </div>
+                <div class="flex flex-col items-center group">
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-box"></i></div>
+                    <span class="font-black text-gray-900 text-base">4. Recibe</span>
+                    <p class="text-xs font-bold text-gray-500 mt-2 px-2">Envíos a todo Chile.</p>
+                </div>
             </div>
         </section>
 
@@ -243,7 +266,7 @@
     <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[160] shadow-2xl transform translate-x-full flex flex-col h-full">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
             <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
-            <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
+            <button onclick="forceCloseCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
         </div>
         
         <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
@@ -320,27 +343,27 @@
         let searchTimeout; 
         let costoEnvio = 3500; 
 
-        // 1. Detección de Botón Atrás (Android/iOS)
+        // DETECCIÓN DE BOTÓN ATRÁS (HISTORIAL)
         window.addEventListener('popstate', function(event) {
             const modal = document.getElementById('product-modal');
             const cartSidebar = document.getElementById('cart-sidebar');
             const leftSidebar = document.getElementById('left-sidebar');
-            
-            // Cerrar Modal Producto
+            const stickyBar = document.getElementById('mobile-sticky-bar');
+
             if (!modal.classList.contains('hidden')) {
                 modal.classList.add('hidden');
                 document.body.classList.remove('locked');
-                return;
             }
-            // Cerrar Carrito
+
             if (cartSidebar.classList.contains('translate-x-0')) {
-                toggleCart(); // Reutilizamos la función toggle que maneja todo
-                return;
+                forceCloseCart(); // USAMOS CIERRE FORZADO PARA LIMPIAR TODO BIEN
             }
-            // Cerrar Menú
+
             if (!leftSidebar.classList.contains('-translate-x-full')) {
-                toggleMobileMenu();
-                return;
+                document.getElementById('left-sidebar').classList.add('-translate-x-full');
+                document.getElementById('menu-overlay').classList.remove('open');
+                document.body.classList.remove('locked');
+                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
             }
         });
 
@@ -348,19 +371,12 @@
 
         function cargarProductosDesdeCSV() {
             Papa.parse(CSV_URL, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                // Función clave para limpiar encabezados del Excel
+                download: true, header: true, skipEmptyLines: true,
                 transformHeader: function(h) { return h.trim().toLowerCase(); }, 
                 complete: function(results) {
                     if (results.data.length === 0) return;
-
                     db = results.data.map((fila, index) => {
-                        // Limpieza de precio: Quitar puntos y símbolos, dejar solo números
                         let rawPrice = fila['precio'] ? fila['precio'].toString().replace(/[^0-9]/g, '') : "0";
-                        
-                        // Mapeo exacto a las columnas de tu Excel
                         return {
                             id: index + 1,
                             nombre: fila['productos'] || "Sin Nombre",
@@ -368,14 +384,12 @@
                             cat: fila['categoria'] || "Varios",
                             desc: fila['descripcion'] || "",
                             img: fila['foto'] || "https://via.placeholder.com/400x400?text=Sin+Foto",
-                            disponible: true // Asumimos stock por defecto si está en la lista
+                            disponible: true
                         };
                     });
-
                     generarMenuCategorias();
                     document.getElementById('loading-msg').classList.add('hidden');
                     document.getElementById('seccion-catalogo').classList.remove('hidden');
-                    
                     currentFilteredList = db;
                     renderGrid(currentFilteredList);
                     renderDestacados(db);
@@ -408,7 +422,6 @@
         function renderGrid(lista) { 
             const contenedor = document.getElementById('grid-productos');
             document.getElementById('cantidad-productos').innerText = `${lista.length}`;
-            
             if(lista.length === 0) { 
                 contenedor.innerHTML = '<div class="col-span-full py-10 text-center text-gray-500"><p>No se encontraron productos.</p></div>'; 
                 return; 
@@ -420,12 +433,11 @@
         }
 
         function renderDestacados(lista) {
-            // Tomamos los primeros 6 como destacados
             const destacados = lista.slice(0, 6); 
             document.getElementById('hero-destacados-container').innerHTML = destacados.map(p => `
-                <div class="slider-card bg-white rounded-2xl border border-gray-100 overflow-hidden relative h-full flex flex-col shadow-sm cursor-pointer" onclick="openProduct(${p.id})">
+                <div class="slider-card bg-white rounded-2xl border border-gray-200 overflow-hidden relative h-full flex flex-col shadow-sm cursor-pointer" onclick="openProduct(${p.id})">
                     <div class="relative h-48 md:h-56 bg-white p-2">
-                        <img src="${p.img}" class="w-full h-full object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/400'">
+                        <img src="${p.img}" class="w-full h-full object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
                         <div class="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-[10px] font-bold uppercase">Destacado</div>
                     </div>
                     <div class="p-3 flex flex-col flex-1">
@@ -448,28 +460,33 @@
         }
 
         function filtrar(cat) {
-            if(window.innerWidth < 1024) {
-                const sidebar = document.getElementById('left-sidebar');
-                if(!sidebar.classList.contains('-translate-x-full')) toggleMobileMenu();
-            }
+            if(window.innerWidth < 1024 && !document.getElementById('left-sidebar').classList.contains('-translate-x-full')) toggleMobileMenu();
             currentFilteredList = cat === 'todas' ? db : db.filter(p => p.cat === cat);
             document.getElementById('titulo-grid').innerText = cat === 'todas' ? 'Catálogo' : cat;
             currentPage = 1;
             renderGrid(currentFilteredList);
         }
 
-        // --- CARRITO ---
+        // --- CARRITO LOGIC ---
         function addToCart(id) {
             const p = db.find(x => x.id === id);
+            if (!p || !p.disponible) return mostrarToast("No disponible", "error");
+            
             let item = cart.find(i => i.id === id);
             if (item) item.qty++; else cart.push({ ...p, qty: 1 });
-            updateCartUI();
-            mostrarToast("Agregado");
             
-            // Auto-abrir solo en PC la primera vez
+            updateCartUI();
+            mostrarToast("¡Agregado!");
+            
+            const badge = document.getElementById('cart-badge');
+            badge.classList.add('scale-125');
+            setTimeout(() => badge.classList.remove('scale-125'), 200);
+            document.getElementById('cart-icon').classList.replace('text-gray-400', 'text-beige');
+
             if (window.innerWidth >= 1024 && !hasOpenedCartAutomatically) {
-                const sidebar = document.getElementById('cart-sidebar');
-                if (sidebar.classList.contains('translate-x-full')) { toggleCart(); hasOpenedCartAutomatically = true; }
+                if (document.getElementById('cart-sidebar').classList.contains('translate-x-full')) { 
+                    toggleCart(); hasOpenedCartAutomatically = true; 
+                }
             }
         }
 
@@ -483,10 +500,9 @@
         function removeFromCart(id) {
             cart = cart.filter(i => i.id !== id);
             updateCartUI();
-            // Si se vacía y está abierto, forzamos cierre para limpiar UI
             if(cart.length === 0) {
-                const sidebar = document.getElementById('cart-sidebar');
-                if(!sidebar.classList.contains('translate-x-full')) toggleCart();
+                document.getElementById('cart-icon').classList.replace('text-beige', 'text-gray-400');
+                forceCloseCart(); // CIERRE OBLIGATORIO SI SE VACÍA
             }
         }
 
@@ -523,7 +539,6 @@
                 
                 // Mostrar botones flotantes
                 if(window.innerWidth < 1024) {
-                    // En móvil, si el sidebar está cerrado, mostrar barra sticky
                     const sidebar = document.getElementById('cart-sidebar');
                     if(sidebar.classList.contains('translate-x-full')) stickyBar.classList.remove('hidden');
                 } else {
@@ -535,28 +550,41 @@
 
         function calcularTotal() {
             let subtotal = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
-            
-            // Envío
             const radios = document.getElementsByName('tipo_envio');
             let tipoEnvio = "rm";
             for(const r of radios) { if(r.checked) tipoEnvio = r.value; }
             costoEnvio = (cart.length > 0 && tipoEnvio === 'rm') ? 3500 : 0; 
 
-            // Renderizar Totales
+            let totalSidebar = subtotal + costoEnvio;
             const subtotalFmt = `$${subtotal.toLocaleString()}`;
+            
             document.getElementById('mobile-total-sticky').innerText = subtotalFmt;
             document.getElementById('desktop-floating-total').innerText = subtotalFmt;
             document.getElementById('header-total').innerText = subtotalFmt;
-            
-            document.getElementById('sidebar-total').innerText = `$${(subtotal + costoEnvio).toLocaleString()}`;
+            document.getElementById('sidebar-total').innerText = `$${totalSidebar.toLocaleString()}`;
             
             if(cart.length > 0) document.getElementById('header-total').classList.add('opacity-100');
         }
 
+        function enviarPedido() {
+            if(cart.length === 0) return alert("Tu carrito está vacío");
+            const radiosEnvio = document.getElementsByName('tipo_envio');
+            let tipoEnvioTexto = "Región Metropolitana ($3.500)";
+            for(const r of radiosEnvio) { if(r.checked && r.value === 'regiones') tipoEnvioTexto = "Regiones (Por Pagar - Starken)"; }
+            const radiosDoc = document.getElementsByName('tipo_doc');
+            let tipoDocTexto = "Boleta";
+            for(const r of radiosDoc) { if(r.checked) tipoDocTexto = r.value; }
+            const totalText = document.getElementById('sidebar-total').innerText;
+            const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre} - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
+            const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar pedido:\n\n${itemsList}\n\n*ENVÍO:* ${tipoEnvioTexto}\n*DOC:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a datos de transferencia.`;
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
+        }
+
+        // --- FUNCIONES UI ---
         function toggleCart() {
             const sidebar = document.getElementById('cart-sidebar');
-            const overlay = document.getElementById('cart-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
+            const overlay = document.getElementById('cart-overlay');
             const isOpen = sidebar.classList.contains('translate-x-0');
 
             if (cart.length === 0 && !isOpen) return mostrarToast("Carrito vacío", "info");
@@ -569,22 +597,37 @@
                 document.body.classList.add('locked');
                 stickyBar.classList.add('hidden'); // Ocultar barra al abrir
             } else { // CERRAR
-                history.back();
+                history.back(); // Usamos historial para cerrar correctamente
             }
         }
         
         function toggleMobileMenu() { 
             const sidebar = document.getElementById('left-sidebar');
-            const overlay = document.getElementById('menu-overlay');
-            if (sidebar.classList.contains('-translate-x-full')) {
+            if (sidebar.classList.contains('-translate-x-full')) { 
                 history.pushState({modal: 'menu'}, null, "");
                 sidebar.classList.remove('-translate-x-full');
-                overlay.classList.add('open');
+                document.getElementById('menu-overlay').classList.add('open');
                 document.body.classList.add('locked');
             } else { history.back(); }
         }
 
         function handleBackAction() { history.back(); }
+
+        // CIERRE FORZADO (Limpia todo visualmente sin depender de history)
+        function forceCloseCart() {
+            const sidebar = document.getElementById('cart-sidebar');
+            const overlay = document.getElementById('cart-overlay');
+            const stickyBar = document.getElementById('mobile-sticky-bar');
+            
+            sidebar.classList.remove('translate-x-0');
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.remove('open');
+            document.body.classList.remove('locked');
+            
+            // Lógica para sticky bar
+            if(cart.length === 0) stickyBar.classList.add('hidden');
+            else if (window.innerWidth < 1024) stickyBar.classList.remove('hidden');
+        }
 
         function openProduct(id) {
             history.pushState({modal: 'product'}, null, "");
@@ -596,15 +639,15 @@
                 <div class="max-w-5xl mx-auto p-4 md:p-10 pt-20">
                     <div class="bg-white rounded-3xl shadow-xl overflow-hidden md:flex">
                         <div class="md:w-1/2 p-8 bg-gray-50 flex items-center justify-center">
-                            <img src="${p.img}" class="max-h-80 object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/400'">
+                            <img src="${p.img}" class="max-h-80 object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
                         </div>
                         <div class="md:w-1/2 p-8 flex flex-col justify-center">
                             <span class="text-beige font-bold uppercase text-xs tracking-widest mb-2">${p.cat}</span>
                             <h1 class="text-2xl font-black text-gray-900 mb-4 leading-tight">${p.nombre}</h1>
-                            <p class="text-gray-600 mb-8 leading-relaxed">${p.desc}</p>
+                            <p class="text-lg text-gray-600 leading-relaxed mb-8 font-medium">${p.desc}</p>
                             <div class="flex items-center justify-between border-t pt-6">
                                 <span class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
-                                <button onclick="${action}" class="bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-beige transition shadow-lg">Agregar</button>
+                                <button onclick="${action}" class="bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-beige transition shadow-lg">${p.disponible ? 'Agregar' : 'Agotado'}</button>
                             </div>
                         </div>
                     </div>
@@ -623,32 +666,14 @@
             btnTodas.innerHTML = "Todo";
             btnTodas.onclick = () => filtrar('todas');
             nav.appendChild(btnTodas);
-            
             const categorias = [...new Set(db.map(p => p.cat))].sort();
             categorias.forEach(cat => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-white text-gray-600 font-medium flex items-center gap-3 transition-all";
+                btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-100 text-gray-600 font-medium flex items-center gap-3 transition-all";
                 btn.innerHTML = cat;
                 btn.onclick = () => filtrar(cat);
                 nav.appendChild(btn);
             });
-        }
-
-        function cardHTML(p) {
-            return `
-                <div class="bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all duration-300 relative flex flex-col h-full overflow-hidden" onclick="openProduct(${p.id})">
-                    <div class="relative h-48 bg-white p-4">
-                        <img src="${p.img}" class="w-full h-full object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/400'">
-                    </div>
-                    <div class="p-4 flex flex-col grow">
-                        <h4 class="font-medium text-gray-800 text-sm mb-2 line-clamp-2">${p.nombre}</h4>
-                        <div class="mt-auto flex justify-between items-center">
-                            <span class="font-black text-lg text-gray-900">$${p.precio.toLocaleString()}</span>
-                            <button onclick="event.stopPropagation(); addToCart(${p.id})" class="bg-gray-100 hover:bg-black hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fa fa-plus text-xs"></i></button>
-                        </div>
-                    </div>
-                </div>
-            `;
         }
 
         function mostrarToast(msg, type='success') {
