@@ -43,7 +43,21 @@
             .mobile-slider::-webkit-scrollbar { display: none; }
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
             body { padding-bottom: 120px; } 
-            .sticky-search { position: sticky; top: 80px; z-index: 40; background-color: rgba(255, 255, 255, 0.98); backdrop-filter: blur(5px); padding-top: 10px; padding-bottom: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.05); border-bottom: 1px solid #f3f4f6; }
+            
+            /* BUSCADOR PEGAJOSO MÓVIL (CORREGIDO) */
+            .sticky-search-container {
+                position: sticky;
+                top: 80px; /* Altura del header */
+                z-index: 40; /* Debajo del header (50) pero encima del contenido */
+                background-color: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(8px);
+                padding: 10px 16px 15px 16px;
+                margin-left: -16px; /* Compensar padding del main */
+                margin-right: -16px;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #f3f4f6;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            }
         }
 
         /* ANIMACIONES */
@@ -56,7 +70,7 @@
         .toast-enter { transform: translate(-50%, 100%); opacity: 0; }
         .toast-visible { transform: translate(-50%, 0); opacity: 1; }
 
-        /* OVERLAYS (TELONES) */
+        /* OVERLAYS */
         .overlay-base {
             position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
             opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
@@ -81,7 +95,7 @@
             
             <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none z-30">
                 <div class="pointer-events-auto inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full border border-gray-50 shadow-sm">
-                    <img src="imagenes/logo.webp" class="w-8 h-8 rounded-full object-cover bg-white shadow-sm" alt="Logo Papajose" onerror="this.style.display='none'">
+                    <img src="imagenes/logo.webp" class="w-8 h-8 rounded-full object-cover bg-white shadow-sm" alt="Logo" onerror="this.style.display='none'">
                     <h1 class="text-lg md:text-2xl font-black tracking-widest text-gray-800 uppercase whitespace-nowrap">Papajose <span class="text-beige">SPA</span></h1>
                 </div>
             </div>
@@ -125,20 +139,23 @@
     </aside>
 
     <main id="main-content" class="pt-28 px-4 md:px-12 layout-desktop min-h-screen">
-        <div class="lg:hidden sticky-search px-1">
-            <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué buscas hoy?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
-            <i class="fa fa-search absolute left-6 top-1/2 transform -translate-y-1/2 text-beige"></i>
+        
+        <div class="lg:hidden sticky-search-container">
+            <div class="relative w-full">
+                <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué buscas hoy?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
+                <i class="fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-beige"></i>
+            </div>
         </div>
 
         <section class="relative bg-soft text-gray-800 py-20 px-6 md:px-12 mb-12 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 fade-in-up">
             <div class="relative z-10 max-w-4xl mx-auto text-center">
                 <div class="flex justify-center mb-6">
                     <div class="w-20 h-20 rounded-full bg-white p-1 shadow-lg flex items-center justify-center">
-                        <img src="imagenes/logo.webp" class="w-full h-full rounded-full object-cover" alt="Logo Hero" onerror="this.style.display='none'">
+                        <img src="imagenes/logo.webp" class="w-full h-full rounded-full object-cover" alt="Logo" onerror="this.style.display='none'">
                     </div>
                 </div>
-                
-                <span class="inline-block py-1.5 px-4 rounded-full bg-white border border-gray-200 text-beige font-bold text-[10px] md:text-xs tracking-widest uppercase mb-4 shadow-sm">Comercializadora Online</span>
+
+                <span class="inline-block py-1.5 px-4 rounded-full bg-white border border-gray-200 text-beige font-bold text-[10px] md:text-xs tracking-widest uppercase mb-6 shadow-sm">Comercializadora Online</span>
                 <h2 class="text-4xl md:text-6xl font-black mb-6 leading-tight text-gray-900 tracking-tight">
                     Variedad, Calidad <br>y <span class="text-beige italic font-serif">Buenos Precios.</span>
                 </h2>
@@ -230,7 +247,7 @@
     <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[160] shadow-2xl transform translate-x-full flex flex-col h-full">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
             <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
-            <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
+            <button onclick="forceCloseCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
         </div>
         
         <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
@@ -296,8 +313,6 @@
 
     <script>
         const WHATSAPP_NUM = "56936416743"; 
-        
-        // CACHE BUSTER
         const CSV_URL = "productos.csv?v=" + new Date().getTime(); 
         
         let db = [];
@@ -352,7 +367,6 @@
             });
         }
 
-        /* --- LÓGICA DEL CARRITO --- */
         function addToCart(id) {
             const p = db.find(x => x.id === id);
             if (!p) return;
@@ -404,11 +418,8 @@
             
             if(cart.length === 0) {
                 document.getElementById('cart-icon').classList.replace('text-beige', 'text-gray-400');
-                // Si está abierto, cerrar
-                const sidebar = document.getElementById('cart-sidebar');
-                if (!sidebar.classList.contains('translate-x-full')) {
-                    toggleCart();
-                }
+                // CERRAR AUTOMÁTICAMENTE SI SE VACÍA
+                forceCloseCart();
             }
         }
 
@@ -445,9 +456,14 @@
                     </div>
                 `).join('');
                 
-                // Mostrar sticky bar si no está el carrito abierto
-                if(window.innerWidth < 1024) stickyBar.classList.remove('hidden');
-                // Mostrar botón flotante
+                if(window.innerWidth < 1024) {
+                    const sidebar = document.getElementById('cart-sidebar');
+                    if(sidebar.classList.contains('translate-x-full')) {
+                        stickyBar.classList.remove('hidden');
+                        stickyBar.classList.remove('translate-y-full');
+                    }
+                }
+                
                 if(window.innerWidth >= 1024) floatingBtn.classList.remove('hidden');
             }
             calcularTotal();
@@ -503,7 +519,6 @@
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
         }
 
-        // --- FUNCIONES RENDERIZADO ---
         function cardHTML(p) {
             const btnClass = p.disponible 
                 ? "bg-gray-50 text-gray-900 hover:bg-black hover:text-white" 
@@ -600,8 +615,10 @@
         }
 
         function filtrar(cat, btnElement) {
-            // AL FILTRAR EN MÓVIL, CERRAMOS EL MENÚ AUTOMÁTICAMENTE
-            if(window.innerWidth < 1024) toggleMobileMenu();
+            if(window.innerWidth < 1024) {
+                const sidebar = document.getElementById('left-sidebar');
+                if (!sidebar.classList.contains('-translate-x-full')) toggleMobileMenu();
+            }
 
             document.querySelectorAll('#nav-categorias button').forEach(b => b.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group");
             if(btnElement) {
@@ -620,31 +637,32 @@
         }
 
         function toggleCart() {
-            if (cart.length === 0) {
+            const sidebar = document.getElementById('cart-sidebar');
+            const overlay = document.getElementById('cart-overlay');
+            const stickyBar = document.getElementById('mobile-sticky-bar');
+            const isOpen = sidebar.classList.contains('translate-x-0');
+
+            // 1. SI INTENTA ABRIR Y ESTÁ VACÍO -> ERROR
+            if (cart.length === 0 && !isOpen) {
                 mostrarToast("Tu carrito está vacío", "info");
                 return;
             }
 
-            const sidebar = document.getElementById('cart-sidebar');
-            const overlay = document.getElementById('cart-overlay');
-            const stickyBar = document.getElementById('mobile-sticky-bar');
-            
+            // 2. TOGGLE NORMAL
             if (sidebar.classList.contains('translate-x-full')) {
+                // ABRIR
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
                 overlay.classList.add('open');
                 document.body.classList.add('locked');
-                
-                // ESCONDEMOS la barra sticky al abrir carrito completo
-                if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
+                if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full'); // Ocultar sticky
             } else {
+                // CERRAR
                 sidebar.classList.remove('translate-x-0');
                 sidebar.classList.add('translate-x-full');
                 overlay.classList.remove('open');
                 document.body.classList.remove('locked');
-                
-                // MOSTRAMOS la barra sticky al cerrar
-                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
+                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full'); // Mostrar sticky
             }
         }
         
@@ -656,12 +674,12 @@
             sidebar.classList.toggle('-translate-x-full');
             overlay.classList.toggle('open');
             
-            // Gestión de scroll y barra sticky
+            // Si el menú se abre, escondemos la barra sticky
             if (!sidebar.classList.contains('-translate-x-full')) {
-                document.body.classList.add('locked');
+                document.body.classList.add('locked'); // Bloqueamos el scroll
                 if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
             } else {
-                document.body.classList.remove('locked');
+                document.body.classList.remove('locked'); // Desbloqueamos
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
             }
         }
