@@ -28,87 +28,46 @@
         .bg-beige { background-color: var(--beige); }
         .bg-soft { background-color: var(--soft-bg); }
         
-        /* Bloqueo de Scroll al abrir carrito */
-        body.cart-open-lock { overflow: hidden; height: 100vh; }
+        /* Bloqueo de Scroll */
+        body.locked { overflow: hidden; height: 100vh; }
 
-        /* --- LAYOUT RESPONSIVE & OPTIMIZACIONES --- */
-        
-        /* Escritorio */
+        /* --- LAYOUT RESPONSIVE --- */
         @media (min-width: 1024px) {
             .layout-desktop { margin-left: 280px; } 
             .header-desktop-adjust { padding-left: 280px; }
-            
-            .destacados-grid-pc {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-            }
+            .destacados-grid-pc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         }
         
-        /* Móvil */
         @media (max-width: 1023px) {
-            .mobile-slider { 
-                display: flex; 
-                overflow-x: auto; 
-                scroll-snap-type: x mandatory; 
-                gap: 1rem; 
-                padding-bottom: 1.5rem; 
-                scrollbar-width: none; 
-            }
+            .mobile-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; padding-bottom: 1.5rem; scrollbar-width: none; }
             .mobile-slider::-webkit-scrollbar { display: none; }
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
-            
-            /* Margen inferior para que el último producto se vea encima de la barra */
             body { padding-bottom: 120px; } 
-
-            .sticky-search {
-                position: sticky;
-                top: 80px;
-                z-index: 40; 
-                background-color: rgba(255, 255, 255, 0.98);
-                backdrop-filter: blur(5px);
-                padding-top: 10px;
-                padding-bottom: 15px;
-                margin-bottom: 20px;
-                box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.05);
-                border-bottom: 1px solid #f3f4f6;
-            }
+            .sticky-search { position: sticky; top: 80px; z-index: 40; background-color: rgba(255, 255, 255, 0.98); backdrop-filter: blur(5px); padding-top: 10px; padding-bottom: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.05); border-bottom: 1px solid #f3f4f6; }
         }
 
-        /* ANIMACIONES FLUIDAS */
+        /* ANIMACIONES */
         .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
         .no-stock { filter: grayscale(100%); opacity: 0.6; }
-        
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         
-        /* Notificación Toast (Acelerada) */
         .toast-enter { transform: translate(-50%, 100%); opacity: 0; }
         .toast-visible { transform: translate(-50%, 0); opacity: 1; }
 
-        /* OVERLAY DEL CARRITO */
-        #cart-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(3px);
-            z-index: 140; 
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease;
+        /* OVERLAYS (TELONES) */
+        .overlay-base {
+            position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
         }
-        #cart-overlay.open {
-            opacity: 1;
-            visibility: visible;
-        }
+        .overlay-base.open { opacity: 1; visibility: visible; }
+        
+        #menu-overlay { z-index: 145; } /* Debajo del menú (150) */
+        #cart-overlay { z-index: 155; } /* Debajo del carrito (160) */
 
-        /* TRANSICIÓN SUAVE DEL SIDEBAR */
-        #cart-sidebar, #left-sidebar {
-            will-change: transform; 
-            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
-        }
+        /* TRANSICIONES SIDEBARS */
+        #cart-sidebar, #left-sidebar { will-change: transform; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
 
     </style>
 </head>
@@ -135,7 +94,6 @@
                 
                 <div class="flex items-center gap-3">
                     <span id="header-total" class="hidden md:block font-bold text-gray-700 text-sm opacity-0 transition-opacity duration-300">$0</span>
-                    
                     <button onclick="toggleCart()" class="relative p-2 group" id="cart-btn-header">
                         <i class="fa fa-shopping-bag text-2xl text-gray-400 group-hover:text-black transition" id="cart-icon"></i>
                         <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white scale-0 transition-transform duration-300">0</span>
@@ -144,6 +102,8 @@
             </div>
         </div>
     </header>
+
+    <div id="menu-overlay" class="overlay-base" onclick="toggleMobileMenu()"></div>
 
     <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[150] pt-24 transform -translate-x-full lg:translate-x-0 shadow-2xl flex flex-col justify-between h-full">
         <div class="p-6 overflow-y-auto">
@@ -165,7 +125,6 @@
     </aside>
 
     <main id="main-content" class="pt-28 px-4 md:px-12 layout-desktop min-h-screen">
-        
         <div class="lg:hidden sticky-search px-1">
             <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué buscas hoy?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
             <i class="fa fa-search absolute left-6 top-1/2 transform -translate-y-1/2 text-beige"></i>
@@ -261,7 +220,7 @@
 
     </main>
 
-    <div id="cart-overlay" onclick="toggleCart()"></div>
+    <div id="cart-overlay" class="overlay-base" onclick="toggleCart()"></div>
 
     <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[160] shadow-2xl transform translate-x-full flex flex-col h-full">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
@@ -305,13 +264,18 @@
         </div>
     </aside>
 
-    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[60] shadow-[0_-5px_15px_rgba(0,0,0,0.05)] flex justify-between items-center lg:hidden hidden fade-in-up transition-transform duration-300">
-        <div class="flex flex-col">
+    <div id="mobile-sticky-bar" onclick="toggleCart()" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[60] shadow-[0_-5px_15px_rgba(0,0,0,0.05)] flex justify-between items-center lg:hidden hidden fade-in-up transition-transform duration-300 cursor-pointer hover:bg-gray-50 active:bg-gray-100">
+        <div class="flex flex-col pointer-events-none">
             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Final</span>
             <span id="mobile-total-sticky" class="text-xl font-black text-gray-900">$0</span>
         </div>
-        <button onclick="toggleCart()" class="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm shadow-xl active:scale-95 transition flex items-center gap-2">Ver Carrito <i class="fa fa-shopping-cart"></i></button>
+        <button class="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm shadow-xl active:scale-95 transition flex items-center gap-2 pointer-events-none">Ver Carrito <i class="fa fa-shopping-cart"></i></button>
     </div>
+
+    <button id="desktop-floating-cart" onclick="toggleCart()" class="hidden lg:flex fixed bottom-8 right-8 bg-black text-white px-6 py-3 rounded-full font-bold shadow-2xl z-[55] hover:scale-105 transition-transform items-center gap-3 border-2 border-white hover:bg-beige">
+        <i class="fa fa-shopping-bag"></i>
+        <span id="desktop-floating-total">$0</span>
+    </button>
 
     <div id="product-modal" class="fixed inset-0 z-[200] bg-white hidden overflow-y-auto animate-fade-in">
         <button onclick="closeProductModal()" class="fixed top-4 right-4 z-50 bg-gray-100 w-10 h-10 rounded-full flex items-center justify-center shadow-sm text-lg hover:bg-red-100 hover:text-red-500 transition">✕</button>
@@ -333,7 +297,7 @@
         
         let db = [];
         let cart = []; 
-        let hasOpenedCartAutomatically = false; // FLAG PARA LA APERTURA AUTOMÁTICA
+        let hasOpenedCartAutomatically = false; 
         let searchTimeout; 
         let costoEnvio = 3500; 
 
@@ -407,11 +371,11 @@
             
             document.getElementById('cart-icon').classList.replace('text-gray-400', 'text-beige');
 
-            // APERTURA AUTOMÁTICA SOLO LA PRIMERA VEZ
-            if (!hasOpenedCartAutomatically) {
+            // APERTURA AUTOMÁTICA SOLO EN ESCRITORIO Y SOLO LA PRIMERA VEZ
+            if (window.innerWidth >= 1024 && !hasOpenedCartAutomatically) {
                 const sidebar = document.getElementById('cart-sidebar');
                 if (sidebar.classList.contains('translate-x-full')) {
-                    toggleCart(); // Usamos toggle para que aplique todas las reglas (lock, overlay, etc)
+                    toggleCart(); 
                     hasOpenedCartAutomatically = true;
                 }
             }
@@ -435,7 +399,7 @@
             
             if(cart.length === 0) {
                 document.getElementById('cart-icon').classList.replace('text-beige', 'text-gray-400');
-                // Si el carrito se vacía y está abierto, lo cerramos
+                // Si está abierto el carrito, lo forzamos a cerrar
                 const sidebar = document.getElementById('cart-sidebar');
                 if (!sidebar.classList.contains('translate-x-full')) {
                     toggleCart();
@@ -452,10 +416,12 @@
 
             const list = document.getElementById('cart-items');
             const stickyBar = document.getElementById('mobile-sticky-bar');
+            const floatingBtn = document.getElementById('desktop-floating-cart');
             
             if (cart.length === 0) {
                 list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-5xl mb-4 opacity-20"></i><p class="text-sm">Tu carrito está vacío</p></div>`;
                 stickyBar.classList.add('hidden'); 
+                floatingBtn.classList.add('hidden');
                 document.getElementById('header-total').classList.remove('opacity-100');
             } else {
                 list.innerHTML = cart.map((p) => `
@@ -474,8 +440,10 @@
                     </div>
                 `).join('');
                 
-                // Si hay productos, mostramos la barra sticky si no está abierto el carrito
+                // Si hay productos, mostramos barra sticky si no está el carrito abierto
                 if(window.innerWidth < 1024) stickyBar.classList.remove('hidden');
+                // En desktop mostramos el botón flotante
+                if(window.innerWidth >= 1024) floatingBtn.classList.remove('hidden');
             }
             calcularTotal();
         }
@@ -495,11 +463,14 @@
             document.getElementById('cart-total').innerText = totalFormatted;
             document.getElementById('mobile-total-sticky').innerText = totalFormatted;
             
-            // Actualizar total en Header
+            // Header y Desktop Float
             const headerTotal = document.getElementById('header-total');
+            const floatTotal = document.getElementById('desktop-floating-total');
+            
             if(cart.length > 0) {
                 headerTotal.innerText = totalFormatted;
                 headerTotal.classList.add('opacity-100');
+                floatTotal.innerText = totalFormatted;
             } else {
                 headerTotal.classList.remove('opacity-100');
             }
@@ -656,7 +627,7 @@
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
                 overlay.classList.add('open');
-                document.body.classList.add('cart-open-lock'); // BLOQUEAR SCROLL
+                document.body.classList.add('locked'); // BLOQUEAR SCROLL
                 
                 // Al abrir el carrito, ESCONDEMOS la barra sticky para que no tape
                 if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
@@ -664,7 +635,7 @@
                 sidebar.classList.remove('translate-x-0');
                 sidebar.classList.add('translate-x-full');
                 overlay.classList.remove('open');
-                document.body.classList.remove('cart-open-lock'); // DESBLOQUEAR SCROLL
+                document.body.classList.remove('locked'); // DESBLOQUEAR SCROLL
                 
                 // Al cerrar, mostramos la barra sticky si hay productos
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
@@ -673,15 +644,18 @@
         
         function toggleMobileMenu() { 
             const sidebar = document.getElementById('left-sidebar');
+            const overlay = document.getElementById('menu-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
             
             sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('open');
             
             // Si el menú se abre, escondemos la barra sticky
             if (!sidebar.classList.contains('-translate-x-full')) {
+                document.body.classList.add('locked'); // Bloqueamos el scroll
                 if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
             } else {
-                // Si se cierra y hay productos, la mostramos
+                document.body.classList.remove('locked'); // Desbloqueamos
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
             }
         }
@@ -694,7 +668,7 @@
             sidebar.classList.remove('translate-x-0');
             sidebar.classList.add('translate-x-full');
             overlay.classList.remove('open');
-            document.body.classList.remove('cart-open-lock');
+            document.body.classList.remove('locked');
             stickyBar.classList.add('hidden');
         }
 
