@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-NDG1TN8LS4"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -8,9 +11,7 @@
       gtag('js', new Date());
       gtag('config', 'G-NDG1TN8LS4');
     </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <link rel="icon" type="image/webp" href="imagenes/logo.webp">
 
     <title>Papajose SPA | Comercializadora</title>
@@ -129,13 +130,13 @@
         </div>
     </header>
 
-    <div id="menu-overlay" class="overlay-base" onclick="toggleMobileMenu()"></div>
+    <div id="menu-overlay" class="overlay-base" onclick="handleBackAction()"></div>
 
     <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[150] pt-24 transform -translate-x-full lg:translate-x-0 shadow-2xl flex flex-col justify-between h-full">
         <div class="p-6 overflow-y-auto">
             <div class="flex justify-between items-center mb-8 lg:hidden">
                 <span class="font-bold text-beige uppercase tracking-widest text-xs">Navegación</span>
-                <button onclick="toggleMobileMenu()" class="text-2xl text-beige">✕</button>
+                <button onclick="handleBackAction()" class="text-2xl text-beige">✕</button>
             </div>
             <nav class="space-y-2" id="nav-categorias"></nav>
         </div>
@@ -325,8 +326,6 @@
 
     <script>
         const WHATSAPP_NUM = "56936416743"; 
-        
-        // CACHE BUSTER
         const CSV_URL = "productos.csv?v=" + new Date().getTime(); 
         
         let db = [];
@@ -334,6 +333,42 @@
         let hasOpenedCartAutomatically = false; 
         let searchTimeout; 
         let costoEnvio = 3500; 
+
+        // DETECCIÓN DE BOTÓN ATRÁS (HISTORIAL)
+        window.addEventListener('popstate', function(event) {
+            // Si hay modales abiertos, los cerramos
+            const modal = document.getElementById('product-modal');
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const leftSidebar = document.getElementById('left-sidebar');
+            const cartOverlay = document.getElementById('cart-overlay');
+            const menuOverlay = document.getElementById('menu-overlay');
+            const stickyBar = document.getElementById('mobile-sticky-bar');
+
+            // 1. Cerrar Modal de Producto
+            if (!modal.classList.contains('hidden')) {
+                modal.classList.add('hidden');
+                document.body.classList.remove('locked');
+            }
+
+            // 2. Cerrar Carrito
+            if (cartSidebar.classList.contains('translate-x-0')) {
+                cartSidebar.classList.remove('translate-x-0');
+                cartSidebar.classList.add('translate-x-full');
+                cartOverlay.classList.remove('open');
+                document.body.classList.remove('locked');
+                // Si estamos en móvil y hay cosas, mostrar barra
+                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
+            }
+
+            // 3. Cerrar Menú Lateral
+            if (!leftSidebar.classList.contains('-translate-x-full')) {
+                leftSidebar.classList.add('-translate-x-full');
+                menuOverlay.classList.remove('open');
+                document.body.classList.remove('locked');
+                // Si hay cosas en el carrito, mostrar barra
+                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
+            }
+        });
 
         window.addEventListener('DOMContentLoaded', () => { cargarProductosDesdeCSV(); });
 
@@ -381,7 +416,6 @@
             });
         }
 
-        /* --- LÓGICA DEL CARRITO --- */
         function addToCart(id) {
             const p = db.find(x => x.id === id);
             if (!p) return;
@@ -471,11 +505,12 @@
                     </div>
                 `).join('');
                 
-                // Mostrar sticky bar si no está el carrito abierto (y hay productos)
-                const sidebar = document.getElementById('cart-sidebar');
-                if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) {
-                    stickyBar.classList.remove('hidden');
-                    stickyBar.classList.remove('translate-y-full');
+                if(window.innerWidth < 1024) {
+                    const sidebar = document.getElementById('cart-sidebar');
+                    if(sidebar.classList.contains('translate-x-full')) {
+                        stickyBar.classList.remove('hidden');
+                        stickyBar.classList.remove('translate-y-full');
+                    }
                 }
                 
                 if(window.innerWidth >= 1024) floatingBtn.classList.remove('hidden');
@@ -650,34 +685,30 @@
             window.scrollTo({top: y, behavior: 'smooth'});
         }
 
+        // --- FUNCIONES CORE CON HISTORIAL (HISTORY API) ---
+
         function toggleCart() {
             const sidebar = document.getElementById('cart-sidebar');
             const overlay = document.getElementById('cart-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
             const isOpen = sidebar.classList.contains('translate-x-0');
 
-            // 1. SI INTENTA ABRIR Y ESTÁ VACÍO -> ERROR
             if (cart.length === 0 && !isOpen) {
                 mostrarToast("Tu carrito está vacío", "info");
                 return;
             }
 
-            // 2. TOGGLE NORMAL
-            if (sidebar.classList.contains('translate-x-full')) {
-                // ABRIR
+            if (!isOpen) {
+                // ABRIR: Push State
+                history.pushState({modal: 'cart'}, null, "");
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
                 overlay.classList.add('open');
                 document.body.classList.add('locked');
-                if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full'); // Ocultar sticky
+                if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
             } else {
-                // CERRAR
-                sidebar.classList.remove('translate-x-0');
-                sidebar.classList.add('translate-x-full');
-                overlay.classList.remove('open');
-                document.body.classList.remove('locked');
-                // MOSTRAR STICKY BAR AL CERRAR (Si hay productos)
-                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
+                // CERRAR: Go Back (trigger popstate)
+                history.back();
             }
         }
         
@@ -686,46 +717,52 @@
             const overlay = document.getElementById('menu-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
             
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('open');
-            
-            // Si el menú se abre, escondemos la barra sticky
-            if (!sidebar.classList.contains('-translate-x-full')) {
-                document.body.classList.add('locked'); 
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // ABRIR
+                history.pushState({modal: 'menu'}, null, "");
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.add('open');
+                document.body.classList.add('locked');
                 if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
             } else {
-                document.body.classList.remove('locked');
-                // Si hay productos y cerramos el menú, reaparece la barra sticky
-                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
+                // CERRAR
+                history.back();
             }
         }
 
+        // Cierre manual (X o Overlay del menú) - Alias para history.back()
+        function handleBackAction() {
+            history.back();
+        }
+
         function forceCloseCart() {
+            // Solo usar si el carrito está vacío y queremos forzar cierre sin historial
+            // O si necesitamos limpiar el UI manualmente
             const sidebar = document.getElementById('cart-sidebar');
-            const overlay = document.getElementById('cart-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
+            const overlay = document.getElementById('cart-overlay');
             
-            sidebar.classList.remove('translate-x-0');
-            sidebar.classList.add('translate-x-full');
-            overlay.classList.remove('open');
-            document.body.classList.remove('locked');
-            
-            // IMPORTANTE: SI FORZAMOS CIERRE PORQUE ESTÁ VACÍO, ESCONDEMOS LA BARRA
-            // SI CERRAMOS CON LA X Y HAY PRODUCTOS, LA MOSTRAMOS
-            if(cart.length === 0) {
-                stickyBar.classList.add('hidden');
-            } else if (window.innerWidth < 1024) {
-                stickyBar.classList.remove('translate-y-full');
+            // Si está abierto, intentamos cerrar via historial primero
+            if(sidebar.classList.contains('translate-x-0')) {
+                history.back();
+            } else {
+                // Limpieza forzada
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.remove('open');
+                document.body.classList.remove('locked');
+                if(cart.length === 0) stickyBar.classList.add('hidden');
             }
         }
 
         function openProduct(id) {
+            history.pushState({modal: 'product'}, null, "");
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
             
             const btnState = p.disponible ? '' : 'disabled class="opacity-50 cursor-not-allowed bg-gray-300"';
             const btnTxt = p.disponible ? 'Agregar al Pedido' : 'Agotado';
-            const action = p.disponible ? `addToCart(${p.id}); closeProductModal()` : '';
+            // Al agregar al carrito, hacemos history.back() para cerrar el modal correctamente
+            const action = p.disponible ? `addToCart(${p.id}); history.back()` : '';
 
             document.getElementById('modal-content').innerHTML = `
                 <div class="max-w-6xl mx-auto p-4 md:p-12 lg:flex gap-12 pt-20">
@@ -749,6 +786,12 @@
                     </div>
                 </div>`;
             modal.classList.remove('hidden');
+            document.body.classList.add('locked');
+        }
+
+        // Función para cerrar modal producto (X)
+        function closeProductModal() {
+            history.back();
         }
 
         function mostrarToast(mensaje, tipo = 'success') {
@@ -773,11 +816,6 @@
                 setTimeout(() => toast.classList.add('hidden'), 300);
             }, 1000); 
         }
-
-        function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
-        function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
     </script>
 </body>
 </html>
-
-
