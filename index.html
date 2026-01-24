@@ -81,7 +81,7 @@
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         
-        /* Notificación Toast */
+        /* Notificación Toast (Acelerada) */
         .toast-enter { transform: translate(-50%, 100%); opacity: 0; }
         .toast-visible { transform: translate(-50%, 0); opacity: 1; }
 
@@ -89,9 +89,9 @@
         #cart-overlay {
             position: fixed;
             inset: 0;
-            background-color: rgba(0,0,0,0.5); /* Más oscuro para mejor contraste */
+            background-color: rgba(0,0,0,0.5);
             backdrop-filter: blur(3px);
-            z-index: 140; /* Muy alto, debajo del carrito */
+            z-index: 140; 
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease;
@@ -101,19 +101,11 @@
             visibility: visible;
         }
 
-        /* TRANSICIÓN SUAVE DEL SIDEBAR (Optimizado Móvil) */
+        /* TRANSICIÓN SUAVE DEL SIDEBAR */
         #cart-sidebar, #left-sidebar {
-            will-change: transform; /* Aviso al navegador para optimizar */
-            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); /* Curva rápida y suave */
+            will-change: transform; 
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
         }
-
-        /* CAPAS Z-INDEX CRÍTICAS */
-        /* Header: 50 */
-        /* Sticky Bar (Total): 60 */
-        /* Menú Izq: 150 (Tapa al sticky bar) */
-        /* Overlay: 140 */
-        /* Carrito Der: 160 (Tapa a todo) */
-        /* Modal Producto: 200 */
 
     </style>
 </head>
@@ -406,7 +398,7 @@
             
             document.getElementById('cart-icon').classList.replace('text-gray-400', 'text-beige');
 
-            // Abrir automáticamente (solo abre, no toggle)
+            // Abrir automáticamente
             const sidebar = document.getElementById('cart-sidebar');
             const overlay = document.getElementById('cart-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
@@ -415,7 +407,7 @@
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
                 overlay.classList.add('open');
-                // Ocultar barra sticky al abrir carrito completo
+                // Ocultar barra sticky
                 if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
             }
         }
@@ -678,7 +670,7 @@
             sidebar.classList.remove('translate-x-0');
             sidebar.classList.add('translate-x-full');
             overlay.classList.remove('open');
-            stickyBar.classList.add('hidden'); // Se esconde porque no hay items
+            stickyBar.classList.add('hidden');
         }
 
         function openProduct(id) {
@@ -733,7 +725,7 @@
             setTimeout(() => {
                 toast.classList.remove('toast-visible');
                 setTimeout(() => toast.classList.add('hidden'), 300);
-            }, 3000);
+            }, 1500); // 1.5 segundos
         }
 
         function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
