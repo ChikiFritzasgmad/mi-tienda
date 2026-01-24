@@ -20,7 +20,7 @@
         /* --- ESTILOS VISUALES --- */
         :root { 
             --beige: #D2B48C; 
-            --soft-bg: #FAFAF9; /* Fondo crema muy suave */
+            --soft-bg: #FAFAF9; 
             --dark-text: #2D2D2D; 
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: #ffffff; color: var(--dark-text); }
@@ -71,16 +71,18 @@
         /* ANIMACIONES Y UTILIDADES */
         .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .cat-btn-active { background-color: #f3f4f6; color: var(--beige); border-left: 4px solid var(--beige); }
         .no-stock { filter: grayscale(100%); opacity: 0.6; }
         
-        /* Estilo para el acordeón (details/summary) */
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         
         /* Botón Scroll to Top */
         .scroll-top-btn { opacity: 0; visibility: hidden; transition: all 0.3s; }
         .scroll-top-btn.visible { opacity: 1; visibility: visible; }
+        
+        /* Notificación Toast */
+        .toast-enter { transform: translate(-50%, 100%); opacity: 0; }
+        .toast-visible { transform: translate(-50%, 0); opacity: 1; }
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
@@ -103,8 +105,8 @@
                     <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar producto..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
                     <i class="fa fa-search absolute right-4 top-3 text-beige"></i>
                 </div>
-                <button onclick="toggleCart()" class="relative p-2 group">
-                    <i class="fa fa-shopping-bag text-2xl text-beige group-hover:text-black transition"></i>
+                <button onclick="toggleCart()" class="relative p-2 group" id="cart-btn-header">
+                    <i class="fa fa-shopping-bag text-2xl text-gray-400 group-hover:text-black transition" id="cart-icon"></i>
                     <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white scale-0 transition-transform duration-300">0</span>
                 </button>
             </div>
@@ -185,7 +187,7 @@
 
         <div id="loading-msg" class="text-center py-20">
             <i class="fa fa-circle-notch fa-spin text-4xl text-beige mb-4"></i>
-            <p class="text-gray-500 font-bold">Cargando inventario...</p>
+            <p class="text-gray-500 font-bold">Cargando inventario actualizado...</p>
         </div>
 
         <section class="mb-16 hidden" id="seccion-destacados">
@@ -227,11 +229,11 @@
 
     </main>
 
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="scrollTopBtn" class="scroll-top-btn fixed bottom-24 right-4 md:right-8 bg-white border border-gray-100 text-gray-800 w-12 h-12 rounded-full shadow-xl flex items-center justify-center z-[80] hover:bg-beige hover:text-white hover:-translate-y-1">
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="scrollTopBtn" class="scroll-top-btn fixed bottom-24 right-4 md:right-8 bg-white border border-gray-100 text-gray-800 w-12 h-12 rounded-full shadow-xl flex items-center justify-center z-[40] hover:bg-beige hover:text-white hover:-translate-y-1">
         <i class="fa fa-arrow-up"></i>
     </button>
 
-    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[100] shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
             <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
             <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
@@ -295,26 +297,24 @@
         <div id="modal-content" class="min-h-screen"></div>
     </div>
     
-    <div id="toast-modal" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[100] hidden transition-all w-11/12 max-w-sm">
+    <div id="toast-modal" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[100] hidden transition-all w-11/12 max-w-sm toast-enter">
         <div class="bg-gray-900 text-white rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-xs"><i class="fa fa-check"></i></div>
-                <span class="font-bold text-sm">¡Agregado al carrito!</span>
-            </div>
-            <button onclick="toggleCart(); cerrarToast()" class="text-xs font-bold text-beige hover:text-white underline">Ver</button>
+            <div class="flex items-center gap-3" id="toast-content">
+                </div>
         </div>
     </div>
 
     <script>
         const WHATSAPP_NUM = "56936416743"; 
-        const CSV_URL = "productos.csv"; 
+        
+        // CACHE BUSTER: Agregamos timestamp para obligar al navegador a leer el archivo nuevo
+        const CSV_URL = "productos.csv?v=" + new Date().getTime(); 
         
         let db = [];
         let cart = []; 
         let searchTimeout; 
         let costoEnvio = 3500; 
 
-        // Listener para Scroll Top Btn
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('scrollTopBtn');
             if (window.scrollY > 300) btn.classList.add('visible');
@@ -324,6 +324,7 @@
         window.addEventListener('DOMContentLoaded', () => { cargarProductosDesdeCSV(); });
 
         function cargarProductosDesdeCSV() {
+            console.log("Cargando desde: " + CSV_URL); // Debug
             Papa.parse(CSV_URL, {
                 download: true,
                 header: true,
@@ -334,9 +335,11 @@
                         db = results.data.map((fila, index) => {
                             let imagenUrl = fila['foto'] || "";
                             
+                            // Lógica de Stock corregida: El archivo trae "1" o "0".
                             let tieneStock = true;
                             if (fila['stock']) {
                                 let s = fila['stock'].toString().trim();
+                                // Si es "0", "no" o "false", no tiene stock. Todo lo demás (como "1") es SÍ.
                                 if(s === '0' || s === 'no' || s === 'false') tieneStock = false;
                             }
 
@@ -360,7 +363,7 @@
                         renderDestacados(db);
                     } catch (error) {
                         console.error("Error procesando datos:", error);
-                        alert("Error interno procesando el archivo de productos.");
+                        alert("Error leyendo el archivo. Intenta recargar la página.");
                     }
                 },
                 error: function(err) {
@@ -374,7 +377,7 @@
         function addToCart(id) {
             const p = db.find(x => x.id === id);
             if (!p) return;
-            if (!p.disponible) return alert("Producto agotado");
+            if (!p.disponible) return mostrarToast("Producto agotado", "error");
 
             let itemEnCarrito = cart.find(item => item.id === id);
             
@@ -385,20 +388,16 @@
             }
 
             updateCartUI();
+            mostrarToast("¡Agregado al carrito!");
             
-            if (window.innerWidth >= 1024) {
-                const sidebar = document.getElementById('cart-sidebar');
-                if (!sidebar.classList.contains('translate-x-0')) toggleCart();
-            } else { 
-                const toast = document.getElementById('toast-modal');
-                toast.classList.remove('hidden');
-                setTimeout(() => cerrarToast(), 3000);
-            }
-            
+            // Animación Badge
             const badge = document.getElementById('cart-badge');
             badge.classList.remove('scale-0');
             badge.classList.add('scale-125');
             setTimeout(() => badge.classList.remove('scale-125'), 200);
+            
+            // Cambiar color icono carrito
+            document.getElementById('cart-icon').classList.replace('text-gray-400', 'text-beige');
         }
 
         function cambiarCantidad(id, cambio) {
@@ -416,6 +415,7 @@
         function removeFromCart(id) {
             cart = cart.filter(item => item.id !== id);
             updateCartUI();
+            if(cart.length === 0) document.getElementById('cart-icon').classList.replace('text-beige', 'text-gray-400');
         }
 
         function updateCartUI() {
@@ -607,6 +607,12 @@
         }
 
         function toggleCart() {
+            // BLOQUEO: Si el carrito está vacío, no se abre y muestra alerta
+            if (cart.length === 0) {
+                mostrarToast("El carrito está vacío", "info");
+                return;
+            }
+
             const sidebar = document.getElementById('cart-sidebar');
             const main = document.getElementById('main-content');
             const stickyBar = document.getElementById('mobile-sticky-bar');
@@ -654,6 +660,29 @@
                     </div>
                 </div>`;
             modal.classList.remove('hidden');
+        }
+
+        function mostrarToast(mensaje, tipo = 'success') {
+            const toast = document.getElementById('toast-modal');
+            const content = document.getElementById('toast-content');
+            
+            let icon = '<i class="fa fa-check"></i>';
+            let color = 'bg-green-500';
+            
+            if(tipo === 'error') { icon = '<i class="fa fa-times"></i>'; color = 'bg-red-500'; }
+            if(tipo === 'info') { icon = '<i class="fa fa-info"></i>'; color = 'bg-blue-500'; }
+
+            content.innerHTML = `
+                <div class="w-8 h-8 ${color} rounded-full flex items-center justify-center text-xs text-white">${icon}</div>
+                <span class="font-bold text-sm">${mensaje}</span>
+            `;
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('toast-visible'), 10);
+            setTimeout(() => {
+                toast.classList.remove('toast-visible');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
         }
 
         function toggleMobileMenu() { document.getElementById('left-sidebar').classList.toggle('-translate-x-full'); }
