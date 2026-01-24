@@ -30,9 +30,9 @@
         
         /* --- LAYOUT RESPONSIVE & OPTIMIZACIONES --- */
         
-        /* Escritorio: Sidebar fijo a la izquierda */
+        /* Escritorio */
         @media (min-width: 1024px) {
-            .layout-desktop { margin-left: 280px; } /* Ya no se mueve, mejor rendimiento */
+            .layout-desktop { margin-left: 280px; } 
             .header-desktop-adjust { padding-left: 280px; }
             
             .destacados-grid-pc {
@@ -42,7 +42,7 @@
             }
         }
         
-        /* Móvil: Ajustes de scroll y margen inferior */
+        /* Móvil */
         @media (max-width: 1023px) {
             .mobile-slider { 
                 display: flex; 
@@ -55,8 +55,8 @@
             .mobile-slider::-webkit-scrollbar { display: none; }
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
             
-            /* MARGEN DE SEGURIDAD PARA EL CARRITO MÓVIL */
-            body { padding-bottom: 140px; } 
+            /* Margen inferior para que el último producto se vea encima de la barra */
+            body { padding-bottom: 120px; } 
 
             .sticky-search {
                 position: sticky;
@@ -72,7 +72,7 @@
             }
         }
 
-        /* ANIMACIONES FLUIDAS (GPU ACCELERATED) */
+        /* ANIMACIONES FLUIDAS */
         .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -85,26 +85,36 @@
         .toast-enter { transform: translate(-50%, 100%); opacity: 0; }
         .toast-visible { transform: translate(-50%, 0); opacity: 1; }
 
-        /* OVERLAY DEL CARRITO (Fondo Oscuro) */
+        /* OVERLAY DEL CARRITO */
         #cart-overlay {
             position: fixed;
             inset: 0;
-            background-color: rgba(0,0,0,0.4);
-            backdrop-filter: blur(2px);
-            z-index: 65; /* Debajo del carrito (70), encima del header (50) */
+            background-color: rgba(0,0,0,0.5); /* Más oscuro para mejor contraste */
+            backdrop-filter: blur(3px);
+            z-index: 140; /* Muy alto, debajo del carrito */
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.3s ease;
         }
         #cart-overlay.open {
             opacity: 1;
             visibility: visible;
         }
 
-        /* TRANSICIÓN SUAVE DEL SIDEBAR */
-        #cart-sidebar {
-            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); /* Curva "Apple" suave */
+        /* TRANSICIÓN SUAVE DEL SIDEBAR (Optimizado Móvil) */
+        #cart-sidebar, #left-sidebar {
+            will-change: transform; /* Aviso al navegador para optimizar */
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); /* Curva rápida y suave */
         }
+
+        /* CAPAS Z-INDEX CRÍTICAS */
+        /* Header: 50 */
+        /* Sticky Bar (Total): 60 */
+        /* Menú Izq: 150 (Tapa al sticky bar) */
+        /* Overlay: 140 */
+        /* Carrito Der: 160 (Tapa a todo) */
+        /* Modal Producto: 200 */
+
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
@@ -135,7 +145,7 @@
         </div>
     </header>
 
-    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[60] pt-24 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 shadow-xl flex flex-col justify-between h-full">
+    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[150] pt-24 transform -translate-x-full lg:translate-x-0 shadow-2xl flex flex-col justify-between h-full">
         <div class="p-6 overflow-y-auto">
             <div class="flex justify-between items-center mb-8 lg:hidden">
                 <span class="font-bold text-beige uppercase tracking-widest text-xs">Navegación</span>
@@ -253,50 +263,41 @@
 
     <div id="cart-overlay" onclick="toggleCart()"></div>
 
-    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-2xl transform translate-x-full flex flex-col">
-        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[160] shadow-2xl transform translate-x-full flex flex-col h-full">
+        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
             <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
             <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
         </div>
         
         <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
         
-        <div class="p-6 bg-white border-t border-gray-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-            <div class="mb-6">
-                <h4 class="font-bold text-xs uppercase text-gray-400 mb-3 tracking-wider">Envío</h4>
-                <div class="space-y-3">
-                    <label class="flex items-center gap-3 cursor-pointer p-3 border border-gray-100 rounded-xl hover:border-beige transition bg-gray-50">
-                        <input type="radio" name="tipo_envio" value="rm" checked onchange="calcularTotal()" class="accent-black w-4 h-4">
-                        <div class="flex-1">
-                            <span class="block text-sm font-bold text-gray-700">Región Metropolitana</span>
-                            <span class="text-xs text-gray-500">Costo fijo: $3.500</span>
-                        </div>
+        <div class="p-5 bg-white border-t border-gray-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] flex-shrink-0">
+            <div class="mb-4 flex gap-4 text-xs">
+                <div class="flex-1">
+                     <h4 class="font-bold text-[10px] uppercase text-gray-400 mb-2 tracking-wider">Envío</h4>
+                     <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50 mb-2">
+                        <input type="radio" name="tipo_envio" value="rm" checked onchange="calcularTotal()" class="accent-black w-3 h-3">
+                        <div><span class="block font-bold text-gray-700">RM</span><span class="text-[10px] text-gray-500">$3.500</span></div>
+                     </label>
+                     <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50">
+                        <input type="radio" name="tipo_envio" value="regiones" onchange="calcularTotal()" class="accent-black w-3 h-3">
+                        <div><span class="block font-bold text-gray-700">Regiones</span><span class="text-[10px] text-gray-500">Por pagar</span></div>
+                     </label>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-[10px] uppercase text-gray-400 mb-2 tracking-wider">Doc.</h4>
+                    <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50 mb-2">
+                        <input type="radio" name="tipo_doc" value="Boleta" checked class="accent-black w-3 h-3">
+                        <span class="font-bold text-gray-700">Boleta</span>
                     </label>
-                    <label class="flex items-center gap-3 cursor-pointer p-3 border border-gray-100 rounded-xl hover:border-beige transition bg-gray-50">
-                        <input type="radio" name="tipo_envio" value="regiones" onchange="calcularTotal()" class="accent-black w-4 h-4">
-                        <div class="flex-1">
-                            <span class="block text-sm font-bold text-gray-700">Otras Regiones</span>
-                            <span class="text-xs text-gray-500">Por pagar (Starken/Chilexpress)</span>
-                        </div>
+                    <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50">
+                        <input type="radio" name="tipo_doc" value="Factura" class="accent-black w-3 h-3">
+                        <span class="font-bold text-gray-700">Factura</span>
                     </label>
                 </div>
             </div>
 
-            <div class="mb-6">
-                <h4 class="font-bold text-xs uppercase text-gray-400 mb-3 tracking-wider">Documento</h4>
-                <div class="flex gap-4">
-                    <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer p-3 border border-gray-100 rounded-xl hover:border-beige transition bg-gray-50">
-                        <input type="radio" name="tipo_doc" value="Boleta" checked class="accent-black w-4 h-4">
-                        <span class="text-sm font-bold text-gray-700">Boleta</span>
-                    </label>
-                    <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer p-3 border border-gray-100 rounded-xl hover:border-beige transition bg-gray-50">
-                        <input type="radio" name="tipo_doc" value="Factura" class="accent-black w-4 h-4">
-                        <span class="text-sm font-bold text-gray-700">Factura</span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="flex justify-between text-2xl font-black text-gray-900 mb-6">
+            <div class="flex justify-between text-2xl font-black text-gray-900 mb-4">
                 <span>Total</span> 
                 <span id="cart-total">$0</span>
             </div>
@@ -304,7 +305,7 @@
         </div>
     </aside>
 
-    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[90] shadow-[0_-5px_15px_rgba(0,0,0,0.05)] flex justify-between items-center lg:hidden hidden fade-in-up">
+    <div id="mobile-sticky-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[60] shadow-[0_-5px_15px_rgba(0,0,0,0.05)] flex justify-between items-center lg:hidden hidden fade-in-up transition-transform duration-300">
         <div class="flex flex-col">
             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Final</span>
             <span id="mobile-total-sticky" class="text-xl font-black text-gray-900">$0</span>
@@ -317,7 +318,7 @@
         <div id="modal-content" class="min-h-screen"></div>
     </div>
     
-    <div id="toast-modal" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[100] hidden transition-all w-11/12 max-w-sm toast-enter">
+    <div id="toast-modal" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[200] hidden transition-all w-11/12 max-w-sm toast-enter">
         <div class="bg-gray-900 text-white rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4">
             <div class="flex items-center gap-3" id="toast-content">
                 </div>
@@ -398,7 +399,6 @@
             updateCartUI();
             mostrarToast("¡Agregado al carrito!");
             
-            // Animación Badge
             const badge = document.getElementById('cart-badge');
             badge.classList.remove('scale-0');
             badge.classList.add('scale-125');
@@ -409,10 +409,14 @@
             // Abrir automáticamente (solo abre, no toggle)
             const sidebar = document.getElementById('cart-sidebar');
             const overlay = document.getElementById('cart-overlay');
+            const stickyBar = document.getElementById('mobile-sticky-bar');
+            
             if (sidebar.classList.contains('translate-x-full')) {
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
                 overlay.classList.add('open');
+                // Ocultar barra sticky al abrir carrito completo
+                if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
             }
         }
 
@@ -432,7 +436,6 @@
             cart = cart.filter(item => item.id !== id);
             updateCartUI();
             
-            // CIERRE AUTOMÁTICO SI SE VACÍA
             if(cart.length === 0) {
                 document.getElementById('cart-icon').classList.replace('text-beige', 'text-gray-400');
                 forceCloseCart();
@@ -641,15 +644,32 @@
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
                 overlay.classList.add('open');
-                stickyBar.classList.add('hidden');
+                // Al abrir el carrito, ESCONDEMOS la barra sticky para que no tape
+                if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
             } else {
                 sidebar.classList.remove('translate-x-0');
                 sidebar.classList.add('translate-x-full');
                 overlay.classList.remove('open');
-                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('hidden');
+                // Al cerrar, mostramos la barra sticky si hay productos
+                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
             }
         }
         
+        function toggleMobileMenu() { 
+            const sidebar = document.getElementById('left-sidebar');
+            const stickyBar = document.getElementById('mobile-sticky-bar');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            
+            // Si el menú se abre, escondemos la barra sticky
+            if (!sidebar.classList.contains('-translate-x-full')) {
+                if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
+            } else {
+                // Si se cierra y hay productos, la mostramos
+                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
+            }
+        }
+
         function forceCloseCart() {
             const sidebar = document.getElementById('cart-sidebar');
             const overlay = document.getElementById('cart-overlay');
@@ -658,7 +678,7 @@
             sidebar.classList.remove('translate-x-0');
             sidebar.classList.add('translate-x-full');
             overlay.classList.remove('open');
-            stickyBar.classList.add('hidden');
+            stickyBar.classList.add('hidden'); // Se esconde porque no hay items
         }
 
         function openProduct(id) {
@@ -716,7 +736,6 @@
             }, 3000);
         }
 
-        function toggleMobileMenu() { document.getElementById('left-sidebar').classList.toggle('-translate-x-full'); }
         function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
         function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
     </script>
