@@ -28,10 +28,11 @@
         .bg-beige { background-color: var(--beige); }
         .bg-soft { background-color: var(--soft-bg); }
         
-        /* --- LAYOUT RESPONSIVE --- */
+        /* --- LAYOUT RESPONSIVE & OPTIMIZACIONES --- */
+        
+        /* Escritorio: Sidebar fijo a la izquierda */
         @media (min-width: 1024px) {
-            .layout-desktop { margin-left: 280px; transition: margin-right 0.3s ease; }
-            .layout-desktop.cart-open { margin-right: 420px; }
+            .layout-desktop { margin-left: 280px; } /* Ya no se mueve, mejor rendimiento */
             .header-desktop-adjust { padding-left: 280px; }
             
             .destacados-grid-pc {
@@ -41,6 +42,7 @@
             }
         }
         
+        /* Móvil: Ajustes de scroll y margen inferior */
         @media (max-width: 1023px) {
             .mobile-slider { 
                 display: flex; 
@@ -52,7 +54,9 @@
             }
             .mobile-slider::-webkit-scrollbar { display: none; }
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
-            body { padding-bottom: 80px; } 
+            
+            /* MARGEN DE SEGURIDAD PARA EL CARRITO MÓVIL */
+            body { padding-bottom: 140px; } 
 
             .sticky-search {
                 position: sticky;
@@ -68,9 +72,10 @@
             }
         }
 
-        /* ANIMACIONES Y UTILIDADES */
+        /* ANIMACIONES FLUIDAS (GPU ACCELERATED) */
         .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
         .no-stock { filter: grayscale(100%); opacity: 0.6; }
         
         details > summary { list-style: none; }
@@ -79,6 +84,27 @@
         /* Notificación Toast */
         .toast-enter { transform: translate(-50%, 100%); opacity: 0; }
         .toast-visible { transform: translate(-50%, 0); opacity: 1; }
+
+        /* OVERLAY DEL CARRITO (Fondo Oscuro) */
+        #cart-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
+            z-index: 65; /* Debajo del carrito (70), encima del header (50) */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease;
+        }
+        #cart-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* TRANSICIÓN SUAVE DEL SIDEBAR */
+        #cart-sidebar {
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); /* Curva "Apple" suave */
+        }
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
@@ -128,7 +154,7 @@
         </div>
     </aside>
 
-    <main id="main-content" class="pt-28 pb-32 px-4 md:px-12 layout-desktop min-h-screen">
+    <main id="main-content" class="pt-28 px-4 md:px-12 layout-desktop min-h-screen">
         
         <div class="lg:hidden sticky-search px-1">
             <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué buscas hoy?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
@@ -225,7 +251,9 @@
 
     </main>
 
-    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[100] shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div id="cart-overlay" onclick="toggleCart()"></div>
+
+    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-2xl transform translate-x-full flex flex-col">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
             <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
             <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
@@ -299,7 +327,7 @@
     <script>
         const WHATSAPP_NUM = "56936416743"; 
         
-        // CACHE BUSTER PARA RECARGAR CSV NUEVO
+        // CACHE BUSTER
         const CSV_URL = "productos.csv?v=" + new Date().getTime(); 
         
         let db = [];
@@ -310,7 +338,6 @@
         window.addEventListener('DOMContentLoaded', () => { cargarProductosDesdeCSV(); });
 
         function cargarProductosDesdeCSV() {
-            console.log("Cargando desde: " + CSV_URL); // Debug
             Papa.parse(CSV_URL, {
                 download: true,
                 header: true,
@@ -320,14 +347,11 @@
                     try {
                         db = results.data.map((fila, index) => {
                             let imagenUrl = fila['foto'] || "";
-                            
-                            // Lógica de Stock corregida
                             let tieneStock = true;
                             if (fila['stock']) {
                                 let s = fila['stock'].toString().trim();
                                 if(s === '0' || s === 'no' || s === 'false') tieneStock = false;
                             }
-
                             return {
                                 id: index + 1,
                                 nombre: fila['productos'] || "Producto Sin Nombre",
@@ -339,7 +363,6 @@
                                 disponible: tieneStock
                             };
                         });
-
                         generarMenuCategorias();
                         document.getElementById('loading-msg').classList.add('hidden');
                         document.getElementById('seccion-destacados').classList.remove('hidden');
@@ -358,7 +381,7 @@
             });
         }
 
-        /* --- LÓGICA DEL CARRITO (CANTIDADES) --- */
+        /* --- LÓGICA DEL CARRITO --- */
         function addToCart(id) {
             const p = db.find(x => x.id === id);
             if (!p) return;
@@ -381,18 +404,15 @@
             badge.classList.add('scale-125');
             setTimeout(() => badge.classList.remove('scale-125'), 200);
             
-            // Cambiar color icono carrito
             document.getElementById('cart-icon').classList.replace('text-gray-400', 'text-beige');
 
-            // Abrir automáticamente en escritorio
-            if (window.innerWidth >= 1024) {
-                const sidebar = document.getElementById('cart-sidebar');
-                if (sidebar.classList.contains('translate-x-full')) {
-                     // Solo abrimos la ventana, no llamamos a toggleCart para evitar conflictos
-                     sidebar.classList.remove('translate-x-full');
-                     sidebar.classList.add('translate-x-0');
-                     document.getElementById('main-content').classList.add('cart-open');
-                }
+            // Abrir automáticamente (solo abre, no toggle)
+            const sidebar = document.getElementById('cart-sidebar');
+            const overlay = document.getElementById('cart-overlay');
+            if (sidebar.classList.contains('translate-x-full')) {
+                sidebar.classList.remove('translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                overlay.classList.add('open');
             }
         }
 
@@ -412,7 +432,7 @@
             cart = cart.filter(item => item.id !== id);
             updateCartUI();
             
-            // Si el carrito se vacía al eliminar, cerramos el panel
+            // CIERRE AUTOMÁTICO SI SE VACÍA
             if(cart.length === 0) {
                 document.getElementById('cart-icon').classList.replace('text-beige', 'text-gray-400');
                 forceCloseCart();
@@ -449,8 +469,7 @@
                     </div>
                 `).join('');
                 
-                const sidebar = document.getElementById('cart-sidebar');
-                // Mantener visible el sticky bar si hay productos y estamos en móvil
+                // Si hay productos, mostramos la barra sticky
                 if(window.innerWidth < 1024) stickyBar.classList.remove('hidden');
             }
             calcularTotal();
@@ -615,30 +634,30 @@
             }
 
             const sidebar = document.getElementById('cart-sidebar');
-            const main = document.getElementById('main-content');
+            const overlay = document.getElementById('cart-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
             
             if (sidebar.classList.contains('translate-x-full')) {
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
-                if(window.innerWidth >= 1024) main.classList.add('cart-open');
+                overlay.classList.add('open');
                 stickyBar.classList.add('hidden');
             } else {
                 sidebar.classList.remove('translate-x-0');
                 sidebar.classList.add('translate-x-full');
-                if(window.innerWidth >= 1024) main.classList.remove('cart-open');
+                overlay.classList.remove('open');
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('hidden');
             }
         }
         
         function forceCloseCart() {
             const sidebar = document.getElementById('cart-sidebar');
-            const main = document.getElementById('main-content');
+            const overlay = document.getElementById('cart-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
             
             sidebar.classList.remove('translate-x-0');
             sidebar.classList.add('translate-x-full');
-            if(window.innerWidth >= 1024) main.classList.remove('cart-open');
+            overlay.classList.remove('open');
             stickyBar.classList.add('hidden');
         }
 
