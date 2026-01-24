@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Papajose SPA | Comercializadora</title>
-    <meta name="description" content="Venta de motos, repuestos, accesorios y artículos varios. Envíos a todo Chile. Compra segura vía WhatsApp.">
+    <meta name="description" content="Comercializadora de artículos variados. Envíos a todo Chile. Compra segura y trato directo.">
     <meta property="og:title" content="Papajose SPA | Catálogo Online">
-    <meta property="og:description" content="Comercializadora de todo a los mejores precios. Revisa nuestro stock actualizado.">
+    <meta property="og:description" content="Encuentra de todo a los mejores precios. Stock actualizado.">
     <meta property="og:image" content="https://comercializadora.papajose.cl/imagenes/logo.webp"> 
     <meta property="og:url" content="https://comercializadora.papajose.cl">
     <meta property="og:type" content="website">
@@ -17,14 +17,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- ESTILOS GENERALES --- */
-        :root { --beige: #D2B48C; --pastel-bg: #FDFBF7; --dark-text: #2D2D2D; }
+        /* --- ESTILOS VISUALES --- */
+        :root { 
+            --beige: #D2B48C; 
+            --soft-bg: #FAFAF9; /* Fondo crema muy suave */
+            --dark-text: #2D2D2D; 
+        }
         body { font-family: 'Segoe UI', sans-serif; background-color: #ffffff; color: var(--dark-text); }
         .text-beige { color: var(--beige); }
         .bg-beige { background-color: var(--beige); }
-        .bg-pastel { background-color: var(--pastel-bg); }
+        .bg-soft { background-color: var(--soft-bg); }
         
-        /* --- LAYOUT ESCRITORIO --- */
+        /* --- LAYOUT RESPONSIVE --- */
         @media (min-width: 1024px) {
             .layout-desktop { margin-left: 280px; transition: margin-right 0.3s ease; }
             .layout-desktop.cart-open { margin-right: 420px; }
@@ -37,7 +41,6 @@
             }
         }
         
-        /* --- LAYOUT MÓVIL --- */
         @media (max-width: 1023px) {
             .mobile-slider { 
                 display: flex; 
@@ -65,11 +68,19 @@
             }
         }
 
-        .fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
+        /* ANIMACIONES Y UTILIDADES */
+        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .cat-btn-active { background-color: #f3f4f6; color: var(--beige); border-left: 4px solid var(--beige); }
+        .no-stock { filter: grayscale(100%); opacity: 0.6; }
         
-        .no-stock { filter: grayscale(100%); opacity: 0.7; }
+        /* Estilo para el acordeón (details/summary) */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        
+        /* Botón Scroll to Top */
+        .scroll-top-btn { opacity: 0; visibility: hidden; transition: all 0.3s; }
+        .scroll-top-btn.visible { opacity: 1; visibility: visible; }
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
@@ -81,15 +92,15 @@
             </div>
             
             <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none z-30">
-                <div class="pointer-events-auto inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                    <div class="w-10 h-10 rounded-full bg-beige text-white flex items-center justify-center font-bold text-xl shadow-sm">P</div>
-                    <h1 class="text-xl md:text-3xl font-black tracking-wider text-beige uppercase whitespace-nowrap">Papajose SPA</h1>
+                <div class="pointer-events-auto inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full border border-gray-50 shadow-sm">
+                    <div class="w-8 h-8 rounded-full bg-beige text-white flex items-center justify-center font-bold text-lg">P</div>
+                    <h1 class="text-lg md:text-2xl font-black tracking-widest text-gray-800 uppercase whitespace-nowrap">Papajose <span class="text-beige">SPA</span></h1>
                 </div>
             </div>
 
             <div class="flex items-center gap-6 z-20 bg-white pl-4">
                 <div class="hidden lg:block relative group">
-                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
+                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar producto..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
                     <i class="fa fa-search absolute right-4 top-3 text-beige"></i>
                 </div>
                 <button onclick="toggleCart()" class="relative p-2 group">
@@ -103,7 +114,7 @@
     <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-50 z-[60] pt-24 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 shadow-xl flex flex-col justify-between h-full">
         <div class="p-6 overflow-y-auto">
             <div class="flex justify-between items-center mb-8 lg:hidden">
-                <span class="font-bold text-beige uppercase tracking-widest text-xs">Menú</span>
+                <span class="font-bold text-beige uppercase tracking-widest text-xs">Navegación</span>
                 <button onclick="toggleMobileMenu()" class="text-2xl text-beige">✕</button>
             </div>
             <nav class="space-y-2" id="nav-categorias"></nav>
@@ -112,7 +123,7 @@
             <h4 class="text-xs font-black uppercase text-beige mb-4 tracking-widest">Síguenos</h4>
             <div class="flex gap-6 text-2xl text-gray-400">
                 <a href="https://www.instagram.com/comercializadora_papa_jose_spa?igsh=bjZlaGlpYTFvYjBz" target="_blank" class="hover:text-beige transition hover:-translate-y-1"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="hover:text-beige transition hover:-translate-y-1 cursor-default opacity-50" title="Próximamente"><i class="fab fa-tiktok"></i></a>
+                <a href="https://www.tiktok.com/@papa_jose_spa?_r=1&_t=ZS-93KH3UbAneD" target="_blank" class="hover:text-beige transition hover:-translate-y-1"><i class="fab fa-tiktok"></i></a>
                 <a href="https://wa.me/56936416743" target="_blank" class="hover:text-beige transition hover:-translate-y-1"><i class="fab fa-whatsapp"></i></a>
             </div>
             <p class="text-[10px] text-gray-300 mt-4">© 2026 Papajose SPA</p>
@@ -126,53 +137,55 @@
             <i class="fa fa-search absolute left-6 top-1/2 transform -translate-y-1/2 text-beige"></i>
         </div>
 
-        <section class="relative bg-pastel text-gray-800 py-16 px-6 md:px-12 mb-12 rounded-3xl overflow-hidden shadow-sm border border-gray-100 fade-in-up">
-            <div class="relative z-10 max-w-3xl mx-auto text-center">
-                <span class="inline-block py-1 px-3 rounded-full bg-beige/10 text-beige font-bold text-[10px] md:text-xs tracking-widest uppercase mb-4">Bienvenidos a Papajose SPA</span>
-                <h2 class="text-3xl md:text-5xl font-black mb-6 leading-tight text-gray-900">
-                    Somos comercializadora.<br>
-                    <span class="text-beige italic font-serif">De todo, a los mejores precios.</span>
+        <section class="relative bg-soft text-gray-800 py-20 px-6 md:px-12 mb-12 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 fade-in-up">
+            <div class="relative z-10 max-w-4xl mx-auto text-center">
+                <span class="inline-block py-1.5 px-4 rounded-full bg-white border border-gray-200 text-beige font-bold text-[10px] md:text-xs tracking-widest uppercase mb-6 shadow-sm">Comercializadora Online</span>
+                <h2 class="text-4xl md:text-6xl font-black mb-6 leading-tight text-gray-900 tracking-tight">
+                    Variedad, Calidad <br>y <span class="text-beige italic font-serif">Buenos Precios.</span>
                 </h2>
-                <p class="text-gray-500 mb-8 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-                    Olvídate de pagar de más. Encuentra desde repuestos y motos hasta artículos para el hogar, directo a tu puerta y sin complicaciones.
+                <p class="text-gray-500 mb-10 text-sm md:text-lg max-w-xl mx-auto leading-relaxed">
+                    Todo lo que necesitas en un solo lugar. Productos seleccionados para el hogar, transporte y vida diaria, directos a tu puerta.
                 </p>
-                <button onclick="document.getElementById('seccion-catalogo').scrollIntoView({behavior: 'smooth'})" class="bg-gray-900 text-white px-8 py-4 rounded-full font-bold hover:bg-beige hover:text-white transition-all shadow-xl hover:shadow-2xl text-sm uppercase tracking-wider transform hover:-translate-y-1">
-                    Ver Ofertas
-                </button>
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button onclick="document.getElementById('seccion-catalogo').scrollIntoView({behavior: 'smooth'})" class="bg-gray-900 text-white px-8 py-4 rounded-full font-bold hover:bg-beige transition-all shadow-lg hover:shadow-xl text-sm uppercase tracking-wider">
+                        Ver Catálogo
+                    </button>
+                </div>
             </div>
-            <div class="absolute top-0 left-0 w-64 h-64 bg-beige/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-            <div class="absolute bottom-0 right-0 w-80 h-80 bg-blue-50 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+            <div class="absolute top-0 left-0 w-72 h-72 bg-beige/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-gray-200/20 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+            <i class="fa fa-bag-shopping absolute top-10 right-10 text-9xl text-gray-100 rotate-12 -z-10"></i>
         </section>
 
         <section class="mb-16 py-8 border-b border-gray-100">
-            <h3 class="text-center font-bold text-gray-300 text-xs uppercase tracking-widest mb-10">Compra simple y segura</h3>
+            <h3 class="text-center font-bold text-gray-300 text-xs uppercase tracking-widest mb-10">Proceso de Compra</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                 <div class="flex flex-col items-center group">
-                    <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-beige text-xl mb-4 group-hover:bg-beige group-hover:text-white transition shadow-sm"><i class="fa fa-hand-pointer"></i></div>
+                    <div class="w-14 h-14 bg-white border border-gray-100 rounded-2xl flex items-center justify-center text-beige text-xl mb-4 group-hover:bg-beige group-hover:text-white transition shadow-sm"><i class="fa fa-hand-pointer"></i></div>
                     <span class="font-bold text-gray-800 text-sm">1. Elige</span>
-                    <p class="text-xs text-gray-400 mt-1 px-4">Agrega tus productos al carrito</p>
+                    <p class="text-xs text-gray-400 mt-1 px-4">Selecciona productos</p>
                 </div>
                 <div class="flex flex-col items-center group">
-                    <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-beige text-xl mb-4 group-hover:bg-beige group-hover:text-white transition shadow-sm"><i class="fa fa-whatsapp"></i></div>
+                    <div class="w-14 h-14 bg-white border border-gray-100 rounded-2xl flex items-center justify-center text-beige text-xl mb-4 group-hover:bg-beige group-hover:text-white transition shadow-sm"><i class="fa fa-whatsapp"></i></div>
                     <span class="font-bold text-gray-800 text-sm">2. Valida</span>
-                    <p class="text-xs text-gray-400 mt-1 px-4">Confirma stock vía WhatsApp</p>
+                    <p class="text-xs text-gray-400 mt-1 px-4">Confirma stock</p>
                 </div>
                 <div class="flex flex-col items-center group">
-                    <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-beige text-xl mb-4 group-hover:bg-beige group-hover:text-white transition shadow-sm"><i class="fa fa-shield-halved"></i></div>
-                    <span class="font-bold text-gray-800 text-sm">3. Transfiere</span>
-                    <p class="text-xs text-gray-400 mt-1 px-4">Pago seguro a <br><strong class="text-gray-600">Cuenta Empresa</strong></p>
+                    <div class="w-14 h-14 bg-white border border-gray-100 rounded-2xl flex items-center justify-center text-beige text-xl mb-4 group-hover:bg-beige group-hover:text-white transition shadow-sm"><i class="fa fa-building-columns"></i></div>
+                    <span class="font-bold text-gray-800 text-sm">3. Paga</span>
+                    <p class="text-xs text-gray-400 mt-1 px-4">A <strong>Cuenta Empresa</strong></p>
                 </div>
                 <div class="flex flex-col items-center group">
-                    <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-beige text-xl mb-4 group-hover:bg-beige group-hover:text-white transition shadow-sm"><i class="fa fa-box-open"></i></div>
+                    <div class="w-14 h-14 bg-white border border-gray-100 rounded-2xl flex items-center justify-center text-beige text-xl mb-4 group-hover:bg-beige group-hover:text-white transition shadow-sm"><i class="fa fa-box"></i></div>
                     <span class="font-bold text-gray-800 text-sm">4. Recibe</span>
-                    <p class="text-xs text-gray-400 mt-1 px-4">Envíos rápidos a todo Chile</p>
+                    <p class="text-xs text-gray-400 mt-1 px-4">Envío a todo Chile</p>
                 </div>
             </div>
         </section>
 
         <div id="loading-msg" class="text-center py-20">
             <i class="fa fa-circle-notch fa-spin text-4xl text-beige mb-4"></i>
-            <p class="text-gray-500 font-bold">Cargando catálogo...</p>
+            <p class="text-gray-500 font-bold">Cargando inventario...</p>
         </div>
 
         <section class="mb-16 hidden" id="seccion-destacados">
@@ -183,7 +196,7 @@
             <div id="grid-destacados" class="mobile-slider destacados-grid-pc pb-4"></div>
         </section>
 
-        <section id="seccion-catalogo" class="hidden mb-20">
+        <section id="seccion-catalogo" class="hidden mb-12">
             <div class="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
                 <h2 id="titulo-grid" class="text-xl font-bold text-beige uppercase tracking-widest">Catálogo Completo</h2>
                 <span id="cantidad-productos" class="text-xs font-bold text-gray-400 bg-gray-100 px-3 py-1.5 rounded-lg">0 productos</span>
@@ -191,27 +204,32 @@
             <div id="grid-productos" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8"></div>
         </section>
 
-        <section class="bg-gray-50 rounded-3xl p-8 md:p-12 text-center md:text-left flex flex-col md:flex-row gap-8 items-center border border-gray-100">
-            <div class="md:w-2/3">
-                <span class="text-beige font-bold uppercase text-xs tracking-widest mb-2 block">Nuestra Historia</span>
-                <h3 class="text-2xl md:text-3xl font-black text-gray-900 mb-4">De Mercado Libre a tu propia casa.</h3>
-                <div class="space-y-4 text-gray-600 text-sm md:text-base leading-relaxed">
+        <section class="max-w-3xl mx-auto mb-20">
+            <details class="group bg-soft border border-gray-100 rounded-2xl p-6 cursor-pointer open:ring-1 open:ring-beige/30 transition-all shadow-sm">
+                <summary class="flex justify-between items-center font-bold text-gray-800 list-none select-none">
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-user-tag text-beige text-xl"></i>
+                        <span class="uppercase tracking-wider text-sm">Quiénes Somos</span>
+                    </div>
+                    <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300"><i class="fa fa-chevron-down"></i></span>
+                </summary>
+                
+                <div class="mt-6 text-gray-600 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 space-y-4 animate-fade-in">
                     <p>
-                        Papajose SPA nació hace un año como una pequeña Pyme en el ecosistema digital. Tras miles de ventas exitosas en Mercado Libre y un aprendizaje constante, decidimos dar <strong>el gran salto</strong>.
+                        <strong>Papajose SPA</strong> nació hace un año como una iniciativa digital enfocada en el servicio. Tras miles de ventas exitosas en plataformas como Mercado Libre y un aprendizaje constante sobre lo que nuestros clientes realmente necesitan, decidimos dar <strong>el gran salto</strong>.
                     </p>
                     <p>
-                        Hoy evolucionamos con nuestra propia plataforma para ofrecerte lo que siempre has buscado: <strong>trato directo, sin comisiones ocultas y precios realmente justos</strong>. Somos una empresa joven, gestionada por personas que entienden el valor de tu confianza y seguridad. ¡Gracias por crecer con nosotros!
+                        Hoy evolucionamos con nuestra propia plataforma para ofrecerte un <strong>trato directo, sin comisiones ocultas y precios realmente justos</strong>. Somos una empresa joven, gestionada por personas que entienden el valor de tu confianza y seguridad. ¡Gracias por preferirnos!
                     </p>
                 </div>
-            </div>
-            <div class="md:w-1/3 flex justify-center">
-                <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-lg text-beige text-5xl">
-                    <i class="fa fa-rocket"></i>
-                </div>
-            </div>
+            </details>
         </section>
 
     </main>
+
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="scrollTopBtn" class="scroll-top-btn fixed bottom-24 right-4 md:right-8 bg-white border border-gray-100 text-gray-800 w-12 h-12 rounded-full shadow-xl flex items-center justify-center z-[80] hover:bg-beige hover:text-white hover:-translate-y-1">
+        <i class="fa fa-arrow-up"></i>
+    </button>
 
     <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[70] shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
@@ -288,7 +306,6 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN ACTUALIZADA
         const WHATSAPP_NUM = "56936416743"; 
         const CSV_URL = "productos.csv"; 
         
@@ -296,6 +313,13 @@
         let cart = []; 
         let searchTimeout; 
         let costoEnvio = 3500; 
+
+        // Listener para Scroll Top Btn
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('scrollTopBtn');
+            if (window.scrollY > 300) btn.classList.add('visible');
+            else btn.classList.remove('visible');
+        });
 
         window.addEventListener('DOMContentLoaded', () => { cargarProductosDesdeCSV(); });
 
@@ -341,7 +365,7 @@
                 },
                 error: function(err) {
                     console.error("Error descarga CSV:", err);
-                    alert("No se pudo leer el archivo 'productos.csv'. Asegúrate que esté subido en GitHub.");
+                    alert("No se pudo leer el archivo 'productos.csv'.");
                 }
             });
         }
