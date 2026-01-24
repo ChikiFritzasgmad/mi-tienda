@@ -76,10 +76,6 @@
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         
-        /* Botón Scroll to Top */
-        .scroll-top-btn { opacity: 0; visibility: hidden; transition: all 0.3s; }
-        .scroll-top-btn.visible { opacity: 1; visibility: visible; }
-        
         /* Notificación Toast */
         .toast-enter { transform: translate(-50%, 100%); opacity: 0; }
         .toast-visible { transform: translate(-50%, 0); opacity: 1; }
@@ -229,10 +225,6 @@
 
     </main>
 
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="scrollTopBtn" class="scroll-top-btn fixed bottom-24 right-4 md:right-8 bg-white border border-gray-100 text-gray-800 w-12 h-12 rounded-full shadow-xl flex items-center justify-center z-[40] hover:bg-beige hover:text-white hover:-translate-y-1">
-        <i class="fa fa-arrow-up"></i>
-    </button>
-
     <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[100] shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
             <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
@@ -307,19 +299,13 @@
     <script>
         const WHATSAPP_NUM = "56936416743"; 
         
-        // CACHE BUSTER: Agregamos timestamp para obligar al navegador a leer el archivo nuevo
+        // CACHE BUSTER PARA RECARGAR CSV NUEVO
         const CSV_URL = "productos.csv?v=" + new Date().getTime(); 
         
         let db = [];
         let cart = []; 
         let searchTimeout; 
         let costoEnvio = 3500; 
-
-        window.addEventListener('scroll', () => {
-            const btn = document.getElementById('scrollTopBtn');
-            if (window.scrollY > 300) btn.classList.add('visible');
-            else btn.classList.remove('visible');
-        });
 
         window.addEventListener('DOMContentLoaded', () => { cargarProductosDesdeCSV(); });
 
@@ -335,11 +321,10 @@
                         db = results.data.map((fila, index) => {
                             let imagenUrl = fila['foto'] || "";
                             
-                            // Lógica de Stock corregida: El archivo trae "1" o "0".
+                            // Lógica de Stock corregida
                             let tieneStock = true;
                             if (fila['stock']) {
                                 let s = fila['stock'].toString().trim();
-                                // Si es "0", "no" o "false", no tiene stock. Todo lo demás (como "1") es SÍ.
                                 if(s === '0' || s === 'no' || s === 'false') tieneStock = false;
                             }
 
@@ -415,7 +400,12 @@
         function removeFromCart(id) {
             cart = cart.filter(item => item.id !== id);
             updateCartUI();
-            if(cart.length === 0) document.getElementById('cart-icon').classList.replace('text-beige', 'text-gray-400');
+            
+            // Si el carrito se vacía al eliminar, cerramos el panel
+            if(cart.length === 0) {
+                document.getElementById('cart-icon').classList.replace('text-beige', 'text-gray-400');
+                forceCloseCart();
+            }
         }
 
         function updateCartUI() {
@@ -628,6 +618,17 @@
                 if(window.innerWidth >= 1024) main.classList.remove('cart-open');
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('hidden');
             }
+        }
+        
+        function forceCloseCart() {
+            const sidebar = document.getElementById('cart-sidebar');
+            const main = document.getElementById('main-content');
+            const stickyBar = document.getElementById('mobile-sticky-bar');
+            
+            sidebar.classList.remove('translate-x-0');
+            sidebar.classList.add('translate-x-full');
+            if(window.innerWidth >= 1024) main.classList.remove('cart-open');
+            stickyBar.classList.add('hidden');
         }
 
         function openProduct(id) {
