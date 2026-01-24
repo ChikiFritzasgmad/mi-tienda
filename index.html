@@ -383,6 +383,17 @@
             
             // Cambiar color icono carrito
             document.getElementById('cart-icon').classList.replace('text-gray-400', 'text-beige');
+
+            // Abrir automáticamente en escritorio
+            if (window.innerWidth >= 1024) {
+                const sidebar = document.getElementById('cart-sidebar');
+                if (sidebar.classList.contains('translate-x-full')) {
+                     // Solo abrimos la ventana, no llamamos a toggleCart para evitar conflictos
+                     sidebar.classList.remove('translate-x-full');
+                     sidebar.classList.add('translate-x-0');
+                     document.getElementById('main-content').classList.add('cart-open');
+                }
+            }
         }
 
         function cambiarCantidad(id, cambio) {
@@ -439,8 +450,8 @@
                 `).join('');
                 
                 const sidebar = document.getElementById('cart-sidebar');
-                if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) stickyBar.classList.remove('hidden');
-                else stickyBar.classList.add('hidden');
+                // Mantener visible el sticky bar si hay productos y estamos en móvil
+                if(window.innerWidth < 1024) stickyBar.classList.remove('hidden');
             }
             calcularTotal();
         }
@@ -599,7 +610,7 @@
         function toggleCart() {
             // BLOQUEO: Si el carrito está vacío, no se abre y muestra alerta
             if (cart.length === 0) {
-                mostrarToast("El carrito está vacío", "info");
+                mostrarToast("Tu carrito está vacío", "info");
                 return;
             }
 
