@@ -28,6 +28,9 @@
         .bg-beige { background-color: var(--beige); }
         .bg-soft { background-color: var(--soft-bg); }
         
+        /* Bloqueo de Scroll al abrir carrito */
+        body.cart-open-lock { overflow: hidden; height: 100vh; }
+
         /* --- LAYOUT RESPONSIVE & OPTIMIZACIONES --- */
         
         /* Escritorio */
@@ -129,10 +132,15 @@
                     <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar producto..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
                     <i class="fa fa-search absolute right-4 top-3 text-beige"></i>
                 </div>
-                <button onclick="toggleCart()" class="relative p-2 group" id="cart-btn-header">
-                    <i class="fa fa-shopping-bag text-2xl text-gray-400 group-hover:text-black transition" id="cart-icon"></i>
-                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white scale-0 transition-transform duration-300">0</span>
-                </button>
+                
+                <div class="flex items-center gap-3">
+                    <span id="header-total" class="hidden md:block font-bold text-gray-700 text-sm opacity-0 transition-opacity duration-300">$0</span>
+                    
+                    <button onclick="toggleCart()" class="relative p-2 group" id="cart-btn-header">
+                        <i class="fa fa-shopping-bag text-2xl text-gray-400 group-hover:text-black transition" id="cart-icon"></i>
+                        <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white scale-0 transition-transform duration-300">0</span>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -325,6 +333,7 @@
         
         let db = [];
         let cart = []; 
+        let hasOpenedCartAutomatically = false; // FLAG PARA LA APERTURA AUTOMÁTICA
         let searchTimeout; 
         let costoEnvio = 3500; 
 
@@ -398,17 +407,13 @@
             
             document.getElementById('cart-icon').classList.replace('text-gray-400', 'text-beige');
 
-            // Abrir automáticamente
-            const sidebar = document.getElementById('cart-sidebar');
-            const overlay = document.getElementById('cart-overlay');
-            const stickyBar = document.getElementById('mobile-sticky-bar');
-            
-            if (sidebar.classList.contains('translate-x-full')) {
-                sidebar.classList.remove('translate-x-full');
-                sidebar.classList.add('translate-x-0');
-                overlay.classList.add('open');
-                // Ocultar barra sticky
-                if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
+            // APERTURA AUTOMÁTICA SOLO LA PRIMERA VEZ
+            if (!hasOpenedCartAutomatically) {
+                const sidebar = document.getElementById('cart-sidebar');
+                if (sidebar.classList.contains('translate-x-full')) {
+                    toggleCart(); // Usamos toggle para que aplique todas las reglas (lock, overlay, etc)
+                    hasOpenedCartAutomatically = true;
+                }
             }
         }
 
@@ -430,7 +435,11 @@
             
             if(cart.length === 0) {
                 document.getElementById('cart-icon').classList.replace('text-beige', 'text-gray-400');
-                forceCloseCart();
+                // Si el carrito se vacía y está abierto, lo cerramos
+                const sidebar = document.getElementById('cart-sidebar');
+                if (!sidebar.classList.contains('translate-x-full')) {
+                    toggleCart();
+                }
             }
         }
 
@@ -447,6 +456,7 @@
             if (cart.length === 0) {
                 list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-5xl mb-4 opacity-20"></i><p class="text-sm">Tu carrito está vacío</p></div>`;
                 stickyBar.classList.add('hidden'); 
+                document.getElementById('header-total').classList.remove('opacity-100');
             } else {
                 list.innerHTML = cart.map((p) => `
                     <div class="flex gap-4 items-center bg-gray-50 p-3 rounded-xl relative group border border-transparent hover:border-beige/20 hover:bg-white transition-all shadow-sm">
@@ -464,7 +474,7 @@
                     </div>
                 `).join('');
                 
-                // Si hay productos, mostramos la barra sticky
+                // Si hay productos, mostramos la barra sticky si no está abierto el carrito
                 if(window.innerWidth < 1024) stickyBar.classList.remove('hidden');
             }
             calcularTotal();
@@ -481,8 +491,18 @@
             let totalProductos = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
             let totalFinal = totalProductos + costoEnvio;
 
-            document.getElementById('cart-total').innerText = `$${totalFinal.toLocaleString()}`;
-            document.getElementById('mobile-total-sticky').innerText = `$${totalFinal.toLocaleString()}`;
+            const totalFormatted = `$${totalFinal.toLocaleString()}`;
+            document.getElementById('cart-total').innerText = totalFormatted;
+            document.getElementById('mobile-total-sticky').innerText = totalFormatted;
+            
+            // Actualizar total en Header
+            const headerTotal = document.getElementById('header-total');
+            if(cart.length > 0) {
+                headerTotal.innerText = totalFormatted;
+                headerTotal.classList.add('opacity-100');
+            } else {
+                headerTotal.classList.remove('opacity-100');
+            }
         }
 
         function enviarPedido() {
@@ -636,12 +656,16 @@
                 sidebar.classList.remove('translate-x-full');
                 sidebar.classList.add('translate-x-0');
                 overlay.classList.add('open');
+                document.body.classList.add('cart-open-lock'); // BLOQUEAR SCROLL
+                
                 // Al abrir el carrito, ESCONDEMOS la barra sticky para que no tape
                 if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
             } else {
                 sidebar.classList.remove('translate-x-0');
                 sidebar.classList.add('translate-x-full');
                 overlay.classList.remove('open');
+                document.body.classList.remove('cart-open-lock'); // DESBLOQUEAR SCROLL
+                
                 // Al cerrar, mostramos la barra sticky si hay productos
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
             }
@@ -670,6 +694,7 @@
             sidebar.classList.remove('translate-x-0');
             sidebar.classList.add('translate-x-full');
             overlay.classList.remove('open');
+            document.body.classList.remove('cart-open-lock');
             stickyBar.classList.add('hidden');
         }
 
@@ -725,7 +750,7 @@
             setTimeout(() => {
                 toast.classList.remove('toast-visible');
                 setTimeout(() => toast.classList.add('hidden'), 300);
-            }, 1500); // 1.5 segundos
+            }, 1000); // 1 segundo (SÚPER RÁPIDO)
         }
 
         function cerrarToast() { document.getElementById('toast-modal').classList.add('hidden'); }
