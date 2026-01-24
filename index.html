@@ -8,7 +8,8 @@
     <meta name="description" content="Venta de motos, repuestos, accesorios y artículos varios. Envíos a todo Chile. Compra segura vía WhatsApp.">
     <meta property="og:title" content="Papajose SPA | Catálogo Online">
     <meta property="og:description" content="Revisa nuestro stock actualizado de motos y accesorios. Precios especiales.">
-    <meta property="og:image" content="https://comercializadora.papajose.cl/imagenes/logo.webp"> <meta property="og:url" content="https://comercializadora.papajose.cl">
+    <meta property="og:image" content="https://comercializadora.papajose.cl/imagenes/logo.webp"> 
+    <meta property="og:url" content="https://comercializadora.papajose.cl">
     <meta property="og:type" content="website">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,7 +26,7 @@
         /* --- LAYOUT ESCRITORIO --- */
         @media (min-width: 1024px) {
             .layout-desktop { margin-left: 280px; transition: margin-right 0.3s ease; }
-            .layout-desktop.cart-open { margin-right: 420px; } /* Ajustado al ancho del carrito */
+            .layout-desktop.cart-open { margin-right: 420px; }
             .header-desktop-adjust { padding-left: 280px; }
             
             .destacados-grid-pc {
@@ -49,7 +50,6 @@
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
             body { padding-bottom: 80px; } 
 
-            /* BUSCADOR PEGAJOSO */
             .sticky-search {
                 position: sticky;
                 top: 80px;
@@ -68,7 +68,6 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .cat-btn-active { background-color: #f3f4f6; color: var(--beige); border-left: 4px solid var(--beige); }
         
-        /* Efecto grayscale para productos sin stock */
         .no-stock { filter: grayscale(100%); opacity: 0.7; }
     </style>
 </head>
@@ -130,7 +129,7 @@
             <div class="relative z-10 max-w-2xl">
                 <span class="text-beige font-bold tracking-widest uppercase text-[10px] md:text-xs mb-2 block">Papajose Comercializadora</span>
                 <h2 class="text-3xl md:text-5xl font-black mb-4 leading-tight">Encuentra Motos, <br>Repuestos y <span class="text-beige">Más.</span></h2>
-                <p class="text-gray-400 mb-6 text-sm md:text-base max-w-md">Catálogo actualizado diariamente. Precios directos sin intermediarios bancarios.</p>
+                <p class="text-gray-400 mb-6 text-sm md:text-base max-w-md">Catálogo actualizado diariamente. Precios directos sin intermediarios.</p>
                 <button onclick="document.getElementById('seccion-catalogo').scrollIntoView({behavior: 'smooth'})" class="bg-beige text-gray-900 px-6 py-3 rounded-xl font-bold hover:bg-white transition shadow-lg text-sm uppercase tracking-wide">
                     Ver Catálogo Completo
                 </button>
@@ -155,7 +154,7 @@
                 <div class="flex flex-col items-center group">
                     <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-beige text-xl mb-3 group-hover:bg-beige group-hover:text-white transition"><i class="fa fa-money-bill-transfer"></i></div>
                     <span class="font-bold text-gray-800 text-sm">3. Transfiere</span>
-                    <p class="text-xs text-gray-400 mt-1">Datos seguros Cuenta RUT/Bancaria</p>
+                    <p class="text-xs text-gray-400 mt-1">Datos seguros Cuenta RUT</p>
                 </div>
                 <div class="flex flex-col items-center group">
                     <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-beige text-xl mb-3 group-hover:bg-beige group-hover:text-white transition"><i class="fa fa-truck-fast"></i></div>
@@ -266,7 +265,7 @@
         const CSV_URL = "productos.csv"; 
         
         let db = [];
-        let cart = []; // Estructura: [{ ...producto, qty: 1 }]
+        let cart = []; 
         let searchTimeout; 
         let costoEnvio = 3500; 
 
@@ -276,32 +275,29 @@
             Papa.parse(CSV_URL, {
                 download: true,
                 header: true,
-                delimiter: ";", // Ajuste para Excel CSV común en Latam
+                delimiter: ",", // IMPORTANTE: Tu nuevo CSV parece usar comas
                 skipEmptyLines: true,
                 complete: function(results) {
                     try {
-                        console.log("Datos crudos:", results.data[0]); // Debug
                         db = results.data.map((fila, index) => {
-                            // Mapeo seguro basado en tu CSV actual
-                            // Columnas esperadas: productos, precio, descripcion, categoria, links, foto
-                            let imagenUrl = fila['foto'] || fila['links'] || "";
+                            // Mapeo seguro para el nuevo CSV
+                            let imagenUrl = fila['foto'] || ""; // SOLO usamos foto, no links
                             
-                            // Lógica de Stock: Si no existe la columna 'stock', asumimos 'si' (disponible).
-                            // Si existe, debe ser distinto de '0', 'no' o 'false'.
+                            // Lógica de Stock: 0 = sin stock
                             let tieneStock = true;
                             if (fila['stock']) {
-                                let s = fila['stock'].toString().toLowerCase().trim();
+                                let s = fila['stock'].toString().trim();
                                 if(s === '0' || s === 'no' || s === 'false') tieneStock = false;
                             }
 
                             return {
                                 id: index + 1,
                                 nombre: fila['productos'] || "Producto Sin Nombre",
-                                precio: parseInt(fila['precio'].replace(/[^0-9]/g, '')) || 0, // Limpia el precio de símbolos
+                                precio: parseInt(fila['precio']) || 0, 
                                 cat: fila['categoria'] ? fila['categoria'].trim() : "Varios",
                                 desc: fila['descripcion'] || "", 
                                 img: imagenUrl && imagenUrl.length > 5 ? imagenUrl : "https://via.placeholder.com/400x400?text=Sin+Foto",
-                                specs: fila['specs'] || "", // Por si acaso agregas specs después
+                                specs: "", // Ya no existe specs en tu CSV
                                 disponible: tieneStock
                             };
                         });
@@ -312,8 +308,6 @@
                         document.getElementById('seccion-catalogo').classList.remove('hidden');
                         renderGrid(db);
                         renderDestacados(db);
-                        
-                        // Si hay productos en el carrito guardados en localStorage, cargarlos (opcional futuro)
                     } catch (error) {
                         console.error("Error procesando datos:", error);
                         alert("Error interno procesando el archivo de productos.");
@@ -321,7 +315,7 @@
                 },
                 error: function(err) {
                     console.error("Error descarga CSV:", err);
-                    alert("No se pudo leer el archivo 'productos.csv'.");
+                    alert("No se pudo leer el archivo 'productos.csv'. Asegúrate que esté subido en GitHub.");
                 }
             });
         }
@@ -332,7 +326,6 @@
             if (!p) return;
             if (!p.disponible) return alert("Producto agotado");
 
-            // Revisar si ya existe
             let itemEnCarrito = cart.find(item => item.id === id);
             
             if (itemEnCarrito) {
@@ -343,7 +336,6 @@
 
             updateCartUI();
             
-            // Animación
             if (window.innerWidth >= 1024) {
                 const sidebar = document.getElementById('cart-sidebar');
                 if (!sidebar.classList.contains('translate-x-0')) toggleCart();
@@ -353,7 +345,6 @@
                 setTimeout(() => cerrarToast(), 3000);
             }
             
-            // Animación Badge
             const badge = document.getElementById('cart-badge');
             badge.classList.remove('scale-0');
             badge.classList.add('scale-125');
@@ -366,7 +357,7 @@
 
             item.qty += cambio;
             if (item.qty <= 0) {
-                removeFromCart(id); // Si baja a 0, se elimina
+                removeFromCart(id); 
             } else {
                 updateCartUI();
             }
@@ -378,14 +369,12 @@
         }
 
         function updateCartUI() {
-            // Actualizar Badge
             const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
             const badge = document.getElementById('cart-badge');
             badge.innerText = totalItems;
             if(totalItems === 0) badge.classList.add('scale-0');
             else badge.classList.remove('scale-0');
 
-            // Renderizar Lista
             const list = document.getElementById('cart-items');
             const stickyBar = document.getElementById('mobile-sticky-bar');
             
@@ -434,14 +423,12 @@
         function enviarPedido() {
             if(cart.length === 0) return alert("Tu carrito está vacío");
             
-            // 1. Obtener Envío
             const radiosEnvio = document.getElementsByName('tipo_envio');
             let tipoEnvioTexto = "Región Metropolitana ($3.500)";
             for(const r of radiosEnvio) { 
                 if(r.checked && r.value === 'regiones') tipoEnvioTexto = "Regiones (Por Pagar)";
             }
 
-            // 2. Obtener Documento
             const radiosDoc = document.getElementsByName('tipo_doc');
             let tipoDocTexto = "Boleta";
             for(const r of radiosDoc) {
@@ -449,7 +436,6 @@
             }
 
             const totalText = document.getElementById('cart-total').innerText;
-            // Formato con cantidades
             const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre} - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
             
             const msg = `*HOLA PAPAJOSE SPA* 👋\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*ENVÍO:* ${tipoEnvioTexto}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
@@ -458,9 +444,7 @@
         }
 
         // --- FUNCIONES RENDERIZADO ---
-        
         function cardHTML(p) {
-            // Lógica Visual de Stock
             const btnClass = p.disponible 
                 ? "bg-gray-50 text-gray-900 hover:bg-black hover:text-white" 
                 : "bg-gray-200 text-gray-400 cursor-not-allowed";
@@ -499,7 +483,6 @@
         }
 
         function renderDestacados(lista) {
-            // Filtramos solo los que tienen stock para destacados
             const destacados = lista.filter(p => p.disponible).slice(0, 6); 
             document.getElementById('grid-destacados').innerHTML = destacados.map(p => `
                 <div class="slider-card bg-white rounded-2xl border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 relative h-full flex flex-col">
@@ -518,7 +501,6 @@
             `).join('');
         }
 
-        // --- UTILIDADES ---
         function generarMenuCategorias() {
             const nav = document.getElementById('nav-categorias');
             nav.innerHTML = ''; 
@@ -596,11 +578,6 @@
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
             
-            let specsHTML = "";
-            if (p.specs && p.specs.length > 2) {
-                specsHTML = `<div class="bg-gray-50 p-6 rounded-2xl mb-8 border border-gray-100"><h3 class="font-bold mb-3 text-xs uppercase text-gray-400 tracking-wider">Detalles</h3><p class="text-sm text-gray-600 leading-relaxed">${p.specs}</p></div>`;
-            }
-            
             const btnState = p.disponible ? '' : 'disabled class="opacity-50 cursor-not-allowed bg-gray-300"';
             const btnTxt = p.disponible ? 'Agregar al Pedido' : 'Agotado';
             const action = p.disponible ? `addToCart(${p.id}); closeProductModal()` : '';
@@ -617,7 +594,6 @@
                         <span class="text-beige font-bold uppercase tracking-widest mb-2 text-xs">${p.cat}</span>
                         <h1 class="text-2xl md:text-4xl font-black text-gray-900 mb-6 leading-tight">${p.nombre}</h1>
                         <p class="text-lg text-gray-600 leading-relaxed mb-8 font-medium">${p.desc}</p>
-                        ${specsHTML}
                         <div class="fixed bottom-0 left-0 w-full bg-white p-4 border-t border-gray-100 lg:static lg:bg-transparent lg:p-0 lg:border-none flex items-center justify-between gap-4 z-50">
                             <div class="flex flex-col lg:block">
                                 <span class="text-xs text-gray-400 font-bold uppercase lg:hidden">Total</span>
