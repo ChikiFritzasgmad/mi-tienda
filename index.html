@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="icon" type="image/webp" href="imagenes/logo.webp">
-    
+
     <title>Papajose SPA | Comercializadora</title>
     <meta name="description" content="Comercializadora de artículos variados. Envíos a todo Chile. Compra segura y trato directo.">
     <meta property="og:title" content="Papajose SPA | Catálogo Online">
@@ -46,15 +46,15 @@
             .slider-card { flex: 0 0 85%; scroll-snap-align: center; }
             body { padding-bottom: 120px; } 
             
-            /* BUSCADOR PEGAJOSO MÓVIL (CORREGIDO) */
+            /* BUSCADOR PEGAJOSO MÓVIL */
             .sticky-search-container {
                 position: sticky;
-                top: 80px; /* Altura del header */
-                z-index: 40; /* Debajo del header (50) pero encima del contenido */
+                top: 80px;
+                z-index: 40;
                 background-color: rgba(255, 255, 255, 0.95);
                 backdrop-filter: blur(8px);
                 padding: 10px 16px 15px 16px;
-                margin-left: -16px; /* Compensar padding del main */
+                margin-left: -16px; 
                 margin-right: -16px;
                 margin-bottom: 20px;
                 border-bottom: 1px solid #f3f4f6;
@@ -84,6 +84,9 @@
 
         /* TRANSICIONES SIDEBARS */
         #cart-sidebar, #left-sidebar { will-change: transform; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+
+        /* Transición suave para la barra sticky */
+        #mobile-sticky-bar { transition: transform 0.3s ease; }
 
     </style>
 </head>
@@ -153,7 +156,7 @@
             <div class="relative z-10 max-w-4xl mx-auto text-center">
                 <div class="flex justify-center mb-6">
                     <div class="w-20 h-20 rounded-full bg-white p-1 shadow-lg flex items-center justify-center">
-                        <img src="imagenes/logo.webp" class="w-full h-full rounded-full object-cover" alt="Logo" onerror="this.style.display='none'">
+                        <img src="imagenes/logo.webp" class="w-full h-full rounded-full object-cover" alt="Logo Hero" onerror="this.style.display='none'">
                     </div>
                 </div>
 
@@ -249,7 +252,7 @@
     <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[160] shadow-2xl transform translate-x-full flex flex-col h-full">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
             <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
-            <button onclick="forceCloseCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
+            <button onclick="toggleCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
         </div>
         
         <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
@@ -315,6 +318,8 @@
 
     <script>
         const WHATSAPP_NUM = "56936416743"; 
+        
+        // CACHE BUSTER
         const CSV_URL = "productos.csv?v=" + new Date().getTime(); 
         
         let db = [];
@@ -369,6 +374,7 @@
             });
         }
 
+        /* --- LÓGICA DEL CARRITO --- */
         function addToCart(id) {
             const p = db.find(x => x.id === id);
             if (!p) return;
@@ -458,12 +464,11 @@
                     </div>
                 `).join('');
                 
-                if(window.innerWidth < 1024) {
-                    const sidebar = document.getElementById('cart-sidebar');
-                    if(sidebar.classList.contains('translate-x-full')) {
-                        stickyBar.classList.remove('hidden');
-                        stickyBar.classList.remove('translate-y-full');
-                    }
+                // Mostrar sticky bar si no está el carrito abierto (y hay productos)
+                const sidebar = document.getElementById('cart-sidebar');
+                if(window.innerWidth < 1024 && sidebar.classList.contains('translate-x-full')) {
+                    stickyBar.classList.remove('hidden');
+                    stickyBar.classList.remove('translate-y-full');
                 }
                 
                 if(window.innerWidth >= 1024) floatingBtn.classList.remove('hidden');
@@ -664,7 +669,8 @@
                 sidebar.classList.add('translate-x-full');
                 overlay.classList.remove('open');
                 document.body.classList.remove('locked');
-                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full'); // Mostrar sticky
+                // MOSTRAR STICKY BAR AL CERRAR (Si hay productos)
+                if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
             }
         }
         
@@ -678,10 +684,11 @@
             
             // Si el menú se abre, escondemos la barra sticky
             if (!sidebar.classList.contains('-translate-x-full')) {
-                document.body.classList.add('locked'); // Bloqueamos el scroll
+                document.body.classList.add('locked'); 
                 if(window.innerWidth < 1024) stickyBar.classList.add('translate-y-full');
             } else {
-                document.body.classList.remove('locked'); // Desbloqueamos
+                document.body.classList.remove('locked');
+                // Si hay productos y cerramos el menú, reaparece la barra sticky
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
             }
         }
@@ -695,7 +702,14 @@
             sidebar.classList.add('translate-x-full');
             overlay.classList.remove('open');
             document.body.classList.remove('locked');
-            stickyBar.classList.add('hidden');
+            
+            // IMPORTANTE: SI FORZAMOS CIERRE PORQUE ESTÁ VACÍO, ESCONDEMOS LA BARRA
+            // SI CERRAMOS CON LA X Y HAY PRODUCTOS, LA MOSTRAMOS
+            if(cart.length === 0) {
+                stickyBar.classList.add('hidden');
+            } else if (window.innerWidth < 1024) {
+                stickyBar.classList.remove('translate-y-full');
+            }
         }
 
         function openProduct(id) {
@@ -758,4 +772,3 @@
     </script>
 </body>
 </html>
-
