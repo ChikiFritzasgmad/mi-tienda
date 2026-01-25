@@ -22,7 +22,6 @@
     <meta property="og:url" content="https://comercializadora.papajose.cl">
     <meta property="og:type" content="website">
 
-    <!-- Schema markup para SEO -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -172,7 +171,6 @@
                         class="lg:hidden text-2xl text-beige hover:text-black transition"><i class="fa fa-bars"></i></button>
             </div>
             
-            <!-- Logo/Título clickeable para resetear -->
             <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none z-30">
                 <div onclick="resetAndScrollToTop()" class="pointer-events-auto inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full border border-gray-50 shadow-sm cursor-pointer hover:bg-gray-50 transition-all active:scale-95">
                     <img src="imagenes/logo.webp" class="w-8 h-8 rounded-full object-cover bg-white shadow-sm" alt="Logo Papajose SPA" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%23D2B48C%22/%3E%3Ctext x=%2216%22 y=%2216%22 font-family=%22Arial%22 font-size=%2210%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22%3EPJ%3C/text%3E%3C/svg%3E'">
@@ -380,7 +378,6 @@
                 <span>Total Final</span> 
                 <span id="cart-total">$0</span>
             </div>
-            <!-- Botón modificado para limpiar carrito -->
             <button onclick="enviarPedidoYLimpiar()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg flex items-center justify-center gap-3 text-sm">
                 Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>
             </button>
@@ -400,9 +397,8 @@
         <span id="desktop-floating-total">$0</span>
     </button>
 
-    <!-- Modal de producto más pequeño en desktop -->
-    <div id="product-modal" class="fixed inset-0 z-[200] bg-black bg-opacity-50 hidden items-center justify-center p-4">
-        <div class="bg-white product-modal-desktop w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col rounded-2xl shadow-2xl">
+    <div id="product-modal" onclick="if(event.target === this) closeProductModal()" class="fixed inset-0 z-[200] bg-black bg-opacity-50 hidden items-center justify-center p-4">
+        <div class="bg-white product-modal-desktop w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col rounded-2xl shadow-2xl relative">
             <button onclick="closeProductModal()" class="absolute top-4 right-4 z-50 bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-lg hover:bg-red-100 hover:text-red-500 transition">✕</button>
             <div id="modal-content" class="overflow-y-auto flex-1"></div>
         </div>
