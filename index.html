@@ -136,7 +136,7 @@
         img.lazy-load { opacity: 0; transition: opacity 0.3s; }
         img:not(.lazy-load) { opacity: 1; }
 
-        /* Modal de producto en desktop - MÁS PEQUEÑO */
+        /* MEJORA 2: Modal de producto en desktop - CON CLICK OUTSIDE */
         @media (min-width: 768px) {
             .product-modal-desktop {
                 max-width: 800px;
@@ -145,6 +145,47 @@
                 border-radius: 24px;
                 overflow: hidden;
                 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                position: relative;
+            }
+            
+            /* Para permitir click fuera del modal en desktop */
+            #product-modal {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+            }
+            
+            #product-modal .modal-container {
+                cursor: auto;
+            }
+        }
+        
+        /* MEJORA 2: Modal de producto en mobile - BOTÓN FIJO */
+        @media (max-width: 767px) {
+            .product-modal-mobile {
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                overflow: hidden;
+            }
+            
+            .product-modal-mobile .modal-content-scrollable {
+                flex: 1;
+                overflow-y: auto;
+                padding-bottom: 80px; /* Espacio para el botón fijo */
+            }
+            
+            .product-modal-mobile .modal-fixed-button {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 16px;
+                border-top: 1px solid #e5e7eb;
+                box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+                z-index: 10;
             }
         }
 
@@ -152,11 +193,11 @@
         html {
             scroll-behavior: smooth;
         }
-
-        /* Placeholder SVG para imágenes */
-        .img-placeholder {
-            background: linear-gradient(45deg, #f0f0f0 25%, #e0e0e0 25%, #e0e0e0 50%, #f0f0f0 50%, #f0f0f0 75%, #e0e0e0 75%);
-            background-size: 20px 20px;
+        
+        /* Clase para overlay del modal de producto */
+        .product-modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
         }
 
     </style>
@@ -172,10 +213,10 @@
                         class="lg:hidden text-2xl text-beige hover:text-black transition"><i class="fa fa-bars"></i></button>
             </div>
             
-            <!-- Logo/Título clickeable para resetear -->
+            <!-- MEJORA 3: Logo/Título clickeable para resetear -->
             <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none z-30">
                 <div onclick="resetAndScrollToTop()" class="pointer-events-auto inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full border border-gray-50 shadow-sm cursor-pointer hover:bg-gray-50 transition-all active:scale-95">
-                    <img src="imagenes/logo.webp" class="w-8 h-8 rounded-full object-cover bg-white shadow-sm" alt="Logo Papajose SPA" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%23D2B48C%22/%3E%3Ctext x=%2216%22 y=%2216%22 font-family=%22Arial%22 font-size=%2210%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22%3EPJ%3C/text%3E%3C/svg%3E'">
+                    <img src="imagenes/logo.webp" class="w-8 h-8 rounded-full object-cover bg-white shadow-sm" alt="Logo Papajose SPA" onerror="this.style.display='none'">
                     <h1 class="text-lg md:text-2xl font-black tracking-widest text-gray-800 uppercase whitespace-nowrap">Papajose <span class="text-beige">SPA</span></h1>
                 </div>
             </div>
@@ -237,7 +278,7 @@
                 <div class="text-center mb-8">
                     <div class="flex justify-center mb-4">
                         <div class="w-20 h-20 rounded-full bg-white p-1 shadow-lg flex items-center justify-center">
-                            <img src="imagenes/logo.webp" class="w-full h-full rounded-full object-cover" alt="Logo Hero" onerror="this.onerror=null; this.classList.add('img-placeholder')">
+                            <img src="imagenes/logo.webp" class="w-full h-full rounded-full object-cover" alt="Logo Hero" onerror="this.style.display='none'">
                         </div>
                     </div>
                     <span class="inline-block py-1.5 px-4 rounded-full bg-black text-white font-bold text-[10px] md:text-xs tracking-widest uppercase mb-4 shadow-sm">Comercializadora Online</span>
@@ -380,7 +421,7 @@
                 <span>Total Final</span> 
                 <span id="cart-total">$0</span>
             </div>
-            <!-- Botón modificado para limpiar carrito -->
+            <!-- MEJORA 1: Botón modificado para limpiar carrito -->
             <button onclick="enviarPedidoYLimpiar()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg flex items-center justify-center gap-3 text-sm">
                 Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>
             </button>
@@ -400,11 +441,20 @@
         <span id="desktop-floating-total">$0</span>
     </button>
 
-    <!-- Modal de producto más pequeño en desktop -->
-    <div id="product-modal" class="fixed inset-0 z-[200] bg-black bg-opacity-50 hidden items-center justify-center p-4">
-        <div class="bg-white product-modal-desktop w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col rounded-2xl shadow-2xl">
-            <button onclick="closeProductModal()" class="absolute top-4 right-4 z-50 bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-lg hover:bg-red-100 hover:text-red-500 transition">✕</button>
-            <div id="modal-content" class="overflow-y-auto flex-1"></div>
+    <!-- MEJORA 2: Modal de producto con mejoras -->
+    <div id="product-modal" class="product-modal-overlay fixed inset-0 z-[200] hidden transition-opacity duration-300">
+        <!-- Contenedor del modal que previene el cierre al hacer click dentro -->
+        <div class="modal-container h-full flex items-center justify-center p-4" onclick="event.stopPropagation()">
+            <div class="bg-white product-modal-desktop w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col rounded-2xl shadow-2xl relative product-modal-mobile">
+                <button onclick="closeProductModal()" class="absolute top-4 right-4 z-50 bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-lg hover:bg-red-100 hover:text-red-500 transition">✕</button>
+                <div class="modal-content-scrollable">
+                    <div id="modal-content" class="p-6 md:p-8"></div>
+                </div>
+                <!-- Botón fijo para móviles (MEJORA 2) -->
+                <div class="modal-fixed-button hidden lg:hidden">
+                    <div id="modal-fixed-button-content"></div>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -432,9 +482,6 @@
         let csvCache = null;
         let csvLastLoad = 0;
 
-        // SVG placeholder para imágenes fallidas
-        const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESin Foto%3C/text%3E%3C/svg%3E";
-
         // Historial para navegación
         window.addEventListener('popstate', function(event) {
             const modal = document.getElementById('product-modal');
@@ -443,8 +490,7 @@
             const stickyBar = document.getElementById('mobile-sticky-bar');
 
             if (!modal.classList.contains('hidden')) {
-                modal.classList.add('hidden');
-                document.body.classList.remove('locked');
+                closeProductModal();
             }
 
             if (cartSidebar.classList.contains('translate-x-0')) {
@@ -463,12 +509,28 @@
             cargarProductosDesdeCSV(); 
             updateCartUI();
             initSwipeGestures();
+            // MEJORA 2: Event listener para cerrar modal al hacer click fuera
+            setupModalCloseOnOutsideClick();
         });
+
+        // MEJORA 2: Configurar cierre del modal al hacer click fuera
+        function setupModalCloseOnOutsideClick() {
+            const modal = document.getElementById('product-modal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    // Si el click es en el overlay (no en el contenedor del modal), cerrar
+                    if (e.target === modal) {
+                        closeProductModal();
+                    }
+                });
+            }
+        }
 
         // MEJORA 3: Función para resetear y hacer scroll
         function resetAndScrollToTop() {
             // Resetear filtros
-            filtrar('todas', document.getElementById('btn-todas'));
+            const btnTodas = document.getElementById('btn-todas');
+            if (btnTodas) filtrar('todas', btnTodas);
             
             // Resetear búsqueda
             document.querySelectorAll('input[type="text"]').forEach(input => {
@@ -477,7 +539,9 @@
             
             // Resetear página
             currentPage = 1;
-            renderGrid(currentFilteredList);
+            if (currentFilteredList.length > 0) {
+                renderGrid(currentFilteredList);
+            }
             
             // Scroll suave al inicio
             window.scrollTo({
@@ -530,30 +594,13 @@
                     let rawPrice = fila['precio'] ? fila['precio'].toString().replace(/[^0-9]/g, '') : "0";
                     let rawStock = (fila['stock'] || '').toString().toLowerCase().trim();
                     
-                    // MEJOR MANEJO DE URLS WEBP
-                    let imagenUrl = fila['foto'] || '';
-                    let imgFinal = PLACEHOLDER_SVG;
-                    
-                    if (imagenUrl && imagenUrl.trim() !== '') {
-                        imagenUrl = imagenUrl.trim();
-                        // Verificar si es una URL válida
-                        if (imagenUrl.startsWith('http://') || imagenUrl.startsWith('https://') || 
-                            imagenUrl.startsWith('//') || imagenUrl.startsWith('/')) {
-                            imgFinal = imagenUrl;
-                        } else if (imagenUrl.includes('.webp') || imagenUrl.includes('.jpg') || 
-                                  imagenUrl.includes('.jpeg') || imagenUrl.includes('.png')) {
-                            // Si tiene extensión de imagen, asumir que es relativa
-                            imgFinal = imagenUrl;
-                        }
-                    }
-                    
                     return {
                         id: index + 1,
                         nombre: sanitize(fila['productos']) || "Sin Nombre",
                         precio: parseInt(rawPrice) || 0,
                         cat: sanitize(fila['categoria']) || "Varios",
                         desc: sanitize(fila['descripcion']) || "",
-                        img: imgFinal,
+                        img: fila['foto'] || "https://via.placeholder.com/400x400?text=Sin+Foto",
                         disponible: !['0', 'no', 'false', 'agotado'].includes(rawStock)
                     };
                 }).filter(p => p.nombre !== "Sin Nombre");
@@ -632,12 +679,7 @@
             container.innerHTML = destacados.map(p => `
                 <div class="slider-card bg-white rounded-2xl border border-gray-200 overflow-hidden relative h-full flex flex-col shadow-sm cursor-pointer" onclick="openProduct(${p.id})">
                     <div class="relative h-48 md:h-56 bg-white p-2">
-                        <img data-src="${p.img}" 
-                             class="lazy-load w-full h-full object-contain" 
-                             alt="${p.nombre}"
-                             loading="lazy"
-                             decoding="async"
-                             onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
+                        <img data-src="${p.img}" class="lazy-load w-full h-full object-contain" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
                         <div class="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-[10px] font-bold uppercase">Destacado</div>
                     </div>
                     <div class="p-3 flex flex-col flex-1">
@@ -793,10 +835,7 @@
             } else {
                 list.innerHTML = cart.map((p) => `
                     <div class="flex gap-4 items-center bg-gray-50 p-3 rounded-xl border border-gray-100 hover:border-beige/20 transition-all">
-                        <img src="${p.img}" 
-                             class="w-14 h-14 rounded object-contain bg-white border" 
-                             alt="${p.nombre}"
-                             onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
+                        <img src="${p.img}" class="w-14 h-14 rounded object-contain bg-white border" onerror="this.src='https://via.placeholder.com/100'">
                         <div class="flex-1 min-w-0">
                             <h4 class="font-bold text-xs text-gray-800 truncate">${p.nombre}</h4>
                             <p class="text-xs font-black text-gray-900">$${(p.precio * p.qty).toLocaleString()}</p>
@@ -885,15 +924,7 @@
                 forceCloseCart();
                 mostrarToast("Pedido enviado. Carrito limpiado.", "success");
                 trackEvent('begin_checkout', { items: cart.length, total: totalText });
-            }, 500); // Pequeño delay para asegurar que WhatsApp se abrió
-            
-            // Fallback si el popup está bloqueado
-            if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed == 'undefined') {
-                // Copiar mensaje al portapapeles como fallback
-                navigator.clipboard.writeText(msg).then(() => {
-                    mostrarToast("Mensaje copiado al portapapeles. Pégalo en WhatsApp.", "info");
-                });
-            }
+            }, 500);
         }
 
         function cardHTML(p) {
@@ -905,12 +936,7 @@
             return `
                 <div class="bg-white rounded-2xl border border-gray-100 hover:border-beige/50 transition-all duration-300 group hover:shadow-lg relative flex flex-col h-full overflow-hidden shadow-sm">
                     <div class="relative h-48 md:h-56 bg-white p-2 cursor-pointer" onclick="openProduct(${p.id})">
-                        <img data-src="${p.img}" 
-                             class="lazy-load w-full h-full object-contain group-hover:scale-105 transition duration-500 ${imageClass}" 
-                             alt="${p.nombre}"
-                             loading="lazy"
-                             decoding="async"
-                             onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
+                        <img data-src="${p.img}" class="lazy-load w-full h-full object-contain group-hover:scale-105 transition duration-500 ${imageClass}" onerror="this.src='https://via.placeholder.com/400?text=Sin+Foto'">
                         <span class="absolute bottom-0 left-0 bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-600 uppercase tracking-wider rounded-tr-lg">${p.cat.substring(0,15)}</span>
                         ${!p.disponible ? '<span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-[10px] font-bold rounded">AGOTADO</span>' : ''}
                     </div>
@@ -1001,7 +1027,7 @@
             }
         }
 
-        // MEJORA 2: Modal de producto más pequeño
+        // MEJORA 2: Modal de producto mejorado
         function openProduct(id) {
             history.pushState({modal: 'product'}, null, "");
             const p = db.find(x => x.id === id);
@@ -1011,44 +1037,76 @@
             const btnTxt = p.disponible ? 'Agregar al Pedido' : 'Agotado';
             const action = p.disponible ? `addToCart(${p.id}); closeProductModal()` : '';
 
-            document.getElementById('modal-content').innerHTML = `
-                <div class="p-6 md:p-8">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="flex items-center justify-center bg-gray-50 rounded-2xl p-4 md:p-8">
-                            <img src="${p.img}" 
-                                 class="max-h-72 w-full object-contain ${p.disponible ? '' : 'no-stock'}" 
-                                 alt="${p.nombre}"
-                                 onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
-                            ${!p.disponible ? '<div class="absolute inset-0 flex items-center justify-center bg-black/10"><span class="bg-red-500 text-white px-4 py-2 font-bold rounded-lg">SIN STOCK</span></div>' : ''}
-                        </div>
-                        <div class="flex flex-col justify-center">
-                            <span class="text-beige font-bold uppercase tracking-widest mb-2 text-xs">${p.cat}</span>
-                            <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-4 leading-tight">${p.nombre}</h1>
-                            <p class="text-gray-600 leading-relaxed mb-6 font-medium">${p.desc}</p>
-                            <div class="mt-auto pt-6 border-t border-gray-200">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <span class="text-sm text-gray-500 font-bold uppercase">Precio</span>
-                                        <div class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</div>
-                                    </div>
-                                    <button onclick="${action}" ${btnState} 
-                                            class="bg-black text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm">
-                                        ${btnTxt}
-                                    </button>
+            // Contenido para desktop
+            const desktopContent = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="flex items-center justify-center bg-gray-50 rounded-2xl p-4 md:p-8">
+                        <img src="${p.img}" class="max-h-72 w-full object-contain ${p.disponible ? '' : 'no-stock'}" onerror="this.src='https://via.placeholder.com/600?text=Sin+Foto'">
+                        ${!p.disponible ? '<div class="absolute inset-0 flex items-center justify-center bg-black/10"><span class="bg-red-500 text-white px-4 py-2 font-bold rounded-lg">SIN STOCK</span></div>' : ''}
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <span class="text-beige font-bold uppercase tracking-widest mb-2 text-xs">${p.cat}</span>
+                        <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-4 leading-tight">${p.nombre}</h1>
+                        <p class="text-gray-600 leading-relaxed mb-6 font-medium">${p.desc}</p>
+                        <div class="mt-auto pt-6 border-t border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-sm text-gray-500 font-bold uppercase">Precio</span>
+                                    <div class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</div>
                                 </div>
+                                <button onclick="${action}" ${btnState} 
+                                        class="bg-black text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm">
+                                    ${btnTxt}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>`;
+
+            // Contenido para el botón fijo en móviles
+            const mobileFixedButtonContent = `
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-sm text-gray-500 font-bold uppercase">Precio</span>
+                        <div class="text-2xl font-black text-gray-900">$${p.precio.toLocaleString()}</div>
+                    </div>
+                    <button onclick="${action}" ${btnState} 
+                            class="bg-black text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm">
+                        ${btnTxt}
+                    </button>
+                </div>`;
+
+            // Actualizar contenido
+            document.getElementById('modal-content').innerHTML = desktopContent;
+            document.getElementById('modal-fixed-button-content').innerHTML = mobileFixedButtonContent;
+            
+            // Mostrar u ocultar botón fijo según dispositivo
+            const fixedButtonContainer = document.querySelector('.modal-fixed-button');
+            if (window.innerWidth < 1024) {
+                fixedButtonContainer.classList.remove('hidden');
+            } else {
+                fixedButtonContainer.classList.add('hidden');
+            }
             
             modal.classList.remove('hidden');
             document.body.classList.add('locked');
+            
+            // Forzar reflow para activar transición
+            setTimeout(() => {
+                modal.style.opacity = '1';
+            }, 10);
         }
 
         function closeProductModal() { 
             const modal = document.getElementById('product-modal');
-            modal.classList.add('hidden');
-            document.body.classList.remove('locked');
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.classList.remove('locked');
+                // Limpiar contenido para evitar fugas de memoria
+                document.getElementById('modal-content').innerHTML = '';
+                document.getElementById('modal-fixed-button-content').innerHTML = '';
+            }, 300);
             history.back();
         }
 
@@ -1145,8 +1203,7 @@
         // Error handling mejorado para imágenes
         document.addEventListener('error', function(e) {
             if (e.target.tagName === 'IMG') {
-                e.target.src = PLACEHOLDER_SVG;
-                e.target.classList.add('img-placeholder');
+                e.target.src = 'https://via.placeholder.com/400?text=Imagen+No+Disponible';
                 e.target.onerror = null; // Prevenir loops infinitos
             }
         }, true);
@@ -1159,20 +1216,17 @@
             }
         });
 
-        // Detectar soporte WebP (opcional, para futuras mejoras)
-        async function checkWebPSupport() {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => resolve(true);
-                img.onerror = () => resolve(false);
-                img.src = 'data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==';
-            });
-        }
-
-        // Inicializar detección WebP
-        checkWebPSupport().then(supported => {
-            if (!supported) {
-                console.log('Navegador no soporta WebP - Considera usar formatos alternativos en el CSV');
+        // MEJORA 2: Ajustar botón fijo en resize
+        window.addEventListener('resize', function() {
+            const modal = document.getElementById('product-modal');
+            const fixedButtonContainer = document.querySelector('.modal-fixed-button');
+            
+            if (!modal.classList.contains('hidden') && fixedButtonContainer) {
+                if (window.innerWidth < 1024) {
+                    fixedButtonContainer.classList.remove('hidden');
+                } else {
+                    fixedButtonContainer.classList.add('hidden');
+                }
             }
         });
 
