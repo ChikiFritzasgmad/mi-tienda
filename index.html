@@ -56,7 +56,6 @@
         body { 
             font-family: 'Segoe UI', sans-serif; 
             color: var(--dark-text);
-            /* Fondo base */
             background-color: #f0f0f0;
             background-image: url('imagenes/fondo.webp');
             background-size: cover;
@@ -75,7 +74,6 @@
         @media (max-width: 1023px) {
             body { background-attachment: scroll; } 
             
-            /* SLIDER MÓVIL ACELERADO (Para el banner) */
             .mobile-slider { 
                 display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; padding-bottom: 1rem; scrollbar-width: none; 
                 -webkit-overflow-scrolling: touch;
@@ -83,7 +81,7 @@
             .mobile-slider::-webkit-scrollbar { display: none; }
             
             .slider-card { 
-                flex: 0 0 85%; /* Un poco más ancho para que se vea bien el banner */
+                flex: 0 0 85%; 
                 scroll-snap-align: center;
                 transform: translateZ(0); will-change: transform; 
             }
@@ -97,7 +95,7 @@
                 border-bottom: 1px solid #f3f4f6; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             }
 
-            input, select, textarea { font-size: 16px !important; } /* Evita zoom en iOS */
+            input, select, textarea { font-size: 16px !important; }
             button, a { touch-action: manipulation; }
         }
 
@@ -131,10 +129,6 @@
 
         #cart-sidebar, #left-sidebar { will-change: transform; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
         #mobile-sticky-bar { transition: transform 0.3s ease; }
-
-        /* Lazy Load */
-        img.lazy-load { opacity: 0; transition: opacity 0.3s; }
-        img:not(.lazy-load) { opacity: 1; }
 
         /* Modal Desktop */
         @media (min-width: 768px) {
@@ -397,7 +391,7 @@
 
     <script>
         const WHATSAPP_NUM = "56936416743"; 
-        const DB_URL = "db.json";
+        const DB_URL = "productos_1.json"; // ACTUALIZADO PARA TU GITHUB
         
         let db = [];
         let cart = JSON.parse(localStorage.getItem('papajose_cart')) || [];
@@ -411,7 +405,6 @@
         
         const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESin Foto%3C/text%3E%3C/svg%3E";
 
-        // Manejo del botón atrás para cerrar modales
         window.addEventListener('popstate', function(event) {
             const modal = document.getElementById('product-modal');
             const cartSidebar = document.getElementById('cart-sidebar');
@@ -422,11 +415,7 @@
                 modal.classList.add('hidden');
                 document.body.classList.remove('locked');
             }
-
-            if (cartSidebar.classList.contains('translate-x-0')) {
-                forceCloseCart(); 
-            }
-
+            if (cartSidebar.classList.contains('translate-x-0')) forceCloseCart(); 
             if (!leftSidebar.classList.contains('-translate-x-full')) {
                 leftSidebar.classList.add('-translate-x-full');
                 document.getElementById('menu-overlay').classList.remove('open');
@@ -442,24 +431,21 @@
         });
 
         function resetAndScrollToTop() {
-            filtrar('todas', document.getElementById('btn-todas'));
-            document.querySelectorAll('input[type="text"]').forEach(input => {
-                input.value = '';
-            });
-            currentPage = 1;
-            renderGrid(currentFilteredList);
+            // Primero subimos
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            mostrarToast("Catálogo restablecido", "info");
+            // Luego filtramos (si el botón existe)
+            const btnTodas = document.getElementById('btn-todas');
+            if(btnTodas) filtrar('todas', btnTodas);
+            
+            document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+            mostrarToast("Inicio", "info");
         }
 
         async function cargarBaseDatos() {
             try {
-                // Añadimos timestamp para evitar caché agresivo
                 const response = await fetch(`${DB_URL}?v=${Date.now()}`);
-                if (!response.ok) throw new Error("Error al cargar db.json");
-                
+                if (!response.ok) throw new Error("Error al cargar productos");
                 db = await response.json();
-                
                 procesarBaseDatos();
             } catch (error) {
                 console.error("Error cargando productos:", error);
@@ -473,21 +459,14 @@
                 mostrarToast("No hay productos disponibles", "info");
                 return;
             }
-
-            // Filtrar productos válidos (que tengan al menos nombre)
             db = db.filter(p => p.nombre && p.nombre !== "Sin Nombre");
-
             generarMenuCategorias();
             document.getElementById('loading-msg').classList.add('hidden');
             document.getElementById('seccion-catalogo').classList.remove('hidden');
             
-            // Inicialización
             currentFilteredList = db;
             renderGrid(currentFilteredList);
             renderDestacados(db);
-            initLazyLoad();
-            
-            console.log("Productos cargados:", db.length);
         }
 
         function changePage(direction) {
@@ -496,7 +475,6 @@
             if (newPage >= 1 && newPage <= totalPages) {
                 currentPage = newPage;
                 renderGrid(currentFilteredList);
-                // Scroll al inicio del catálogo
                 window.scrollTo({
                     top: document.getElementById('seccion-catalogo').getBoundingClientRect().top + window.pageYOffset - 120, 
                     behavior: 'smooth'
@@ -507,10 +485,7 @@
         function renderPaginationControls() {
             const controls = document.getElementById('pagination-controls');
             const totalPages = Math.ceil(currentFilteredList.length / itemsPerPage);
-            if (totalPages <= 1) { 
-                controls.classList.add('hidden'); 
-                return; 
-            }
+            if (totalPages <= 1) { controls.classList.add('hidden'); return; }
             controls.classList.remove('hidden');
             document.getElementById('page-indicator').innerText = `Pág ${currentPage} de ${totalPages}`;
             document.getElementById('btn-prev').disabled = currentPage === 1;
@@ -523,10 +498,7 @@
             cantidad.innerText = lista.length;
             
             if(lista.length === 0) { 
-                contenedor.innerHTML = `
-                    <div class="col-span-full py-10 text-center text-gray-500 bg-white/80 rounded-xl p-6">
-                        <p>No se encontraron productos.</p>
-                    </div>`; 
+                contenedor.innerHTML = `<div class="col-span-full py-10 text-center text-gray-500 bg-white/80 rounded-xl p-6"><p>No se encontraron productos.</p></div>`; 
                 document.getElementById('pagination-controls').classList.add('hidden');
                 return; 
             }
@@ -535,27 +507,24 @@
             const end = start + itemsPerPage;
             contenedor.innerHTML = lista.slice(start, end).map(p => cardHTML(p)).join(''); 
             renderPaginationControls();
-            initLazyLoad();
         }
 
         function renderDestacados(lista) {
-            // Filtrar donde destacado sea 1
             const destacados = lista.filter(p => p.destacado === 1 && p.disponible).slice(0, 6); 
             const container = document.getElementById('hero-destacados-container');
             const section = document.getElementById('hero-section');
             
             if (destacados.length === 0) {
-                section.classList.add('hidden'); // Ocultar sección si no hay destacados
+                section.classList.add('hidden'); 
                 return;
             }
-            
-            section.classList.remove('hidden'); // Mostrar sección
+            section.classList.remove('hidden'); 
             
             container.innerHTML = destacados.map(p => `
                 <div class="slider-card bg-white rounded-2xl border border-gray-200 overflow-hidden relative h-full flex flex-col shadow-sm cursor-pointer hover:shadow-md transition-all" onclick="openProduct(${p.id})">
                     <div class="relative h-48 md:h-56 bg-white p-2">
-                        <img data-src="${p.img}" 
-                             class="lazy-load w-full h-full object-contain" 
+                        <img src="${p.img}" 
+                             class="w-full h-full object-contain" 
                              alt="${p.nombre}"
                              loading="lazy"
                              onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
@@ -567,8 +536,6 @@
                     </div>
                 </div>
             `).join('');
-            
-            initLazyLoad();
         }
 
         let lastSearch = '';
@@ -578,10 +545,7 @@
             clearTimeout(searchTimeout); 
             
             if (query.length > 2) {
-                document.getElementById('grid-productos').innerHTML = 
-                    '<div class="col-span-full py-10 text-center">' +
-                    '<i class="fa fa-spinner fa-spin text-beige text-2xl mb-2"></i>' +
-                    '<p class="text-gray-600">Buscando...</p></div>';
+                document.getElementById('grid-productos').innerHTML = '<div class="col-span-full py-10 text-center"><i class="fa fa-spinner fa-spin text-beige text-2xl mb-2"></i><p class="text-gray-600">Buscando...</p></div>';
             }
             
             searchTimeout = setTimeout(() => {
@@ -590,17 +554,13 @@
                     p.nombre.toLowerCase().includes(texto) || 
                     p.cat.toLowerCase().includes(texto) ||
                     p.desc.toLowerCase().includes(texto) ||
-                    (p.sku && p.sku.toLowerCase().includes(texto)) // Búsqueda por SKU
+                    (p.sku && p.sku.toLowerCase().includes(texto))
                 );
                 currentPage = 1; 
                 renderGrid(currentFilteredList);
-                
                 if(query.length > 0) {
                     const section = document.getElementById('seccion-catalogo');
-                    window.scrollTo({
-                        top: section.offsetTop - 100,
-                        behavior: 'smooth'
-                    });
+                    window.scrollTo({ top: section.offsetTop - 100, behavior: 'smooth' });
                 }
             }, 300); 
         }
@@ -609,60 +569,32 @@
             if(window.innerWidth < 1024 && !document.getElementById('left-sidebar').classList.contains('-translate-x-full')) {
                 toggleMobileMenu();
             }
-            
             document.querySelectorAll('#nav-categorias button').forEach(b => {
                 b.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
             });
-            
             if(btnElement) {
                 btnElement.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
             }
-            
             currentFilteredList = cat === 'todas' ? db : db.filter(p => p.cat === cat);
             document.getElementById('titulo-grid').innerText = cat === 'todas' ? 'Catálogo Completo' : cat;
             currentPage = 1;
             renderGrid(currentFilteredList);
-            
-            window.scrollTo({
-                top: document.getElementById('seccion-catalogo').getBoundingClientRect().top + window.pageYOffset - 110, 
-                behavior: 'smooth'
-            });
-        }
-
-        function trackEvent(eventName, eventData = {}) {
-            if (typeof gtag !== 'undefined') {
-                gtag('event', eventName, eventData);
-            }
+            window.scrollTo({ top: document.getElementById('seccion-catalogo').getBoundingClientRect().top + window.pageYOffset - 110, behavior: 'smooth' });
         }
 
         function addToCart(id) {
             const p = db.find(x => x.id === id);
-            if (!p || !p.disponible) {
-                mostrarToast("Producto agotado", "error");
-                return;
-            }
-            
+            if (!p || !p.disponible) { mostrarToast("Producto agotado", "error"); return; }
             let item = cart.find(i => i.id === id);
-            if (item) {
-                item.qty++;
-            } else {
-                cart.push({ ...p, qty: 1 });
-            }
-            
+            if (item) item.qty++; else cart.push({ ...p, qty: 1 });
             updateCartUI();
             mostrarToast("¡Agregado al carrito!");
-            trackEvent('add_to_cart', { product_id: id, product_name: p.nombre, price: p.precio });
-            
             const badge = document.getElementById('cart-badge');
             badge.classList.add('scale-125');
             setTimeout(() => badge.classList.remove('scale-125'), 200);
             document.getElementById('cart-icon').classList.replace('text-gray-400', 'text-beige');
-
             if (window.innerWidth >= 1024 && !hasOpenedCartAutomatically) {
-                if (document.getElementById('cart-sidebar').classList.contains('translate-x-full')) { 
-                    toggleCart(); 
-                    hasOpenedCartAutomatically = true; 
-                }
+                if (document.getElementById('cart-sidebar').classList.contains('translate-x-full')) { toggleCart(); hasOpenedCartAutomatically = true; }
             }
         }
 
@@ -670,11 +602,7 @@
             let item = cart.find(x => x.id === id);
             if(!item) return;
             item.qty += n;
-            if(item.qty <= 0) {
-                removeFromCart(id);
-            } else {
-                updateCartUI();
-            }
+            if(item.qty <= 0) removeFromCart(id); else updateCartUI();
         }
 
         function removeFromCart(id) {
@@ -687,12 +615,7 @@
         }
 
         function updateCartUI() {
-            try {
-                localStorage.setItem('papajose_cart', JSON.stringify(cart));
-            } catch (e) {
-                console.warn("No se pudo guardar en localStorage:", e);
-            }
-
+            try { localStorage.setItem('papajose_cart', JSON.stringify(cart)); } catch (e) {}
             const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
             const badge = document.getElementById('cart-badge');
             badge.innerText = totalItems;
@@ -703,21 +626,14 @@
             const floatingBtn = document.getElementById('desktop-floating-cart');
             
             if (cart.length === 0) {
-                list.innerHTML = `
-                    <div class="text-center text-gray-300 mt-20 flex flex-col items-center">
-                        <i class="fa fa-shopping-bag text-5xl mb-4 opacity-20"></i>
-                        <p class="text-sm">Tu carrito está vacío</p>
-                    </div>`;
+                list.innerHTML = `<div class="text-center text-gray-300 mt-20 flex flex-col items-center"><i class="fa fa-shopping-bag text-5xl mb-4 opacity-20"></i><p class="text-sm">Tu carrito está vacío</p></div>`;
                 stickyBar.classList.add('hidden'); 
                 floatingBtn.classList.add('hidden');
                 document.getElementById('header-total').classList.remove('opacity-100');
             } else {
                 list.innerHTML = cart.map((p) => `
                     <div class="flex gap-4 items-center bg-gray-50 p-3 rounded-xl border border-gray-100 hover:border-beige/20 transition-all">
-                        <img src="${p.img}" 
-                             class="w-14 h-14 rounded object-contain bg-white border" 
-                             alt="${p.nombre}"
-                             onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
+                        <img src="${p.img}" class="w-14 h-14 rounded object-contain bg-white border" alt="${p.nombre}" onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
                         <div class="flex-1 min-w-0">
                             <h4 class="font-bold text-xs text-gray-800 truncate">${p.nombre}</h4>
                             <p class="text-[10px] text-gray-500 mb-1">SKU: ${p.sku}</p>
@@ -730,86 +646,44 @@
                         </div>
                     </div>
                 `).join('');
-                
-                if(window.innerWidth < 1024) {
-                    if(document.getElementById('cart-sidebar').classList.contains('translate-x-full')) {
-                        stickyBar.classList.remove('hidden'); 
-                        stickyBar.classList.remove('translate-y-full');
-                    }
-                }
-                
-                if(window.innerWidth >= 1024) {
-                    floatingBtn.classList.remove('hidden');
-                }
+                if(window.innerWidth < 1024) if(document.getElementById('cart-sidebar').classList.contains('translate-x-full')) { stickyBar.classList.remove('hidden'); stickyBar.classList.remove('translate-y-full'); }
+                if(window.innerWidth >= 1024) floatingBtn.classList.remove('hidden');
             }
             calcularTotal();
         }
 
         function calcularTotal() {
             let subtotal = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
-            
             const radios = document.getElementsByName('tipo_envio');
             let tipoEnvio = "rm";
-            for(const r of radios) { 
-                if(r.checked) tipoEnvio = r.value; 
-            }
-            
+            for(const r of radios) { if(r.checked) tipoEnvio = r.value; }
             costoEnvio = (cart.length > 0 && tipoEnvio === 'rm') ? 3500 : 0; 
             let totalSidebar = subtotal + costoEnvio;
             const subtotalFmt = `$${subtotal.toLocaleString()}`;
-            
             document.getElementById('mobile-total-sticky').innerText = subtotalFmt;
             document.getElementById('desktop-floating-total').innerText = subtotalFmt;
             document.getElementById('header-total').innerText = subtotalFmt;
             document.getElementById('cart-total').innerText = `$${totalSidebar.toLocaleString()}`;
-            
-            if(cart.length > 0) {
-                document.getElementById('header-total').classList.add('opacity-100');
-            } else {
-                document.getElementById('header-total').classList.remove('opacity-100');
-            }
+            if(cart.length > 0) document.getElementById('header-total').classList.add('opacity-100'); else document.getElementById('header-total').classList.remove('opacity-100');
         }
 
         function enviarPedidoYLimpiar() {
-            if(cart.length === 0) {
-                mostrarToast("Tu carrito está vacío", "info");
-                return;
-            }
-            
+            if(cart.length === 0) { mostrarToast("Tu carrito está vacío", "info"); return; }
             const radiosEnvio = document.getElementsByName('tipo_envio');
             let tipoEnvioTexto = "Región Metropolitana ($3.500)";
-            for(const r of radiosEnvio) { 
-                if(r.checked && r.value === 'regiones') {
-                    tipoEnvioTexto = "Regiones (Por Pagar - Starken)";
-                }
-            }
-            
+            for(const r of radiosEnvio) { if(r.checked && r.value === 'regiones') tipoEnvioTexto = "Regiones (Por Pagar - Starken)"; }
             const radiosDoc = document.getElementsByName('tipo_doc');
             let tipoDocTexto = "Boleta";
-            for(const r of radiosDoc) { 
-                if(r.checked) tipoDocTexto = r.value; 
-            }
-            
+            for(const r of radiosDoc) { if(r.checked) tipoDocTexto = r.value; }
             const totalText = document.getElementById('cart-total').innerText;
             const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre}\n  [SKU: ${p.sku}] - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
-            
             const msg = `*HOLA PAPAJOSE SPA* 👋\n\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*ENVÍO:* ${tipoEnvioTexto}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia a Cuenta Empresa.`;
-            
             const whatsappWindow = window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
-            
             setTimeout(() => {
-                cart = [];
-                localStorage.removeItem('papajose_cart');
-                updateCartUI();
-                forceCloseCart();
-                mostrarToast("Pedido enviado. Carrito limpiado.", "success");
-                trackEvent('begin_checkout', { items: cart.length, total: totalText });
+                cart = []; localStorage.removeItem('papajose_cart'); updateCartUI(); forceCloseCart(); mostrarToast("Pedido enviado. Carrito limpiado.", "success");
             }, 500); 
-            
             if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed == 'undefined') {
-                navigator.clipboard.writeText(msg).then(() => {
-                    mostrarToast("Mensaje copiado. Pégalo en WhatsApp.", "info");
-                });
+                navigator.clipboard.writeText(msg).then(() => { mostrarToast("Mensaje copiado. Pégalo en WhatsApp.", "info"); });
             }
         }
 
@@ -818,15 +692,14 @@
             const btnText = p.disponible ? "Agregar" : "Agotado";
             const action = p.disponible ? `addToCart(${p.id})` : "";
             const imageClass = p.disponible ? "" : "no-stock";
-            
+            // AQUÍ ESTABA EL ERROR: Cambiamos data-src por src y quitamos lazy-load
             return `
                 <div class="bg-white rounded-2xl border border-gray-100 hover:border-beige/50 transition-all duration-300 group hover:shadow-lg relative flex flex-col h-full overflow-hidden shadow-sm">
                     <div class="relative h-48 md:h-56 bg-white p-2 cursor-pointer" onclick="openProduct(${p.id})">
-                        <img data-src="${p.img}" 
-                             class="lazy-load w-full h-full object-contain group-hover:scale-105 transition duration-500 ${imageClass}" 
+                        <img src="${p.img}" 
+                             class="w-full h-full object-contain group-hover:scale-105 transition duration-500 ${imageClass}" 
                              alt="${p.nombre}"
                              loading="lazy"
-                             decoding="async"
                              onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
                         <span class="absolute bottom-0 left-0 bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-600 uppercase tracking-wider rounded-tr-lg">${p.cat.substring(0,15)}</span>
                         ${!p.disponible ? '<span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-[10px] font-bold rounded">AGOTADO</span>' : ''}
@@ -845,14 +718,12 @@
         function generarMenuCategorias() {
             const nav = document.getElementById('nav-categorias');
             nav.innerHTML = ''; 
-            
             const btnTodas = document.createElement('button');
             btnTodas.className = "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige";
             btnTodas.id = "btn-todas";
             btnTodas.onclick = () => filtrar('todas', btnTodas);
             btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
             nav.appendChild(btnTodas);
-            
             const categoriasUnicas = [...new Set(db.map(p => p.cat))].filter(c => c && c.trim() !== "").sort();
             categoriasUnicas.forEach(cat => {
                 const btn = document.createElement('button');
@@ -868,74 +739,43 @@
             const overlay = document.getElementById('cart-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
             const isOpen = sidebar.classList.contains('translate-x-0');
-
-            if (cart.length === 0 && !isOpen) {
-                mostrarToast("Tu carrito está vacío", "info");
-                return;
-            }
-
+            if (cart.length === 0 && !isOpen) { mostrarToast("Tu carrito está vacío", "info"); return; }
             if (!isOpen) { 
                 history.pushState({modal: 'cart'}, null, "");
-                sidebar.classList.remove('translate-x-full');
-                sidebar.classList.add('translate-x-0');
-                overlay.classList.add('open');
-                document.body.classList.add('locked');
+                sidebar.classList.remove('translate-x-full'); sidebar.classList.add('translate-x-0'); overlay.classList.add('open'); document.body.classList.add('locked');
                 if(window.innerWidth < 1024) stickyBar.classList.add('hidden');
-            } else { 
-                history.back();
-            }
+            } else history.back();
         }
         
         function toggleMobileMenu() { 
             const sidebar = document.getElementById('left-sidebar');
             if (sidebar.classList.contains('-translate-x-full')) { 
-                history.pushState({modal: 'menu'}, null, "");
-                sidebar.classList.remove('-translate-x-full');
-                document.getElementById('menu-overlay').classList.add('open');
-                document.body.classList.add('locked');
-            } else { 
-                history.back(); 
-            }
+                history.pushState({modal: 'menu'}, null, ""); sidebar.classList.remove('-translate-x-full'); document.getElementById('menu-overlay').classList.add('open'); document.body.classList.add('locked');
+            } else history.back(); 
         }
 
-        function handleBackAction() { 
-            history.back(); 
-        }
+        function handleBackAction() { history.back(); }
 
         function forceCloseCart() {
             const sidebar = document.getElementById('cart-sidebar');
             const overlay = document.getElementById('cart-overlay');
             const stickyBar = document.getElementById('mobile-sticky-bar');
-            
-            sidebar.classList.remove('translate-x-0');
-            sidebar.classList.add('translate-x-full');
-            overlay.classList.remove('open');
-            document.body.classList.remove('locked');
-            
-            if(cart.length === 0) {
-                stickyBar.classList.add('hidden');
-            } else if(window.innerWidth < 1024) {
-                stickyBar.classList.remove('translate-y-full');
-            }
+            sidebar.classList.remove('translate-x-0'); sidebar.classList.add('translate-x-full'); overlay.classList.remove('open'); document.body.classList.remove('locked');
+            if(cart.length === 0) stickyBar.classList.add('hidden'); else if(window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
         }
 
         function openProduct(id) {
             history.pushState({modal: 'product'}, null, "");
             const p = db.find(x => x.id === id);
             const modal = document.getElementById('product-modal');
-            
             const btnState = p.disponible ? '' : 'disabled class="opacity-50 cursor-not-allowed bg-gray-300"';
             const btnTxt = p.disponible ? 'Agregar al Pedido' : 'Agotado';
             const action = p.disponible ? `addToCart(${p.id}); closeProductModal()` : '';
-
             document.getElementById('modal-content').innerHTML = `
                 <div class="p-6 md:p-8">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div class="flex items-center justify-center bg-gray-50 rounded-2xl p-4 md:p-8">
-                            <img src="${p.img}" 
-                                 class="max-h-72 w-full object-contain ${p.disponible ? '' : 'no-stock'}" 
-                                 alt="${p.nombre}"
-                                 onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
+                            <img src="${p.img}" class="max-h-72 w-full object-contain ${p.disponible ? '' : 'no-stock'}" alt="${p.nombre}" onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
                             ${!p.disponible ? '<div class="absolute inset-0 flex items-center justify-center bg-black/10"><span class="bg-red-500 text-white px-4 py-2 font-bold rounded-lg">SIN STOCK</span></div>' : ''}
                         </div>
                         <div class="flex flex-col justify-center">
@@ -945,53 +785,37 @@
                             <p class="text-gray-600 leading-relaxed mb-6 font-medium">${p.desc}</p>
                             <div class="mt-auto pt-6 border-t border-gray-200">
                                 <div class="flex items-center justify-between">
-                                    <div>
-                                        <span class="text-sm text-gray-500 font-bold uppercase">Precio</span>
-                                        <div class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</div>
-                                    </div>
-                                    <button onclick="${action}" ${btnState} 
-                                            class="bg-black text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm">
-                                        ${btnTxt}
-                                    </button>
+                                    <div><span class="text-sm text-gray-500 font-bold uppercase">Precio</span><div class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</div></div>
+                                    <button onclick="${action}" ${btnState} class="bg-black text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm">${btnTxt}</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>`;
-            
-            modal.classList.remove('hidden');
-            document.body.classList.add('locked');
+            modal.classList.remove('hidden'); document.body.classList.add('locked');
         }
 
-        function closeProductModal() { 
-            const modal = document.getElementById('product-modal');
-            modal.classList.add('hidden');
-            document.body.classList.remove('locked');
-            history.back();
+        function closeProductModal() { const modal = document.getElementById('product-modal'); modal.classList.add('hidden'); document.body.classList.remove('locked'); history.back(); }
+
+        function mostrarToast(msg, type = 'success') {
+            const t = document.getElementById('toast-modal');
+            const c = document.getElementById('toast-content');
+            let color = type === 'error' ? 'bg-red-500' : (type === 'info' ? 'bg-blue-500' : 'bg-green-500');
+            let icon = type === 'error' ? 'times' : (type === 'info' ? 'info' : 'check');
+            c.innerHTML = `<div class="w-6 h-6 ${color} rounded-full flex items-center justify-center text-xs text-white"><i class="fa fa-${icon}"></i></div><span class="font-bold text-sm">${msg}</span>`;
+            t.classList.remove('hidden'); setTimeout(() => t.classList.add('toast-visible'), 10);
+            setTimeout(() => { t.classList.remove('toast-visible'); setTimeout(() => t.classList.add('hidden'), 300); }, 2000);
         }
 
         function initSwipeGestures() {
-            let touchStartX = 0;
-            let touchStartY = 0;
-            
-            document.addEventListener('touchstart', function(e) {
-                touchStartX = e.changedTouches[0].screenX;
-                touchStartY = e.changedTouches[0].screenY;
-            }, {passive: true});
-            
+            let touchStartX = 0; let touchStartY = 0;
+            document.addEventListener('touchstart', function(e) { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, {passive: true});
             document.addEventListener('touchend', function(e) {
-                const touchEndX = e.changedTouches[0].screenX;
-                const touchEndY = e.changedTouches[0].screenY;
-                const diffX = touchStartX - touchEndX;
-                const diffY = Math.abs(touchStartY - touchEndY);
-                
+                const touchEndX = e.changedTouches[0].screenX; const touchEndY = e.changedTouches[0].screenY;
+                const diffX = touchStartX - touchEndX; const diffY = Math.abs(touchStartY - touchEndY);
                 if (diffY < 30 && Math.abs(diffX) > 50) {
-                    if (diffX > 0 && document.getElementById('cart-sidebar').classList.contains('translate-x-0')) {
-                        forceCloseCart();
-                    }
-                    else if (diffX < 0 && !document.getElementById('left-sidebar').classList.contains('-translate-x-full')) {
-                        handleBackAction();
-                    }
+                    if (diffX > 0 && document.getElementById('cart-sidebar').classList.contains('translate-x-0')) forceCloseCart();
+                    else if (diffX < 0 && !document.getElementById('left-sidebar').classList.contains('-translate-x-full')) handleBackAction();
                 }
             }, {passive: true});
         }
