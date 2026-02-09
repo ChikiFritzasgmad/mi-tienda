@@ -431,14 +431,24 @@
         });
 
         function resetAndScrollToTop() {
-            // Primero subimos
+            // Scroll al inicio de TODO el documento
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            // Luego filtramos (si el botón existe)
-            const btnTodas = document.getElementById('btn-todas');
-            if(btnTodas) filtrar('todas', btnTodas);
             
+            // Restablecer filtro a "todas"
+            const btnTodas = document.getElementById('btn-todas');
+            if(btnTodas) {
+                filtrar('todas', btnTodas);
+            }
+            
+            // Limpiar búsquedas
             document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
-            mostrarToast("Inicio", "info");
+            
+            // Forzar actualización de la lista
+            currentFilteredList = db;
+            currentPage = 1;
+            renderGrid(currentFilteredList);
+            
+            mostrarToast("Volviendo al inicio", "info");
         }
 
         async function cargarBaseDatos() {
@@ -510,19 +520,27 @@
         }
 
         function renderDestacados(lista) {
+            // IMPORTANTE: Busca productos con "destacado === 1"
             const destacados = lista.filter(p => p.destacado === 1 && p.disponible).slice(0, 6); 
             const container = document.getElementById('hero-destacados-container');
             const section = document.getElementById('hero-section');
             
+            console.log("Productos destacados encontrados:", destacados.length);
+            console.log("Total productos en DB:", lista.length);
+            
             if (destacados.length === 0) {
+                console.log("No hay productos destacados, ocultando hero");
                 section.classList.add('hidden'); 
                 return;
             }
+            
+            console.log("Mostrando hero con", destacados.length, "destacados");
             section.classList.remove('hidden'); 
             
             container.innerHTML = destacados.map(p => `
                 <div class="slider-card bg-white rounded-2xl border border-gray-200 overflow-hidden relative h-full flex flex-col shadow-sm cursor-pointer hover:shadow-md transition-all" onclick="openProduct(${p.id})">
                     <div class="relative h-48 md:h-56 bg-white p-2">
+                        <!-- IMAGEN FIJADA: Cambié data-src por src -->
                         <img src="${p.img}" 
                              class="w-full h-full object-contain" 
                              alt="${p.nombre}"
@@ -692,7 +710,8 @@
             const btnText = p.disponible ? "Agregar" : "Agotado";
             const action = p.disponible ? `addToCart(${p.id})` : "";
             const imageClass = p.disponible ? "" : "no-stock";
-            // AQUÍ ESTABA EL ERROR: Cambiamos data-src por src y quitamos lazy-load
+            
+            // **SOLUCIÓN PARA IMÁGENES:** Cambié data-src por src directamente
             return `
                 <div class="bg-white rounded-2xl border border-gray-100 hover:border-beige/50 transition-all duration-300 group hover:shadow-lg relative flex flex-col h-full overflow-hidden shadow-sm">
                     <div class="relative h-48 md:h-56 bg-white p-2 cursor-pointer" onclick="openProduct(${p.id})">
