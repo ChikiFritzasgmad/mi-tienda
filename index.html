@@ -16,6 +16,7 @@
 
     <title>Papajose SPA | Comercializadora</title>
     <meta name="description" content="Comercializadora de artículos variados. Envíos a todo Chile. Compra segura y trato directo.">
+    
     <meta property="og:title" content="Papajose SPA | Catálogo Online">
     <meta property="og:description" content="Encuentra de todo a los mejores precios. Stock actualizado.">
     <meta property="og:image" content="imagenes/logo.webp"> 
@@ -34,14 +35,12 @@
             "@type": "PostalAddress",
             "addressCountry": "CL"
         },
-        "openingHours": "Mo-Fr 09:00-18:00",
         "priceRange": "$$",
         "image": "imagenes/logo.webp"
     }
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
     
@@ -57,13 +56,14 @@
         body { 
             font-family: 'Segoe UI', sans-serif; 
             color: var(--dark-text);
+            /* Fondo base */
+            background-color: #f0f0f0;
             background-image: url('imagenes/fondo.webp');
             background-size: cover;
             background-position: center;
-            background-color: #f0f0f0;
         }
 
-        /* OPTIMIZACIÓN ANTI-LAG Y IPHONE */
+        /* OPTIMIZACIÓN DESKTOP */
         @media (min-width: 1024px) {
             body { background-attachment: fixed; } 
             .layout-desktop { margin-left: 280px; } 
@@ -71,10 +71,11 @@
             .destacados-grid-pc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         }
         
+        /* OPTIMIZACIÓN MÓVIL */
         @media (max-width: 1023px) {
             body { background-attachment: scroll; } 
             
-            /* SLIDER MÓVIL ACELERADO */
+            /* SLIDER MÓVIL ACELERADO (Para el banner) */
             .mobile-slider { 
                 display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; padding-bottom: 1rem; scrollbar-width: none; 
                 -webkit-overflow-scrolling: touch;
@@ -82,7 +83,8 @@
             .mobile-slider::-webkit-scrollbar { display: none; }
             
             .slider-card { 
-                flex: 0 0 75%; scroll-snap-align: center;
+                flex: 0 0 85%; /* Un poco más ancho para que se vea bien el banner */
+                scroll-snap-align: center;
                 transform: translateZ(0); will-change: transform; 
             }
             
@@ -95,10 +97,7 @@
                 border-bottom: 1px solid #f3f4f6; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             }
 
-            /* FIX: Prevenir Zoom en iOS al tocar inputs */
-            input, select, textarea { font-size: 16px !important; }
-            
-            /* Prevenir double tap to zoom */
+            input, select, textarea { font-size: 16px !important; } /* Evita zoom en iOS */
             button, a { touch-action: manipulation; }
         }
 
@@ -112,7 +111,9 @@
 
         .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .no-stock { filter: grayscale(100%); opacity: 0.6; }
+        
+        .no-stock { filter: grayscale(100%); opacity: 0.7; }
+        
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         
@@ -131,11 +132,11 @@
         #cart-sidebar, #left-sidebar { will-change: transform; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
         #mobile-sticky-bar { transition: transform 0.3s ease; }
 
-        /* Estilo para Lazy Load */
+        /* Lazy Load */
         img.lazy-load { opacity: 0; transition: opacity 0.3s; }
         img:not(.lazy-load) { opacity: 1; }
 
-        /* Modal de producto en desktop - MÁS PEQUEÑO */
+        /* Modal Desktop */
         @media (min-width: 768px) {
             .product-modal-desktop {
                 max-width: 800px;
@@ -147,12 +148,8 @@
             }
         }
 
-        /* Animación suave para scroll */
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
-        /* Placeholder SVG para imágenes */
         .img-placeholder {
             background: linear-gradient(45deg, #f0f0f0 25%, #e0e0e0 25%, #e0e0e0 50%, #f0f0f0 50%, #f0f0f0 75%, #e0e0e0 75%);
             background-size: 20px 20px;
@@ -166,31 +163,26 @@
         <div class="h-full flex justify-between items-center px-6 md:px-10 relative">
             <div class="flex items-center z-20">
                 <button onclick="toggleMobileMenu()" 
-                        aria-label="Abrir menú de navegación"
-                        aria-expanded="false"
+                        aria-label="Abrir menú"
                         class="lg:hidden text-2xl text-beige hover:text-black transition"><i class="fa fa-bars"></i></button>
             </div>
             
             <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full pointer-events-none z-30">
                 <div onclick="resetAndScrollToTop()" class="pointer-events-auto inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full border border-gray-50 shadow-sm cursor-pointer hover:bg-gray-50 transition-all active:scale-95">
-                    <img src="imagenes/logo.webp" class="w-8 h-8 rounded-full object-cover bg-white shadow-sm" alt="Logo Papajose SPA" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%23D2B48C%22/%3E%3Ctext x=%2216%22 y=%2216%22 font-family=%22Arial%22 font-size=%2210%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22%3EPJ%3C/text%3E%3C/svg%3E'">
+                    <img src="imagenes/logo.webp" class="w-8 h-8 rounded-full object-cover bg-white shadow-sm" alt="Logo" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%23D2B48C%22/%3E%3Ctext x=%2216%22 y=%2216%22 font-family=%22Arial%22 font-size=%2210%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22%3EPJ%3C/text%3E%3C/svg%3E'">
                     <h1 class="text-lg md:text-2xl font-black tracking-widest text-gray-800 uppercase whitespace-nowrap">Papajose <span class="text-beige">SPA</span></h1>
                 </div>
             </div>
 
             <div class="flex items-center gap-6 z-20 bg-white pl-4">
                 <div class="hidden lg:block relative group">
-                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar producto..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
+                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar producto o SKU..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
                     <i class="fa fa-search absolute right-4 top-3 text-beige"></i>
                 </div>
                 
                 <div class="flex items-center gap-3">
                     <span id="header-total" class="hidden md:block font-bold text-gray-700 text-sm opacity-0 transition-opacity duration-300">$0</span>
-                    <button onclick="toggleCart()" 
-                            aria-label="Carrito de compras" 
-                            aria-expanded="false" 
-                            aria-controls="cart-sidebar"
-                            class="relative p-2 group" id="cart-btn-header">
+                    <button onclick="toggleCart()" class="relative p-2 group" id="cart-btn-header">
                         <i class="fa fa-shopping-bag text-2xl text-gray-400 group-hover:text-black transition" id="cart-icon"></i>
                         <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white scale-0 transition-transform duration-300">0</span>
                     </button>
@@ -225,19 +217,14 @@
         
         <div class="lg:hidden sticky-search-container">
             <div class="relative w-full">
-                <input type="text" onkeyup="buscar(this.value)" placeholder="¿Qué buscas hoy?" class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
+                <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar por nombre o SKU..." class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
                 <i class="fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-beige"></i>
             </div>
         </div>
 
-        <section class="relative glass-panel text-gray-800 py-12 px-6 md:px-12 mb-12 rounded-[2rem] overflow-hidden shadow-lg fade-in-up">
+        <section id="hero-section" class="relative glass-panel text-gray-800 py-12 px-6 md:px-12 mb-12 rounded-[2rem] overflow-hidden shadow-lg fade-in-up hidden">
             <div class="relative z-10 max-w-6xl mx-auto">
                 <div class="text-center mb-8">
-                    <div class="flex justify-center mb-4">
-                        <div class="w-20 h-20 rounded-full bg-white p-1 shadow-lg flex items-center justify-center">
-                            <img src="imagenes/logo.webp" class="w-full h-full rounded-full object-cover" alt="Logo Hero" onerror="this.onerror=null; this.classList.add('img-placeholder')">
-                        </div>
-                    </div>
                     <span class="inline-block py-1.5 px-4 rounded-full bg-black text-white font-bold text-[10px] md:text-xs tracking-widest uppercase mb-4 shadow-sm">Comercializadora Online</span>
                     <h2 class="text-3xl md:text-5xl font-black mb-4 leading-tight text-gray-900 tracking-tight">
                         Variedad, Calidad y <span class="text-beige italic font-serif">Buenos Precios.</span>
@@ -245,10 +232,9 @@
                 </div>
 
                 <div class="mt-8 border-t border-gray-200 pt-8">
-                    <h3 class="text-center font-bold text-gray-400 text-xs uppercase tracking-widest mb-6">🔥 Productos Destacados</h3>
+                    <h3 class="text-center font-bold text-gray-400 text-xs uppercase tracking-widest mb-6">🔥 Ofertas Destacadas</h3>
                     <div id="hero-destacados-container" class="mobile-slider destacados-grid-pc pb-2">
-                        <div class="text-center w-full text-gray-400">Cargando destacados...</div>
-                    </div>
+                        </div>
                 </div>
             </div>
         </section>
@@ -308,9 +294,9 @@
                     <div class="flex items-center gap-3"><i class="fa fa-user-tag text-beige text-xl"></i><span class="uppercase tracking-wider text-sm">Quiénes Somos</span></div>
                     <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300"><i class="fa fa-chevron-down"></i></span>
                 </summary>
-                <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 space-y-4 animate-fade-in font-medium">
+                <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 font-medium">
                     <p><strong>Papajose SPA</strong> nació hace un año como una iniciativa digital enfocada en el servicio. Tras miles de ventas exitosas en plataformas como Mercado Libre y un aprendizaje constante sobre lo que nuestros clientes realmente necesitan, decidimos dar <strong>el gran salto</strong>.</p>
-                    <p>Hoy evolucionamos con nuestra propia plataforma para ofrecerte un <strong>trato directo, sin comisiones ocultas y precios realmente justos</strong>. Somos una empresa joven, gestionada por personas que entienden el valor de tu confianza y seguridad. ¡Gracias por preferirnos!</p>
+                    <p class="mt-2">Hoy evolucionamos con nuestra propia plataforma para ofrecerte un <strong>trato directo, sin comisiones ocultas y precios realmente justos</strong>.</p>
                 </div>
             </details>
 
@@ -319,20 +305,19 @@
                     <div class="flex items-center gap-3"><i class="fa fa-shield-alt text-beige text-xl"></i><span class="uppercase tracking-wider text-sm">Confianza y Pagos</span></div>
                     <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300"><i class="fa fa-chevron-down"></i></span>
                 </summary>
-                <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 space-y-4 animate-fade-in font-medium">
-                    <p>🤝 <strong>Sin intermediarios:</strong> No usamos Webpay para evitar comisiones extra. El pago se realiza mediante transferencia directa a nuestra <strong>Cuenta Empresa</strong> verificada.</p>
-                    <p>📄 <strong>Documentación:</strong> Tu Boleta o Factura electrónica se genera y envía vía WhatsApp o Correo en un plazo máximo de <strong>24 horas</strong> tras confirmar tu pago.</p>
+                <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 font-medium">
+                    <p>🤝 <strong>Sin intermediarios:</strong> Pago directo a Cuenta Empresa.</p>
+                    <p>📄 <strong>Documentación:</strong> Boleta o Factura en 24 horas.</p>
                 </div>
             </details>
 
             <details class="group glass-panel rounded-2xl p-6 cursor-pointer open:ring-1 open:ring-beige/30 transition-all shadow-sm">
                 <summary class="flex justify-between items-center font-bold text-gray-900 list-none select-none">
-                    <div class="flex items-center gap-3"><i class="fa fa-rotate-left text-beige text-xl"></i><span class="uppercase tracking-wider text-sm">Garantía y Devoluciones</span></div>
+                    <div class="flex items-center gap-3"><i class="fa fa-rotate-left text-beige text-xl"></i><span class="uppercase tracking-wider text-sm">Garantía</span></div>
                     <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300"><i class="fa fa-chevron-down"></i></span>
                 </summary>
-                <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 space-y-4 animate-fade-in font-medium">
-                    <p>✅ <strong>Garantía Real:</strong> Si recibes un producto defectuoso, te lo cambiamos o devolvemos tu dinero con <strong>costo de envío GRATIS</strong> para ti.</p>
-                    <p>📲 <strong>Fácil Gestión:</strong> Solo contáctanos por WhatsApp, envíanos una foto/video del problema y coordinaremos el retiro y reposición de inmediato.</p>
+                <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 font-medium">
+                    <p>✅ <strong>Garantía Real:</strong> Cambios y devoluciones sin costo si el producto falla.</p>
                 </div>
             </details>
 
@@ -412,7 +397,7 @@
 
     <script>
         const WHATSAPP_NUM = "56936416743"; 
-        const CSV_URL = "productos.csv";
+        const DB_URL = "db.json";
         
         let db = [];
         let cart = JSON.parse(localStorage.getItem('papajose_cart')) || [];
@@ -424,14 +409,9 @@
         let searchTimeout; 
         let costoEnvio = 3500; 
         
-        // Caché CSV optimizado
-        let csvCache = null;
-        let csvLastLoad = 0;
-
-        // SVG placeholder para imágenes fallidas
         const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESin Foto%3C/text%3E%3C/svg%3E";
 
-        // Historial para navegación
+        // Manejo del botón atrás para cerrar modales
         window.addEventListener('popstate', function(event) {
             const modal = document.getElementById('product-modal');
             const cartSidebar = document.getElementById('cart-sidebar');
@@ -456,117 +436,58 @@
         });
 
         window.addEventListener('DOMContentLoaded', () => { 
-            cargarProductosDesdeCSV(); 
+            cargarBaseDatos(); 
             updateCartUI();
             initSwipeGestures();
         });
 
-        // MEJORA 3: Función para resetear y hacer scroll
         function resetAndScrollToTop() {
-            // Resetear filtros
             filtrar('todas', document.getElementById('btn-todas'));
-            
-            // Resetear búsqueda
             document.querySelectorAll('input[type="text"]').forEach(input => {
                 input.value = '';
             });
-            
-            // Resetear página
             currentPage = 1;
             renderGrid(currentFilteredList);
-            
-            // Scroll suave al inicio
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             mostrarToast("Catálogo restablecido", "info");
         }
 
-        async function cargarProductosDesdeCSV() {
-            const now = Date.now();
-            const cacheValido = csvCache && (now - csvLastLoad) < 900000; // 15 minutos
-            
-            if (cacheValido) {
-                procesarProductos(csvCache);
-                return;
+        async function cargarBaseDatos() {
+            try {
+                // Añadimos timestamp para evitar caché agresivo
+                const response = await fetch(`${DB_URL}?v=${Date.now()}`);
+                if (!response.ok) throw new Error("Error al cargar db.json");
+                
+                db = await response.json();
+                
+                procesarBaseDatos();
+            } catch (error) {
+                console.error("Error cargando productos:", error);
+                mostrarToast("Error cargando productos. Intenta recargar.", "error");
+                document.getElementById('loading-msg').innerHTML = '<p class="text-red-500 font-bold">Error de conexión.</p>';
             }
-            
-            Papa.parse(CSV_URL + '?v=' + now, {
-                download: true, 
-                header: true, 
-                delimiter: ",", 
-                skipEmptyLines: true,
-                transformHeader: function(h) { return h.trim().toLowerCase(); },
-                complete: function(results) {
-                    csvCache = results;
-                    csvLastLoad = now;
-                    procesarProductos(results);
-                },
-                error: function(err) {
-                    console.error("Error CSV:", err);
-                    mostrarToast("Error cargando productos", "error");
-                    // Intentar con caché antiguo si existe
-                    if (csvCache) procesarProductos(csvCache);
-                }
-            });
         }
 
-        function procesarProductos(results) {
-            if (!results || !results.data || results.data.length === 0) {
+        function procesarBaseDatos() {
+            if (db.length === 0) {
                 mostrarToast("No hay productos disponibles", "info");
                 return;
             }
+
+            // Filtrar productos válidos (que tengan al menos nombre)
+            db = db.filter(p => p.nombre && p.nombre !== "Sin Nombre");
+
+            generarMenuCategorias();
+            document.getElementById('loading-msg').classList.add('hidden');
+            document.getElementById('seccion-catalogo').classList.remove('hidden');
             
-            const sanitize = (text) => text ? text.toString().replace(/[<>"']/g, '') : "";
-
-            try {
-                db = results.data.map((fila, index) => {
-                    let rawPrice = fila['precio'] ? fila['precio'].toString().replace(/[^0-9]/g, '') : "0";
-                    let rawStock = (fila['stock'] || '').toString().toLowerCase().trim();
-                    
-                    // MEJOR MANEJO DE URLS WEBP
-                    let imagenUrl = fila['foto'] || '';
-                    let imgFinal = PLACEHOLDER_SVG;
-                    
-                    if (imagenUrl && imagenUrl.trim() !== '') {
-                        imagenUrl = imagenUrl.trim();
-                        // Verificar si es una URL válida
-                        if (imagenUrl.startsWith('http://') || imagenUrl.startsWith('https://') || 
-                            imagenUrl.startsWith('//') || imagenUrl.startsWith('/')) {
-                            imgFinal = imagenUrl;
-                        } else if (imagenUrl.includes('.webp') || imagenUrl.includes('.jpg') || 
-                                  imagenUrl.includes('.jpeg') || imagenUrl.includes('.png')) {
-                            // Si tiene extensión de imagen, asumir que es relativa
-                            imgFinal = imagenUrl;
-                        }
-                    }
-                    
-                    return {
-                        id: index + 1,
-                        nombre: sanitize(fila['productos']) || "Sin Nombre",
-                        precio: parseInt(rawPrice) || 0,
-                        cat: sanitize(fila['categoria']) || "Varios",
-                        desc: sanitize(fila['descripcion']) || "",
-                        img: imgFinal,
-                        disponible: !['0', 'no', 'false', 'agotado'].includes(rawStock)
-                    };
-                }).filter(p => p.nombre !== "Sin Nombre");
-
-                generarMenuCategorias();
-                document.getElementById('loading-msg').classList.add('hidden');
-                document.getElementById('seccion-catalogo').classList.remove('hidden');
-                currentFilteredList = db;
-                renderGrid(currentFilteredList);
-                renderDestacados(db);
-                initLazyLoad();
-                
-                console.log("Productos cargados:", db.length);
-            } catch (error) {
-                console.error("Error procesando productos:", error);
-                mostrarToast("Error formateando productos", "error");
-            }
+            // Inicialización
+            currentFilteredList = db;
+            renderGrid(currentFilteredList);
+            renderDestacados(db);
+            initLazyLoad();
+            
+            console.log("Productos cargados:", db.length);
         }
 
         function changePage(direction) {
@@ -575,6 +496,7 @@
             if (newPage >= 1 && newPage <= totalPages) {
                 currentPage = newPage;
                 renderGrid(currentFilteredList);
+                // Scroll al inicio del catálogo
                 window.scrollTo({
                     top: document.getElementById('seccion-catalogo').getBoundingClientRect().top + window.pageYOffset - 120, 
                     behavior: 'smooth'
@@ -617,24 +539,27 @@
         }
 
         function renderDestacados(lista) {
-            const destacados = lista.filter(p => p.disponible).slice(0, 6); 
+            // Filtrar donde destacado sea 1
+            const destacados = lista.filter(p => p.destacado === 1 && p.disponible).slice(0, 6); 
             const container = document.getElementById('hero-destacados-container');
+            const section = document.getElementById('hero-section');
             
             if (destacados.length === 0) {
-                container.innerHTML = '<div class="text-center w-full text-gray-400">No hay productos destacados</div>';
+                section.classList.add('hidden'); // Ocultar sección si no hay destacados
                 return;
             }
             
+            section.classList.remove('hidden'); // Mostrar sección
+            
             container.innerHTML = destacados.map(p => `
-                <div class="slider-card bg-white rounded-2xl border border-gray-200 overflow-hidden relative h-full flex flex-col shadow-sm cursor-pointer" onclick="openProduct(${p.id})">
+                <div class="slider-card bg-white rounded-2xl border border-gray-200 overflow-hidden relative h-full flex flex-col shadow-sm cursor-pointer hover:shadow-md transition-all" onclick="openProduct(${p.id})">
                     <div class="relative h-48 md:h-56 bg-white p-2">
                         <img data-src="${p.img}" 
                              class="lazy-load w-full h-full object-contain" 
                              alt="${p.nombre}"
                              loading="lazy"
-                             decoding="async"
                              onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
-                        <div class="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-[10px] font-bold uppercase">Destacado</div>
+                        <div class="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm">Destacado</div>
                     </div>
                     <div class="p-3 flex flex-col flex-1">
                         <h3 class="font-bold text-gray-800 text-xs md:text-sm mb-1 line-clamp-2">${p.nombre}</h3>
@@ -664,7 +589,8 @@
                 currentFilteredList = db.filter(p => 
                     p.nombre.toLowerCase().includes(texto) || 
                     p.cat.toLowerCase().includes(texto) ||
-                    p.desc.toLowerCase().includes(texto)
+                    p.desc.toLowerCase().includes(texto) ||
+                    (p.sku && p.sku.toLowerCase().includes(texto)) // Búsqueda por SKU
                 );
                 currentPage = 1; 
                 renderGrid(currentFilteredList);
@@ -707,7 +633,6 @@
             if (typeof gtag !== 'undefined') {
                 gtag('event', eventName, eventData);
             }
-            console.log(`[Track] ${eventName}:`, eventData);
         }
 
         function addToCart(id) {
@@ -795,6 +720,7 @@
                              onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
                         <div class="flex-1 min-w-0">
                             <h4 class="font-bold text-xs text-gray-800 truncate">${p.nombre}</h4>
+                            <p class="text-[10px] text-gray-500 mb-1">SKU: ${p.sku}</p>
                             <p class="text-xs font-black text-gray-900">$${(p.precio * p.qty).toLocaleString()}</p>
                         </div>
                         <div class="flex flex-col items-center bg-white rounded border border-gray-200">
@@ -844,7 +770,6 @@
             }
         }
 
-        // MEJORA 1: Función modificada para limpiar carrito después de enviar
         function enviarPedidoYLimpiar() {
             if(cart.length === 0) {
                 mostrarToast("Tu carrito está vacío", "info");
@@ -866,14 +791,12 @@
             }
             
             const totalText = document.getElementById('cart-total').innerText;
-            const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre} - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
+            const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre}\n  [SKU: ${p.sku}] - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
             
             const msg = `*HOLA PAPAJOSE SPA* 👋\n\nQuiero confirmar el siguiente pedido:\n\n${itemsList}\n\n*ENVÍO:* ${tipoEnvioTexto}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia a Cuenta Empresa.`;
             
-            // Abrir WhatsApp
             const whatsappWindow = window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
             
-            // Limpiar carrito después de abrir WhatsApp
             setTimeout(() => {
                 cart = [];
                 localStorage.removeItem('papajose_cart');
@@ -881,13 +804,11 @@
                 forceCloseCart();
                 mostrarToast("Pedido enviado. Carrito limpiado.", "success");
                 trackEvent('begin_checkout', { items: cart.length, total: totalText });
-            }, 500); // Pequeño delay para asegurar que WhatsApp se abrió
+            }, 500); 
             
-            // Fallback si el popup está bloqueado
             if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed == 'undefined') {
-                // Copiar mensaje al portapapeles como fallback
                 navigator.clipboard.writeText(msg).then(() => {
-                    mostrarToast("Mensaje copiado al portapapeles. Pégalo en WhatsApp.", "info");
+                    mostrarToast("Mensaje copiado. Pégalo en WhatsApp.", "info");
                 });
             }
         }
@@ -911,7 +832,8 @@
                         ${!p.disponible ? '<span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-[10px] font-bold rounded">AGOTADO</span>' : ''}
                     </div>
                     <div class="p-4 flex flex-col grow">
-                        <h4 class="font-medium text-gray-800 text-sm mb-3 leading-snug line-clamp-2 grow">${p.nombre}</h4>
+                        <h4 class="font-medium text-gray-800 text-sm mb-1 leading-snug line-clamp-2 grow">${p.nombre}</h4>
+                        <p class="text-[10px] text-gray-400 font-mono mb-2">SKU: ${p.sku}</p>
                         <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
                             <span class="font-black text-lg text-gray-900">$${p.precio.toLocaleString()}</span>
                             <button onclick="${action}" class="text-xs font-bold px-3 py-2 rounded-lg transition uppercase ${btnClass}">${btnText}</button>
@@ -997,7 +919,6 @@
             }
         }
 
-        // MEJORA 2: Modal de producto más pequeño
         function openProduct(id) {
             history.pushState({modal: 'product'}, null, "");
             const p = db.find(x => x.id === id);
@@ -1019,7 +940,8 @@
                         </div>
                         <div class="flex flex-col justify-center">
                             <span class="text-beige font-bold uppercase tracking-widest mb-2 text-xs">${p.cat}</span>
-                            <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-4 leading-tight">${p.nombre}</h1>
+                            <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-2 leading-tight">${p.nombre}</h1>
+                            <p class="text-sm font-mono text-gray-400 mb-4">SKU: ${p.sku}</p>
                             <p class="text-gray-600 leading-relaxed mb-6 font-medium">${p.desc}</p>
                             <div class="mt-auto pt-6 border-t border-gray-200">
                                 <div class="flex items-center justify-between">
@@ -1048,57 +970,6 @@
             history.back();
         }
 
-        function mostrarToast(msg, type = 'success') {
-            const t = document.getElementById('toast-modal');
-            const c = document.getElementById('toast-content');
-            
-            let color = type === 'error' ? 'bg-red-500' : (type === 'info' ? 'bg-blue-500' : 'bg-green-500');
-            let icon = type === 'error' ? 'times' : (type === 'info' ? 'info' : 'check');
-            
-            c.innerHTML = `
-                <div class="w-6 h-6 ${color} rounded-full flex items-center justify-center text-xs text-white">
-                    <i class="fa fa-${icon}"></i>
-                </div>
-                <span class="font-bold text-sm">${msg}</span>`;
-            
-            t.classList.remove('hidden'); 
-            setTimeout(() => t.classList.add('toast-visible'), 10);
-            
-            setTimeout(() => {
-                t.classList.remove('toast-visible');
-                setTimeout(() => t.classList.add('hidden'), 300);
-            }, 2000);
-        }
-
-        // Lazy loading con Intersection Observer
-        function initLazyLoad() {
-            const lazyImages = [].slice.call(document.querySelectorAll('img.lazy-load'));
-            
-            if ('IntersectionObserver' in window) {
-                const observer = new IntersectionObserver((entries, obs) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const img = entry.target;
-                            img.src = img.dataset.src;
-                            img.classList.remove('lazy-load');
-                            obs.unobserve(img);
-                        }
-                    });
-                }, {
-                    rootMargin: '50px 0px',
-                    threshold: 0.1
-                });
-                
-                lazyImages.forEach(img => observer.observe(img));
-            } else {
-                lazyImages.forEach(img => {
-                    img.src = img.dataset.src;
-                    img.classList.remove('lazy-load');
-                });
-            }
-        }
-
-        // Gestos táctiles para móviles (swipe)
         function initSwipeGestures() {
             let touchStartX = 0;
             let touchStartY = 0;
@@ -1124,54 +995,6 @@
                 }
             }, {passive: true});
         }
-
-        // Tecla Escape para cerrar modales
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (!document.getElementById('product-modal').classList.contains('hidden')) {
-                    closeProductModal();
-                } else if (document.getElementById('cart-sidebar').classList.contains('translate-x-0')) {
-                    forceCloseCart();
-                } else if (!document.getElementById('left-sidebar').classList.contains('-translate-x-full')) {
-                    handleBackAction();
-                }
-            }
-        });
-
-        // Error handling mejorado para imágenes
-        document.addEventListener('error', function(e) {
-            if (e.target.tagName === 'IMG') {
-                e.target.src = PLACEHOLDER_SVG;
-                e.target.classList.add('img-placeholder');
-                e.target.onerror = null; // Prevenir loops infinitos
-            }
-        }, true);
-
-        // Prevenir recarga accidental con F5
-        window.addEventListener('beforeunload', function(e) {
-            if (cart.length > 0) {
-                // Guardar carrito automáticamente
-                localStorage.setItem('papajose_cart', JSON.stringify(cart));
-            }
-        });
-
-        // Detectar soporte WebP (opcional, para futuras mejoras)
-        async function checkWebPSupport() {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => resolve(true);
-                img.onerror = () => resolve(false);
-                img.src = 'data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==';
-            });
-        }
-
-        // Inicializar detección WebP
-        checkWebPSupport().then(supported => {
-            if (!supported) {
-                console.log('Navegador no soporta WebP - Considera usar formatos alternativos en el CSV');
-            }
-        });
-
     </script>
 </body>
 </html>
