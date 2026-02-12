@@ -148,6 +148,11 @@
             background: linear-gradient(45deg, #f0f0f0 25%, #e0e0e0 25%, #e0e0e0 50%, #f0f0f0 50%, #f0f0f0 75%, #e0e0e0 75%);
             background-size: 20px 20px;
         }
+        
+        /* Ajuste para modal móvil fijo */
+        .modal-body-scroll {
+            -webkit-overflow-scrolling: touch;
+        }
 
     </style>
 </head>
@@ -330,15 +335,15 @@
         <div class="p-5 bg-white border-t border-gray-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] flex-shrink-0">
             <div class="mb-4 flex gap-4 text-xs">
                 <div class="flex-1">
-                     <h4 class="font-bold text-[10px] uppercase text-gray-400 mb-2 tracking-wider">Envío (Obligatorio)</h4>
-                     <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50 mb-2">
+                      <h4 class="font-bold text-[10px] uppercase text-gray-400 mb-2 tracking-wider">Envío (Obligatorio)</h4>
+                      <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50 mb-2">
                         <input type="radio" name="tipo_envio" value="rm" checked onchange="calcularTotal()" class="accent-black w-3 h-3">
                         <div><span class="block font-bold text-gray-700">RM</span><span class="text-[10px] text-gray-500">+$3.500</span></div>
-                     </label>
-                     <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50">
+                      </label>
+                      <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50">
                         <input type="radio" name="tipo_envio" value="regiones" onchange="calcularTotal()" class="accent-black w-3 h-3">
                         <div><span class="block font-bold text-gray-700">Regiones</span><span class="text-[10px] text-gray-500">Por pagar (Starken)</span></div>
-                     </label>
+                      </label>
                 </div>
                 <div class="flex-1">
                     <h4 class="font-bold text-[10px] uppercase text-gray-400 mb-2 tracking-wider">Doc.</h4>
@@ -377,9 +382,9 @@
     </button>
 
     <div id="product-modal" onclick="if(event.target === this) closeProductModal()" class="fixed inset-0 z-[200] bg-black bg-opacity-50 hidden items-center justify-center p-4">
-        <div class="bg-white product-modal-desktop w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col rounded-2xl shadow-2xl relative">
+        <div class="bg-white product-modal-desktop w-full max-w-4xl max-h-[85vh] flex flex-col rounded-2xl shadow-2xl relative h-full md:h-auto">
             <button onclick="closeProductModal()" class="absolute top-4 right-4 z-50 bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-lg hover:bg-red-100 hover:text-red-500 transition">✕</button>
-            <div id="modal-content" class="overflow-y-auto flex-1"></div>
+            <div id="modal-content" class="flex-1 flex flex-col md:block overflow-hidden relative h-full"></div>
         </div>
     </div>
     
@@ -391,7 +396,7 @@
 
     <script>
         const WHATSAPP_NUM = "56936416743"; 
-        const DB_URL = "db.json"; // ACTUALIZADO PARA TU GITHUB
+        const DB_URL = "db.json"; 
         
         let db = [];
         let cart = JSON.parse(localStorage.getItem('papajose_cart')) || [];
@@ -404,6 +409,9 @@
         let costoEnvio = 3500; 
         
         const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESin Foto%3C/text%3E%3C/svg%3E";
+
+        // MODIFICACIÓN 1: Orden deseado explícito para las categorías
+        const ordenCategorias = ["Hogar", "Electrónica", "Belleza", "Deportes y Outdoor", "Juguetes", "Otros"];
 
         window.addEventListener('popstate', function(event) {
             const modal = document.getElementById('product-modal');
@@ -431,23 +439,15 @@
         });
 
         function resetAndScrollToTop() {
-            // Scroll al inicio de TODO el documento
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // Restablecer filtro a "todas"
             const btnTodas = document.getElementById('btn-todas');
             if(btnTodas) {
                 filtrar('todas', btnTodas);
             }
-            
-            // Limpiar búsquedas
             document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
-            
-            // Forzar actualización de la lista
             currentFilteredList = db;
             currentPage = 1;
             renderGrid(currentFilteredList);
-            
             mostrarToast("Volviendo al inicio", "info");
         }
 
@@ -464,12 +464,18 @@
             }
         }
 
+        // MODIFICACIÓN 3: Lógica para limpiar el SKU (5 dígitos) al procesar los datos
         function procesarBaseDatos() {
             if (db.length === 0) {
                 mostrarToast("No hay productos disponibles", "info");
                 return;
             }
-            db = db.filter(p => p.nombre && p.nombre !== "Sin Nombre");
+            // Filtramos y LIMPIAMOS el SKU aquí mismo para todo el sitio
+            db = db.filter(p => p.nombre && p.nombre !== "Sin Nombre").map(p => {
+                let cleanSku = p.sku ? p.sku.toString().replace(/\D/g, '').substring(0, 5) : 'S/N';
+                return { ...p, sku: cleanSku };
+            });
+
             generarMenuCategorias();
             document.getElementById('loading-msg').classList.add('hidden');
             document.getElementById('seccion-catalogo').classList.remove('hidden');
@@ -520,27 +526,20 @@
         }
 
         function renderDestacados(lista) {
-            // IMPORTANTE: Busca productos con "destacado === 1"
             const destacados = lista.filter(p => p.destacado === 1 && p.disponible).slice(0, 6); 
             const container = document.getElementById('hero-destacados-container');
             const section = document.getElementById('hero-section');
             
-            console.log("Productos destacados encontrados:", destacados.length);
-            console.log("Total productos en DB:", lista.length);
-            
             if (destacados.length === 0) {
-                console.log("No hay productos destacados, ocultando hero");
                 section.classList.add('hidden'); 
                 return;
             }
             
-            console.log("Mostrando hero con", destacados.length, "destacados");
             section.classList.remove('hidden'); 
             
             container.innerHTML = destacados.map(p => `
                 <div class="slider-card bg-white rounded-2xl border border-gray-200 overflow-hidden relative h-full flex flex-col shadow-sm cursor-pointer hover:shadow-md transition-all" onclick="openProduct(${p.id})">
                     <div class="relative h-48 md:h-56 bg-white p-2">
-                        <!-- IMAGEN FIJADA: Cambié data-src por src -->
                         <img src="${p.img}" 
                              class="w-full h-full object-contain" 
                              alt="${p.nombre}"
@@ -711,7 +710,6 @@
             const action = p.disponible ? `addToCart(${p.id})` : "";
             const imageClass = p.disponible ? "" : "no-stock";
             
-            // **SOLUCIÓN PARA IMÁGENES:** Cambié data-src por src directamente
             return `
                 <div class="bg-white rounded-2xl border border-gray-100 hover:border-beige/50 transition-all duration-300 group hover:shadow-lg relative flex flex-col h-full overflow-hidden shadow-sm">
                     <div class="relative h-48 md:h-56 bg-white p-2 cursor-pointer" onclick="openProduct(${p.id})">
@@ -734,6 +732,7 @@
                 </div>`;
         }
 
+        // MODIFICACIÓN 2: Generar menú basado en el ORDEN establecido
         function generarMenuCategorias() {
             const nav = document.getElementById('nav-categorias');
             nav.innerHTML = ''; 
@@ -743,8 +742,26 @@
             btnTodas.onclick = () => filtrar('todas', btnTodas);
             btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
             nav.appendChild(btnTodas);
-            const categoriasUnicas = [...new Set(db.map(p => p.cat))].filter(c => c && c.trim() !== "").sort();
-            categoriasUnicas.forEach(cat => {
+            
+            // Obtenemos las categorías reales de la DB
+            const categoriasDB = [...new Set(db.map(p => p.cat))].filter(c => c && c.trim() !== "");
+            
+            // Ordenamos: Primero las que están en 'ordenCategorias', luego las sobrantes
+            const categoriasOrdenadas = categoriasDB.sort((a, b) => {
+                const indexA = ordenCategorias.indexOf(a);
+                const indexB = ordenCategorias.indexOf(b);
+                
+                // Si ambos están en la lista, ordenar por índice
+                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                // Si A está en la lista y B no, A va primero
+                if (indexA !== -1) return -1;
+                // Si B está en la lista y A no, B va primero
+                if (indexB !== -1) return 1;
+                // Si ninguno está, alfabéticamente
+                return a.localeCompare(b);
+            });
+
+            categoriasOrdenadas.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
                 btn.onclick = () => filtrar(cat, btn);
@@ -783,6 +800,7 @@
             if(cart.length === 0) stickyBar.classList.add('hidden'); else if(window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
         }
 
+        // MODIFICACIÓN 2: Nueva estructura del Modal (Botón Fijo en Móvil)
         function openProduct(id) {
             history.pushState({modal: 'product'}, null, "");
             const p = db.find(x => x.id === id);
@@ -790,24 +808,45 @@
             const btnState = p.disponible ? '' : 'disabled class="opacity-50 cursor-not-allowed bg-gray-300"';
             const btnTxt = p.disponible ? 'Agregar al Pedido' : 'Agotado';
             const action = p.disponible ? `addToCart(${p.id}); closeProductModal()` : '';
+            
+            // NOTA: He cambiado la estructura HTML aquí.
+            // Usamos 'flex flex-col h-full' para ocupar todo el alto.
+            // 'flex-1 overflow-y-auto' permite que el contenido central (imagen y texto) haga scroll.
+            // El div final con el botón está fuera del scroll, pegado abajo.
+            
             document.getElementById('modal-content').innerHTML = `
-                <div class="p-6 md:p-8">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="flex items-center justify-center bg-gray-50 rounded-2xl p-4 md:p-8">
-                            <img src="${p.img}" class="max-h-72 w-full object-contain ${p.disponible ? '' : 'no-stock'}" alt="${p.nombre}" onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
-                            ${!p.disponible ? '<div class="absolute inset-0 flex items-center justify-center bg-black/10"><span class="bg-red-500 text-white px-4 py-2 font-bold rounded-lg">SIN STOCK</span></div>' : ''}
-                        </div>
-                        <div class="flex flex-col justify-center">
-                            <span class="text-beige font-bold uppercase tracking-widest mb-2 text-xs">${p.cat}</span>
-                            <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-2 leading-tight">${p.nombre}</h1>
-                            <p class="text-sm font-mono text-gray-400 mb-4">SKU: ${p.sku}</p>
-                            <p class="text-gray-600 leading-relaxed mb-6 font-medium">${p.desc}</p>
-                            <div class="mt-auto pt-6 border-t border-gray-200">
-                                <div class="flex items-center justify-between">
-                                    <div><span class="text-sm text-gray-500 font-bold uppercase">Precio</span><div class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</div></div>
-                                    <button onclick="${action}" ${btnState} class="bg-black text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm">${btnTxt}</button>
+                <div class="flex flex-col h-full">
+                    <div class="flex-1 overflow-y-auto p-6 md:p-8 modal-body-scroll">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="flex items-center justify-center bg-gray-50 rounded-2xl p-4 md:p-8">
+                                <img src="${p.img}" class="max-h-72 w-full object-contain ${p.disponible ? '' : 'no-stock'}" alt="${p.nombre}" onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
+                                ${!p.disponible ? '<div class="absolute inset-0 flex items-center justify-center bg-black/10"><span class="bg-red-500 text-white px-4 py-2 font-bold rounded-lg">SIN STOCK</span></div>' : ''}
+                            </div>
+                            <div class="flex flex-col justify-start">
+                                <span class="text-beige font-bold uppercase tracking-widest mb-2 text-xs">${p.cat}</span>
+                                <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-2 leading-tight">${p.nombre}</h1>
+                                <p class="text-sm font-mono text-gray-400 mb-4">SKU: ${p.sku}</p>
+                                <p class="text-gray-600 leading-relaxed mb-6 font-medium">${p.desc}</p>
+                                
+                                <div class="hidden lg:block mt-auto pt-6 border-t border-gray-200">
+                                    <div class="flex items-center justify-between">
+                                        <div><span class="text-sm text-gray-500 font-bold uppercase">Precio</span><div class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</div></div>
+                                        <button onclick="${action}" ${btnState} class="bg-black text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm">${btnTxt}</button>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:hidden p-4 bg-white border-t border-gray-100 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-10 shrink-0">
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-gray-400 font-bold uppercase">Total</span>
+                                <span class="text-2xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
+                            </div>
+                            <button onclick="${action}" ${btnState} class="flex-1 bg-black text-white py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm truncate px-2">
+                                ${btnTxt}
+                            </button>
                         </div>
                     </div>
                 </div>`;
@@ -841,4 +880,3 @@
     </script>
 </body>
 </html>
-
