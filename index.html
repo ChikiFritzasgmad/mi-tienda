@@ -149,7 +149,7 @@
             background-size: 20px 20px;
         }
 
-        /* CLASE NUEVA: Scroll suave dentro del modal móvil */
+        /* Scroll suave para el contenido del modal */
         .modal-body-scroll {
             -webkit-overflow-scrolling: touch;
         }
@@ -728,7 +728,7 @@
                 </div>`;
         }
 
-        // --- MENÚ HARDCODEADO ---
+        // --- MENÚ MANUAL AJUSTADO ---
         function generarMenuCategorias() {
             const nav = document.getElementById('nav-categorias');
             nav.innerHTML = ''; 
@@ -739,7 +739,7 @@
             btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
             nav.appendChild(btnTodas);
             
-            // LISTA MANUAL EXIGIDA
+            // LISTA MANUAL ACTUALIZADA (Copia exacta de tu pedido)
             const categoriasManuales = [
                 "Hogar",
                 "Electrónica y accesorios",
@@ -791,7 +791,7 @@
             if(cart.length === 0) stickyBar.classList.add('hidden'); else if(window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
         }
 
-        // --- MODAL CORREGIDO: Botón Fijo + Scroll ---
+        // --- MODAL MÓVIL (Con botón fijo y scroll) ---
         function openProduct(id) {
             history.pushState({modal: 'product'}, null, "");
             const p = db.find(x => x.id === id);
