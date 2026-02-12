@@ -62,7 +62,7 @@
             background-position: center;
         }
 
-        /* BLOQUEO DE SCROLL DEL FONDO (SOLUCIÓN PUNTO 2) */
+        /* BLOQUEO DE SCROLL DEL FONDO */
         body.locked {
             overflow: hidden !important;
             height: 100vh;
@@ -155,10 +155,10 @@
             background-size: 20px 20px;
         }
 
-        /* CLASE IMPORTANTE: Scroll suave dentro del modal + EVITA el scroll chaining */
+        /* Scroll suave dentro del modal + EVITA el scroll chaining */
         .modal-body-scroll {
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain; /* Esto evita que se mueva el fondo */
+            overscroll-behavior: contain; 
         }
     </style>
 </head>
@@ -473,7 +473,6 @@
                 mostrarToast("No hay productos disponibles", "info");
                 return;
             }
-            // Filtramos productos válidos y limpiamos el SKU
             db = db.filter(p => p.nombre && p.nombre !== "Sin Nombre").map(p => {
                 let cleanSku = p.sku ? p.sku.toString().replace(/\D/g, '').substring(0, 5) : 'S/N';
                 return { ...p, sku: cleanSku };
@@ -746,7 +745,6 @@
             btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
             nav.appendChild(btnTodas);
             
-            // LISTA MANUAL ACTUALIZADA (Copia exacta de tu pedido)
             const categoriasManuales = [
                 "Hogar",
                 "Electrónica y accesorios",
@@ -758,7 +756,6 @@
                 "Otros"
             ];
 
-            // Renderizado estricto
             categoriasManuales.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
@@ -798,7 +795,7 @@
             if(cart.length === 0) stickyBar.classList.add('hidden'); else if(window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
         }
 
-        // --- MODAL MÓVIL (Con botón fijo y scroll) + DESKTOP ARREGLADO ---
+        // --- MODAL UNIFICADO (BOTÓN FIJO SIEMPRE) ---
         function openProduct(id) {
             history.pushState({modal: 'product'}, null, "");
             const p = db.find(x => x.id === id);
@@ -808,9 +805,9 @@
             const action = p.disponible ? `addToCart(${p.id}); closeProductModal()` : '';
             
             document.getElementById('modal-content').innerHTML = `
-                <div class="flex flex-col h-full">
+                <div class="flex flex-col h-full relative">
                     <div class="flex-1 overflow-y-auto p-6 md:p-8 modal-body-scroll">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-4">
                             <div class="flex items-center justify-center bg-gray-50 rounded-2xl p-4 md:p-8">
                                 <img src="${p.img}" class="max-h-72 w-full object-contain ${p.disponible ? '' : 'no-stock'}" alt="${p.nombre}" onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
                                 ${!p.disponible ? '<div class="absolute inset-0 flex items-center justify-center bg-black/10"><span class="bg-red-500 text-white px-4 py-2 font-bold rounded-lg">SIN STOCK</span></div>' : ''}
@@ -820,24 +817,17 @@
                                 <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-2 leading-tight">${p.nombre}</h1>
                                 <p class="text-sm font-mono text-gray-400 mb-4">SKU: ${p.sku}</p>
                                 <p class="text-gray-600 leading-relaxed mb-6 font-medium">${p.desc}</p>
-                                
-                                <div class="hidden lg:block mt-auto pt-6 border-t border-gray-200">
-                                    <div class="flex items-center justify-between">
-                                        <div><span class="text-sm text-gray-500 font-bold uppercase">Precio</span><div class="text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</div></div>
-                                        <button onclick="${action}" ${btnState} class="bg-black text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm">${btnTxt}</button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="lg:hidden p-4 bg-white border-t border-gray-100 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-10 shrink-0">
+                    <div class="p-4 md:p-6 bg-white border-t border-gray-100 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-10 shrink-0">
                         <div class="flex items-center justify-between gap-4">
                             <div class="flex flex-col">
-                                <span class="text-[10px] text-gray-400 font-bold uppercase">Total</span>
-                                <span class="text-2xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase">Precio</span>
+                                <span class="text-2xl md:text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
                             </div>
-                            <button onclick="${action}" ${btnState} class="flex-1 bg-black text-white py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm truncate px-2">
+                            <button onclick="${action}" ${btnState} class="flex-1 md:flex-none md:w-1/2 bg-black text-white py-3 md:py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm truncate px-2">
                                 ${btnTxt}
                             </button>
                         </div>
