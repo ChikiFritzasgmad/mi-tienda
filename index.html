@@ -148,12 +148,11 @@
             background: linear-gradient(45deg, #f0f0f0 25%, #e0e0e0 25%, #e0e0e0 50%, #f0f0f0 50%, #f0f0f0 75%, #e0e0e0 75%);
             background-size: 20px 20px;
         }
-        
-        /* Ajuste para modal móvil fijo */
+
+        /* CLASE NUEVA: Scroll suave dentro del modal móvil */
         .modal-body-scroll {
             -webkit-overflow-scrolling: touch;
         }
-
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
@@ -410,9 +409,6 @@
         
         const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESin Foto%3C/text%3E%3C/svg%3E";
 
-        // MODIFICACIÓN 1: Orden deseado explícito para las categorías
-        const ordenCategorias = ["Hogar", "Electrónica", "Belleza", "Deportes y Outdoor", "Juguetes", "Otros"];
-
         window.addEventListener('popstate', function(event) {
             const modal = document.getElementById('product-modal');
             const cartSidebar = document.getElementById('cart-sidebar');
@@ -464,13 +460,13 @@
             }
         }
 
-        // MODIFICACIÓN 3: Lógica para limpiar el SKU (5 dígitos) al procesar los datos
+        // --- LÓGICA SKU 5 DÍGITOS ---
         function procesarBaseDatos() {
             if (db.length === 0) {
                 mostrarToast("No hay productos disponibles", "info");
                 return;
             }
-            // Filtramos y LIMPIAMOS el SKU aquí mismo para todo el sitio
+            // Filtramos productos válidos y limpiamos el SKU
             db = db.filter(p => p.nombre && p.nombre !== "Sin Nombre").map(p => {
                 let cleanSku = p.sku ? p.sku.toString().replace(/\D/g, '').substring(0, 5) : 'S/N';
                 return { ...p, sku: cleanSku };
@@ -732,7 +728,7 @@
                 </div>`;
         }
 
-        // MODIFICACIÓN 2: Generar menú basado en el ORDEN establecido
+        // --- MENÚ HARDCODEADO ---
         function generarMenuCategorias() {
             const nav = document.getElementById('nav-categorias');
             nav.innerHTML = ''; 
@@ -743,29 +739,24 @@
             btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
             nav.appendChild(btnTodas);
             
-            // Obtenemos las categorías reales de la DB
-            const categoriasDB = [...new Set(db.map(p => p.cat))].filter(c => c && c.trim() !== "");
-            
-            // Ordenamos: Primero las que están en 'ordenCategorias', luego las sobrantes
-            const categoriasOrdenadas = categoriasDB.sort((a, b) => {
-                const indexA = ordenCategorias.indexOf(a);
-                const indexB = ordenCategorias.indexOf(b);
-                
-                // Si ambos están en la lista, ordenar por índice
-                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                // Si A está en la lista y B no, A va primero
-                if (indexA !== -1) return -1;
-                // Si B está en la lista y A no, B va primero
-                if (indexB !== -1) return 1;
-                // Si ninguno está, alfabéticamente
-                return a.localeCompare(b);
-            });
+            // LISTA MANUAL EXIGIDA
+            const categoriasManuales = [
+                "Hogar",
+                "Electrónica y accesorios",
+                "Belleza e Higiene",
+                "Deportes y Outdoor",
+                "Juguetes",
+                "Ropa y Accesorios",
+                "Vehiculos",
+                "Otros"
+            ];
 
-            categoriasOrdenadas.forEach(cat => {
+            // Renderizado estricto
+            categoriasManuales.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
                 btn.onclick = () => filtrar(cat, btn);
-                btn.innerHTML = `<i class="fa fa-chevron-right text-gray-300 text-xs group-hover:text-beige transition"></i> ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
+                btn.innerHTML = `<i class="fa fa-chevron-right text-gray-300 text-xs group-hover:text-beige transition"></i> ${cat}`;
                 nav.appendChild(btn);
             });
         }
@@ -800,7 +791,7 @@
             if(cart.length === 0) stickyBar.classList.add('hidden'); else if(window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
         }
 
-        // MODIFICACIÓN 2: Nueva estructura del Modal (Botón Fijo en Móvil)
+        // --- MODAL CORREGIDO: Botón Fijo + Scroll ---
         function openProduct(id) {
             history.pushState({modal: 'product'}, null, "");
             const p = db.find(x => x.id === id);
@@ -808,11 +799,6 @@
             const btnState = p.disponible ? '' : 'disabled class="opacity-50 cursor-not-allowed bg-gray-300"';
             const btnTxt = p.disponible ? 'Agregar al Pedido' : 'Agotado';
             const action = p.disponible ? `addToCart(${p.id}); closeProductModal()` : '';
-            
-            // NOTA: He cambiado la estructura HTML aquí.
-            // Usamos 'flex flex-col h-full' para ocupar todo el alto.
-            // 'flex-1 overflow-y-auto' permite que el contenido central (imagen y texto) haga scroll.
-            // El div final con el botón está fuera del scroll, pegado abajo.
             
             document.getElementById('modal-content').innerHTML = `
                 <div class="flex flex-col h-full">
