@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-NDG1TN8LS4"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -13,7 +14,6 @@
     </script>
 
     <link rel="icon" type="image/webp" href="imagenes/logo.webp">
-
     <title>Papajose SPA | Comercializadora</title>
     <meta name="description" content="Comercializadora de artículos variados. Envíos a todo Chile. Compra segura y trato directo.">
     
@@ -43,11 +43,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* --- ESTILOS VISUALES (sin cambios) --- */
         :root { 
             --beige: #D2B48C; 
             --soft-bg: #FAFAF9; 
@@ -241,29 +239,29 @@
                     
                     <!-- Vista de solo lectura -->
                     <div id="profile-readonly">
-                        <div class="space-y-3 bg-gray-50 p-4 rounded-xl">
+                        <div class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
                             <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase">Nombre completo</p>
-                                <p class="font-medium" id="display-nombre">-</p>
+                                <p class="text-xs font-bold text-gray-500 uppercase">Nombre completo</p>
+                                <p class="font-medium text-gray-900" id="display-nombre">-</p>
                             </div>
                             <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase">RUT</p>
-                                <p class="font-medium" id="display-rut">-</p>
+                                <p class="text-xs font-bold text-gray-500 uppercase">RUT</p>
+                                <p class="font-medium text-gray-900" id="display-rut">-</p>
                             </div>
                             <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase">Teléfono</p>
-                                <p class="font-medium" id="display-telefono">-</p>
+                                <p class="text-xs font-bold text-gray-500 uppercase">Teléfono</p>
+                                <p class="font-medium text-gray-900" id="display-telefono">-</p>
                             </div>
                             <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase">Dirección de entrega</p>
-                                <p class="font-medium" id="display-direccion">-</p>
+                                <p class="text-xs font-bold text-gray-500 uppercase">Dirección de entrega</p>
+                                <p class="font-medium text-gray-900" id="display-direccion">-</p>
                             </div>
                             <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase">Referencia</p>
-                                <p class="font-medium" id="display-referencia">-</p>
+                                <p class="text-xs font-bold text-gray-500 uppercase">Referencia</p>
+                                <p class="font-medium text-gray-900" id="display-referencia">-</p>
                             </div>
                         </div>
-                        <button onclick="showEditProfile()" class="w-full bg-beige text-white py-3 rounded-xl font-bold uppercase text-xs shadow-md mt-4">Editar mis datos</button>
+                        <button onclick="showEditProfile()" class="w-full bg-beige text-gray-900 font-bold py-3 rounded-xl uppercase text-xs shadow-md mt-4 hover:bg-amber-600 transition">✏️ Editar mis datos</button>
                     </div>
 
                     <!-- Vista de edición (inicialmente oculta) -->
@@ -271,34 +269,36 @@
                         <h3 class="text-lg font-bold text-gray-800 mb-3">Editar datos</h3>
                         <form id="edit-profile-form" onsubmit="actualizarPerfil(event)" class="space-y-3">
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Nombre completo</label>
-                                <input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-2">Nombre completo</label>
+                                <input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">RUT</label>
-                                <input type="text" id="edit-rut" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-2">RUT</label>
+                                <input type="text" id="edit-rut" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Teléfono</label>
-                                <input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-2">Teléfono</label>
+                                <input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Dirección de entrega</label>
-                                <input type="text" id="edit-direccion" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-2">Dirección de entrega</label>
+                                <input type="text" id="edit-direccion" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Referencia</label>
-                                <input type="text" id="edit-referencia" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-2">Referencia</label>
+                                <input type="text" id="edit-referencia" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
                             </div>
                             <div class="flex gap-3 mt-4">
                                 <button type="submit" id="btn-update-profile" class="flex-1 bg-black text-white py-3 rounded-xl font-bold uppercase text-xs shadow-md hover:bg-gray-800 transition">Guardar cambios</button>
-                                <button type="button" onclick="cancelEditProfile()" class="flex-1 border border-gray-300 py-3 rounded-xl font-bold uppercase text-xs hover:bg-gray-50 transition">Cancelar</button>
+                                <button type="button" onclick="cancelEditProfile()" class="flex-1 border border-gray-300 py-3 rounded-xl font-bold uppercase text-xs hover:bg-gray-100 transition">Cancelar</button>
                             </div>
                         </form>
                     </div>
 
-                    <!-- Botón de cierre de sesión -->
-                    <button onclick="cerrarSesion()" class="w-full mt-6 text-red-400 text-xs font-bold uppercase hover:underline">Cerrar Sesión</button>
+                    <!-- Botón de cierre de sesión (visible en ambas vistas) -->
+                    <button onclick="cerrarSesion()" class="w-full mt-6 text-red-500 text-xs font-bold uppercase hover:underline flex items-center justify-center gap-2">
+                        <i class="fa fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
                 </div>
             </div>
         </div>
@@ -608,7 +608,6 @@
             .maybeSingle();
         if (!error && data) { 
             userProfile = data; 
-            // Al cargar perfil, ajustamos la opción de envío según dirección
             actualizarOpcionEnvioSegunDireccion();
         } else {
             userProfile = null;
@@ -638,21 +637,20 @@
         document.body.classList.add('locked');
         
         if (currentUser && userProfile) {
-            // Mostrar vista de perfil con datos actuales
             document.getElementById('auth-login-view').classList.add('hidden');
             document.getElementById('auth-register-view').classList.add('hidden');
             document.getElementById('auth-logged-view').classList.remove('hidden');
             document.getElementById('profile-readonly').classList.remove('hidden');
             document.getElementById('profile-edit').classList.add('hidden');
             
-            // Llenar vista de solo lectura
+            // Actualizar vista de solo lectura
             document.getElementById('display-nombre').innerText = userProfile.nombre || '-';
             document.getElementById('display-rut').innerText = userProfile.rut || '-';
             document.getElementById('display-telefono').innerText = userProfile.telefono || '-';
             document.getElementById('display-direccion').innerText = userProfile.direccion_defecto || '-';
             document.getElementById('display-referencia').innerText = userProfile.referencia || '-';
             
-            // También rellenar formulario de edición por si el usuario quiere editar
+            // Rellenar formulario de edición
             document.getElementById('edit-nombre').value = userProfile.nombre || '';
             document.getElementById('edit-rut').value = userProfile.rut || '';
             document.getElementById('edit-telefono').value = userProfile.telefono || '';
@@ -750,24 +748,26 @@
             password: pass 
         });
         
-        btn.innerText = "Ingresar"; 
-        btn.disabled = false;
-
         if (error) { 
             mostrarToast("Correo o contraseña incorrectos", "error"); 
         } else { 
+            // Actualizar estado y perfil
+            currentUser = data.user;
+            await cargarPerfil(currentUser.id);
             mostrarToast("¡Bienvenido de vuelta!"); 
             closeAuthModal(); 
         }
+        
+        btn.innerText = "Ingresar"; 
+        btn.disabled = false;
     }
 
-    // Función para mostrar formulario de edición
+    // Funciones para alternar vistas de perfil
     function showEditProfile() {
         document.getElementById('profile-readonly').classList.add('hidden');
         document.getElementById('profile-edit').classList.remove('hidden');
     }
 
-    // Función para cancelar edición
     function cancelEditProfile() {
         document.getElementById('profile-readonly').classList.remove('hidden');
         document.getElementById('profile-edit').classList.add('hidden');
@@ -792,24 +792,22 @@
             .update(updates)
             .eq('id', currentUser.id);
 
-        btn.innerText = "Guardar cambios";
-        btn.disabled = false;
-
         if (error) {
             mostrarToast("Error al actualizar: " + error.message, "error");
         } else {
             mostrarToast("Perfil actualizado correctamente", "success");
-            // Recargar perfil
+            // Recargar perfil y actualizar vista de solo lectura
             await cargarPerfil(currentUser.id);
-            // Actualizar vista de solo lectura
             document.getElementById('display-nombre').innerText = userProfile.nombre || '-';
             document.getElementById('display-rut').innerText = userProfile.rut || '-';
             document.getElementById('display-telefono').innerText = userProfile.telefono || '-';
             document.getElementById('display-direccion').innerText = userProfile.direccion_defecto || '-';
             document.getElementById('display-referencia').innerText = userProfile.referencia || '-';
-            // Volver a vista de solo lectura
             cancelEditProfile();
         }
+        
+        btn.innerText = "Guardar cambios";
+        btn.disabled = false;
     }
 
     async function cerrarSesion() {
@@ -1275,7 +1273,7 @@
                 precio_historico: item.precio
             }));
 
-            // Llamar a la función RPC crear_pedido
+            // Llamar a la función RPC crear_pedido (debe existir en Supabase)
             const { data, error } = await supabaseClient.rpc('crear_pedido', {
                 p_user_id: currentUser.id,
                 p_tipo_envio: tipoEnvioTexto,
