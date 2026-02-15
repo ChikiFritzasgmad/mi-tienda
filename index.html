@@ -235,34 +235,70 @@
                     <p class="text-center text-sm text-gray-500 mt-6">¿Ya tienes cuenta? <span onclick="toggleAuthView()" class="text-beige font-black hover:underline cursor-pointer">Inicia Sesión</span></p>
                 </div>
 
-                <!-- VISTA PERFIL (editable) -->
+                <!-- VISTA PERFIL (mejorada) -->
                 <div id="auth-logged-view" class="hidden">
-                    <h2 class="text-xl font-black text-gray-900 mb-2">Mis Datos de Envío</h2>
-                    <p class="text-xs text-gray-500 mb-6" id="logged-user-email"></p>
-                    <form id="edit-profile-form" onsubmit="actualizarPerfil(event)" class="space-y-3">
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Nombre Completo</label>
-                            <input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                    <h2 class="text-xl font-black text-gray-900 mb-4">Mi Perfil</h2>
+                    
+                    <!-- Vista de solo lectura -->
+                    <div id="profile-readonly">
+                        <div class="space-y-3 bg-gray-50 p-4 rounded-xl">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase">Nombre completo</p>
+                                <p class="font-medium" id="display-nombre">-</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase">RUT</p>
+                                <p class="font-medium" id="display-rut">-</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase">Teléfono</p>
+                                <p class="font-medium" id="display-telefono">-</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase">Dirección de entrega</p>
+                                <p class="font-medium" id="display-direccion">-</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase">Referencia</p>
+                                <p class="font-medium" id="display-referencia">-</p>
+                            </div>
                         </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">RUT</label>
-                            <input type="text" id="edit-rut" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Teléfono</label>
-                            <input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Dirección de Entrega</label>
-                            <input type="text" id="edit-direccion" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Referencia</label>
-                            <input type="text" id="edit-referencia" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
-                        </div>
-                        <button type="submit" id="btn-update-profile" class="w-full bg-beige text-white py-3 rounded-xl font-bold uppercase text-xs shadow-md mt-2">Actualizar mis datos</button>
-                    </form>
-                    <button onclick="cerrarSesion()" class="w-full mt-8 text-red-400 text-xs font-bold uppercase hover:underline">Cerrar Sesión</button>
+                        <button onclick="showEditProfile()" class="w-full bg-beige text-white py-3 rounded-xl font-bold uppercase text-xs shadow-md mt-4">Editar mis datos</button>
+                    </div>
+
+                    <!-- Vista de edición (inicialmente oculta) -->
+                    <div id="profile-edit" class="hidden">
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">Editar datos</h3>
+                        <form id="edit-profile-form" onsubmit="actualizarPerfil(event)" class="space-y-3">
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Nombre completo</label>
+                                <input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">RUT</label>
+                                <input type="text" id="edit-rut" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Teléfono</label>
+                                <input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Dirección de entrega</label>
+                                <input type="text" id="edit-direccion" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Referencia</label>
+                                <input type="text" id="edit-referencia" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-beige">
+                            </div>
+                            <div class="flex gap-3 mt-4">
+                                <button type="submit" id="btn-update-profile" class="flex-1 bg-black text-white py-3 rounded-xl font-bold uppercase text-xs shadow-md hover:bg-gray-800 transition">Guardar cambios</button>
+                                <button type="button" onclick="cancelEditProfile()" class="flex-1 border border-gray-300 py-3 rounded-xl font-bold uppercase text-xs hover:bg-gray-50 transition">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Botón de cierre de sesión -->
+                    <button onclick="cerrarSesion()" class="w-full mt-6 text-red-400 text-xs font-bold uppercase hover:underline">Cerrar Sesión</button>
                 </div>
             </div>
         </div>
@@ -606,8 +642,17 @@
             document.getElementById('auth-login-view').classList.add('hidden');
             document.getElementById('auth-register-view').classList.add('hidden');
             document.getElementById('auth-logged-view').classList.remove('hidden');
-            document.getElementById('logged-user-email').innerText = currentUser.email;
-            // Rellenar formulario de edición
+            document.getElementById('profile-readonly').classList.remove('hidden');
+            document.getElementById('profile-edit').classList.add('hidden');
+            
+            // Llenar vista de solo lectura
+            document.getElementById('display-nombre').innerText = userProfile.nombre || '-';
+            document.getElementById('display-rut').innerText = userProfile.rut || '-';
+            document.getElementById('display-telefono').innerText = userProfile.telefono || '-';
+            document.getElementById('display-direccion').innerText = userProfile.direccion_defecto || '-';
+            document.getElementById('display-referencia').innerText = userProfile.referencia || '-';
+            
+            // También rellenar formulario de edición por si el usuario quiere editar
             document.getElementById('edit-nombre').value = userProfile.nombre || '';
             document.getElementById('edit-rut').value = userProfile.rut || '';
             document.getElementById('edit-telefono').value = userProfile.telefono || '';
@@ -716,6 +761,18 @@
         }
     }
 
+    // Función para mostrar formulario de edición
+    function showEditProfile() {
+        document.getElementById('profile-readonly').classList.add('hidden');
+        document.getElementById('profile-edit').classList.remove('hidden');
+    }
+
+    // Función para cancelar edición
+    function cancelEditProfile() {
+        document.getElementById('profile-readonly').classList.remove('hidden');
+        document.getElementById('profile-edit').classList.add('hidden');
+    }
+
     async function actualizarPerfil(e) {
         e.preventDefault();
         const btn = document.getElementById('btn-update-profile');
@@ -735,15 +792,23 @@
             .update(updates)
             .eq('id', currentUser.id);
 
-        btn.innerText = "Actualizar mis datos";
+        btn.innerText = "Guardar cambios";
         btn.disabled = false;
 
         if (error) {
             mostrarToast("Error al actualizar: " + error.message, "error");
         } else {
-            mostrarToast("Perfil actualizado");
+            mostrarToast("Perfil actualizado correctamente", "success");
+            // Recargar perfil
             await cargarPerfil(currentUser.id);
-            closeAuthModal(); // Opcional: cerrar modal después de guardar
+            // Actualizar vista de solo lectura
+            document.getElementById('display-nombre').innerText = userProfile.nombre || '-';
+            document.getElementById('display-rut').innerText = userProfile.rut || '-';
+            document.getElementById('display-telefono').innerText = userProfile.telefono || '-';
+            document.getElementById('display-direccion').innerText = userProfile.direccion_defecto || '-';
+            document.getElementById('display-referencia').innerText = userProfile.referencia || '-';
+            // Volver a vista de solo lectura
+            cancelEditProfile();
         }
     }
 
