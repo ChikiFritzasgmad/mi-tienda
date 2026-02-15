@@ -47,7 +47,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* --- ESTILOS VISUALES ORIGINALES --- */
+        /* --- ESTILOS VISUALES (sin cambios) --- */
         :root { 
             --beige: #D2B48C; 
             --soft-bg: #FAFAF9; 
@@ -64,13 +64,11 @@
             background-position: center;
         }
 
-        /* BLOQUEO DE SCROLL DEL FONDO */
         body.locked {
             overflow: hidden !important;
             height: 100vh;
         }
 
-        /* OPTIMIZACIÓN DESKTOP */
         @media (min-width: 1024px) {
             body { background-attachment: fixed; } 
             .layout-desktop { margin-left: 280px; } 
@@ -78,7 +76,6 @@
             .destacados-grid-pc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         }
         
-        /* OPTIMIZACIÓN MÓVIL */
         @media (max-width: 1023px) {
             body { background-attachment: scroll; } 
             
@@ -138,7 +135,6 @@
         #cart-sidebar, #left-sidebar { will-change: transform; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
         #mobile-sticky-bar { transition: transform 0.3s ease; }
 
-        /* Modal Desktop */
         @media (min-width: 768px) {
             .product-modal-desktop {
                 max-width: 800px;
@@ -204,11 +200,13 @@
     <div id="menu-overlay" class="overlay-base" onclick="handleBackAction()"></div>
     <div id="cart-overlay" class="overlay-base" onclick="forceCloseCart()"></div>
 
+    <!-- MODAL DE AUTENTICACIÓN Y PERFIL -->
     <div id="auth-modal" class="fixed inset-0 z-[200] bg-black bg-opacity-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 z-50 bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition">✕</button>
             <div class="p-8 overflow-y-auto modal-body-scroll">
                 
+                <!-- VISTA LOGIN -->
                 <div id="auth-login-view">
                     <h2 class="text-2xl font-black text-gray-900 mb-6 tracking-tight">Iniciar Sesión</h2>
                     <form id="login-form" onsubmit="iniciarSesion(event)" class="space-y-4">
@@ -219,12 +217,14 @@
                     <p class="text-center text-sm text-gray-500 mt-6">¿Eres nuevo? <span onclick="toggleAuthView()" class="text-beige font-black hover:underline cursor-pointer">Regístrate aquí</span></p>
                 </div>
 
+                <!-- VISTA REGISTRO (con teléfono) -->
                 <div id="auth-register-view" class="hidden">
                     <h2 class="text-2xl font-black text-gray-900 mb-2 tracking-tight">Crear Cuenta</h2>
                     <p class="text-xs text-gray-500 mb-6 uppercase font-bold tracking-widest text-beige">Datos para el repartidor 🚚</p>
                     <form id="register-form" onsubmit="registrarUsuario(event)" class="space-y-3">
                         <input type="text" id="reg-nombre" placeholder="Nombre Completo" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
                         <input type="text" id="reg-rut" placeholder="RUT (Ej: 12345678-9)" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                        <input type="text" id="reg-telefono" placeholder="Teléfono (Ej: +56912345678)" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
                         <input type="text" id="reg-direccion" placeholder="Dirección (Calle, N°, Comuna)" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
                         <input type="text" id="reg-referencia" placeholder="Referencia (Ej: Casa portón verde)" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
                         <input type="email" id="reg-email" placeholder="Correo electrónico" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
@@ -235,14 +235,31 @@
                     <p class="text-center text-sm text-gray-500 mt-6">¿Ya tienes cuenta? <span onclick="toggleAuthView()" class="text-beige font-black hover:underline cursor-pointer">Inicia Sesión</span></p>
                 </div>
 
+                <!-- VISTA PERFIL (editable) -->
                 <div id="auth-logged-view" class="hidden">
                     <h2 class="text-xl font-black text-gray-900 mb-2">Mis Datos de Envío</h2>
                     <p class="text-xs text-gray-500 mb-6" id="logged-user-email"></p>
                     <form id="edit-profile-form" onsubmit="actualizarPerfil(event)" class="space-y-3">
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Nombre Completo</label><input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none"></div>
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase ml-2">RUT</label><input type="text" id="edit-rut" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none"></div>
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Dirección de Entrega</label><input type="text" id="edit-direccion" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none"></div>
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Referencia</label><input type="text" id="edit-referencia" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none"></div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Nombre Completo</label>
+                            <input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">RUT</label>
+                            <input type="text" id="edit-rut" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Teléfono</label>
+                            <input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Dirección de Entrega</label>
+                            <input type="text" id="edit-direccion" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Referencia</label>
+                            <input type="text" id="edit-referencia" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                        </div>
                         <button type="submit" id="btn-update-profile" class="w-full bg-beige text-white py-3 rounded-xl font-bold uppercase text-xs shadow-md mt-2">Actualizar mis datos</button>
                     </form>
                     <button onclick="cerrarSesion()" class="w-full mt-8 text-red-400 text-xs font-bold uppercase hover:underline">Cerrar Sesión</button>
@@ -251,6 +268,7 @@
         </div>
     </div>
 
+    <!-- MENÚ LATERAL IZQUIERDO -->
     <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] menu-bg-color border-r border-gray-100 z-[150] pt-24 transform -translate-x-full lg:translate-x-0 shadow-2xl flex flex-col justify-between h-full">
         <div class="p-6 overflow-y-auto">
             <div class="flex justify-between items-center mb-8 lg:hidden">
@@ -293,8 +311,7 @@
 
                 <div class="mt-8 border-t border-gray-200 pt-8">
                     <h3 class="text-center font-bold text-gray-400 text-xs uppercase tracking-widest mb-6">🔥 Ofertas Destacadas</h3>
-                    <div id="hero-destacados-container" class="mobile-slider destacados-grid-pc pb-2">
-                        </div>
+                    <div id="hero-destacados-container" class="mobile-slider destacados-grid-pc pb-2"></div>
                 </div>
             </div>
         </section>
@@ -348,7 +365,6 @@
         </section>
 
         <section class="max-w-3xl mx-auto mb-20 space-y-4">
-            
             <details class="group glass-panel rounded-2xl p-6 cursor-pointer open:ring-1 open:ring-beige/30 transition-all shadow-sm">
                 <summary class="flex justify-between items-center font-bold text-gray-900 list-none select-none">
                     <div class="flex items-center gap-3"><i class="fa fa-user-tag text-beige text-xl"></i><span class="uppercase tracking-wider text-sm">Quiénes Somos</span></div>
@@ -380,11 +396,11 @@
                     <p>✅ <strong>Garantía Real:</strong> Cambios y devoluciones sin costo si el producto falla.</p>
                 </div>
             </details>
-
         </section>
 
     </main>
 
+    <!-- CARRITO LATERAL -->
     <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[160] shadow-2xl transform translate-x-full flex flex-col h-full">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
             <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
@@ -398,11 +414,11 @@
                 <div class="flex-1">
                       <h4 class="font-bold text-[10px] uppercase text-gray-400 mb-2 tracking-wider">Envío (Obligatorio)</h4>
                       <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50 mb-2">
-                        <input type="radio" name="tipo_envio" value="rm" checked onchange="calcularTotal()" class="accent-black w-3 h-3">
+                        <input type="radio" name="tipo_envio" value="rm" checked onchange="calcularTotal(); actualizarOpcionEnvioSegunDireccion();" class="accent-black w-3 h-3">
                         <div><span class="block font-bold text-gray-700 text-[11px]">RM</span><span class="text-[10px] text-gray-500">+$3.500</span></div>
                       </label>
                       <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50">
-                        <input type="radio" name="tipo_envio" value="regiones" onchange="calcularTotal()" class="accent-black w-3 h-3">
+                        <input type="radio" name="tipo_envio" value="regiones" onchange="calcularTotal();" class="accent-black w-3 h-3">
                         <div><span class="block font-bold text-gray-700 text-[11px]">Regiones</span><span class="text-[10px] text-gray-500">Por pagar (Starken)</span></div>
                       </label>
                 </div>
@@ -442,6 +458,7 @@
         <span id="desktop-floating-total">$0</span>
     </button>
 
+    <!-- MODAL PRODUCTO -->
     <div id="product-modal" onclick="if(event.target === this) closeProductModal()" class="fixed inset-0 z-[200] bg-black bg-opacity-50 hidden items-center justify-center p-4">
         <div class="bg-white product-modal-desktop w-full max-w-4xl max-h-[85vh] flex flex-col rounded-2xl shadow-2xl relative h-full">
             <button onclick="closeProductModal()" class="absolute top-4 right-4 z-50 bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-lg hover:bg-red-100 hover:text-red-500 transition">✕</button>
@@ -518,7 +535,6 @@
         if(btnTodas) {
             filtrar('todas', btnTodas);
         } else {
-            // Si el menú no está listo, simplemente mostramos todo
             currentFilteredList = db;
             currentPage = 1;
             renderGrid(currentFilteredList);
@@ -536,7 +552,6 @@
         }
         actualizarBotonesUsuario();
         
-        // Escuchar cambios de sesión (cuando inicia o cierra sesión)
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             if (session) {
                 currentUser = session.user;
@@ -554,13 +569,15 @@
             .from('profiles')
             .select('*')
             .eq('id', userId)
-            .maybeSingle(); // Cambiado de single() a maybeSingle() para evitar error si no existe
+            .maybeSingle();
         if (!error && data) { 
             userProfile = data; 
+            // Al cargar perfil, ajustamos la opción de envío según dirección
+            actualizarOpcionEnvioSegunDireccion();
         } else {
             userProfile = null;
         }
-        return userProfile; // Devolvemos para poder esperarlo
+        return userProfile;
     }
 
     function actualizarBotonesUsuario() {
@@ -585,14 +602,18 @@
         document.body.classList.add('locked');
         
         if (currentUser && userProfile) {
-            // Usuario ya inició sesión: mostrar vista de Perfil
+            // Mostrar vista de perfil con datos actuales
             document.getElementById('auth-login-view').classList.add('hidden');
             document.getElementById('auth-register-view').classList.add('hidden');
             document.getElementById('auth-logged-view').classList.remove('hidden');
-            document.getElementById('logged-user-name').innerText = "Hola, " + (userProfile.nombre?.split(' ')[0] || 'Cliente');
             document.getElementById('logged-user-email').innerText = currentUser.email;
+            // Rellenar formulario de edición
+            document.getElementById('edit-nombre').value = userProfile.nombre || '';
+            document.getElementById('edit-rut').value = userProfile.rut || '';
+            document.getElementById('edit-telefono').value = userProfile.telefono || '';
+            document.getElementById('edit-direccion').value = userProfile.direccion_defecto || '';
+            document.getElementById('edit-referencia').value = userProfile.referencia || '';
         } else {
-            // Usuario no ha iniciado sesión: mostrar vista de Login por defecto
             document.getElementById('auth-logged-view').classList.add('hidden');
             document.getElementById('auth-register-view').classList.add('hidden');
             document.getElementById('auth-login-view').classList.remove('hidden');
@@ -624,7 +645,6 @@
         
         const email = document.getElementById('reg-email').value;
         const emailConfirm = document.getElementById('reg-email-confirm').value;
-
         if(email !== emailConfirm) {
             mostrarToast("Los correos no coinciden. Revísalos.", "error");
             return;
@@ -637,23 +657,23 @@
         const pass = document.getElementById('reg-pass').value;
         const nombre = document.getElementById('reg-nombre').value;
         const rut = document.getElementById('reg-rut').value;
+        const telefono = document.getElementById('reg-telefono').value;
         const direccion = document.getElementById('reg-direccion').value;
         const referencia = document.getElementById('reg-referencia').value;
 
         try {
-            // 1. Crear usuario en Auth de Supabase
             const { data: authData, error: authErr } = await supabaseClient.auth.signUp({ 
                 email: email, 
                 password: pass 
             });
             if (authErr) throw authErr;
 
-            // 2. Guardar datos en la tabla Perfiles
             if (authData.user) {
                 const { error: profileErr } = await supabaseClient.from('profiles').insert({
                     id: authData.user.id,
                     nombre: nombre,
                     rut: rut,
+                    telefono: telefono,
                     direccion_defecto: direccion,
                     referencia: referencia
                 });
@@ -696,10 +716,62 @@
         }
     }
 
+    async function actualizarPerfil(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-update-profile');
+        btn.innerText = "Guardando...";
+        btn.disabled = true;
+
+        const updates = {
+            nombre: document.getElementById('edit-nombre').value,
+            rut: document.getElementById('edit-rut').value,
+            telefono: document.getElementById('edit-telefono').value,
+            direccion_defecto: document.getElementById('edit-direccion').value,
+            referencia: document.getElementById('edit-referencia').value
+        };
+
+        const { error } = await supabaseClient
+            .from('profiles')
+            .update(updates)
+            .eq('id', currentUser.id);
+
+        btn.innerText = "Actualizar mis datos";
+        btn.disabled = false;
+
+        if (error) {
+            mostrarToast("Error al actualizar: " + error.message, "error");
+        } else {
+            mostrarToast("Perfil actualizado");
+            await cargarPerfil(currentUser.id);
+            closeAuthModal(); // Opcional: cerrar modal después de guardar
+        }
+    }
+
     async function cerrarSesion() {
         await supabaseClient.auth.signOut();
         mostrarToast("Sesión cerrada", "info");
         closeAuthModal();
+    }
+
+    // --- FUNCIÓN PARA DETECTAR REGIÓN METROPOLITANA ---
+    function esRegionMetropolitana(direccion) {
+        if (!direccion) return false;
+        const lower = direccion.toLowerCase();
+        const comunasRM = ['santiago', 'ñuñoa', 'providencia', 'las condes', 'vitacura', 'lo barnechea', 'la reina', 'peñalolén', 'la florida', 'macul', 'san joaquín', 'san miguel', 'pedro aguirre cerda', 'lo espejo', 'estación central', 'cerrillos', 'maipú', 'quinta normal', 'renca', 'independencia', 'conchalí', 'huechuraba', 'recoleta', 'cerro navia', 'lo prado', 'quilicura', 'pudahuel', 'colina', 'lampa', 'til til', 'pirque', 'puente alto', 'san bernardo', 'calera de tango', 'buin', 'paine', 'melipilla', 'maría pinto', 'curacaví', 'talagante', 'el monte', 'isla de maipo', 'padre hurtado', 'peñaflor'];
+        return comunasRM.some(comuna => lower.includes(comuna)) || lower.includes('rm') || lower.includes('region metropolitana');
+    }
+
+    function actualizarOpcionEnvioSegunDireccion() {
+        if (!userProfile || !userProfile.direccion_defecto) return;
+        const esRM = esRegionMetropolitana(userProfile.direccion_defecto);
+        const radioRM = document.querySelector('input[name="tipo_envio"][value="rm"]');
+        const radioRegiones = document.querySelector('input[name="tipo_envio"][value="regiones"]');
+        if (esRM) {
+            radioRM.checked = true;
+        } else {
+            radioRegiones.checked = true;
+        }
+        calcularTotal();
     }
 
     // --- CARGA DE PRODUCTOS DESDE SUPABASE ---
@@ -720,9 +792,9 @@
                 cat: p.categoria || 'Otros',
                 precio: Number(p.precio) || 0,
                 img: p.foto || '',
-                disponible: p.estado_stock && p.estado_stock.toLowerCase().includes('con stock'),
+                disponible: (p.stock || 0) > 0,
                 destacado: p.destacado || 0,
-                stock: p.stock || 0 // Asumimos que existe columna stock numérica
+                stock: p.stock || 0
             }));
 
             procesarBaseDatos();
@@ -903,16 +975,21 @@
         });
     }
 
-    // --- MANEJO DEL CARRITO ---
+    // --- MANEJO DEL CARRITO (con control de stock) ---
     function addToCart(id) {
         const p = db.find(x => x.id === id);
-        if (!p || !p.disponible) { 
+        if (!p || p.stock <= 0) { 
             mostrarToast("Producto agotado", "error"); 
             return; 
         }
         let item = cart.find(i => i.id === id);
+        const cantidadActual = item ? item.qty : 0;
+        if (cantidadActual + 1 > p.stock) {
+            mostrarToast(`Solo hay ${p.stock} unidades disponibles`, "error");
+            return;
+        }
         if (item) {
-            item.qty++; 
+            item.qty++;
         } else {
             cart.push({ ...p, qty: 1 });
         }
@@ -935,6 +1012,12 @@
     function cambiarCantidad(id, n) {
         let item = cart.find(x => x.id === id);
         if(!item) return;
+        const p = db.find(x => x.id === id);
+        const nuevaCantidad = item.qty + n;
+        if (n > 0 && nuevaCantidad > p.stock) {
+            mostrarToast(`Máximo ${p.stock} unidades`, "error");
+            return;
+        }
         item.qty += n;
         if(item.qty <= 0) {
             removeFromCart(id); 
@@ -1080,104 +1163,103 @@
         }
     }
 
-    // --- PROCESAR PEDIDO Y ENVIAR A SUPABASE (con validación de perfil y actualización de stock) ---
-   async function procesarCheckout() {
-    if(cart.length === 0) return;
-    
-    if(!currentUser) {
-        mostrarToast("Debes iniciar sesión para pedir", "info");
-        openAuthModal();
-        return;
-    }
-
-    // Asegurar que el perfil esté cargado
-    if (!userProfile) {
-        mostrarToast("Cargando tu perfil...", "info");
-        await cargarPerfil(currentUser.id);
-    }
-
-    if (!userProfile || !userProfile.direccion_defecto || !userProfile.rut) {
-        mostrarToast("Completa tus datos de envío en Mi Cuenta", "error");
-        openAuthModal();
-        return;
-    }
-
-    const btn = document.getElementById('btn-checkout');
-    btn.innerHTML = "Procesando... <i class='fa fa-spinner fa-spin'></i>"; 
-    btn.disabled = true;
-
-    try {
-        // Obtener tipo de envío
-        let tipoEnvioTexto = "rm";
-        for(const r of document.getElementsByName('tipo_envio')) { 
-            if(r.checked) tipoEnvioTexto = r.value; 
-        }
+    // --- PROCESAR PEDIDO USANDO FUNCIÓN RPC ---
+    async function procesarCheckout() {
+        if(cart.length === 0) return;
         
-        let tipoDocTexto = "Boleta";
-        for(const r of document.getElementsByName('tipo_doc')) { 
-            if(r.checked) tipoDocTexto = r.value; 
+        if(!currentUser) {
+            mostrarToast("Debes iniciar sesión para pedir", "info");
+            openAuthModal();
+            return;
         }
 
-        const direccion = userProfile.direccion_defecto || '';
-        const referencia = userProfile.referencia || '';
-        const dirEnvio = direccion + (referencia ? ` | Ref: ${referencia}` : '');
-
-        // Preparar los items en el formato que espera la función
-        const items = cart.map(item => ({
-            product_id: item.id,
-            cantidad: item.qty,
-            precio_historico: item.precio
-        }));
-
-        // Llamar a la función RPC
-        const { data, error } = await supabaseClient.rpc('crear_pedido', {
-            p_user_id: currentUser.id,
-            p_tipo_envio: tipoEnvioTexto,
-            p_costo_envio: costoEnvio,
-            p_tipo_doc: tipoDocTexto,
-            p_total: totalPagarFinal,
-            p_direccion_envio: dirEnvio,
-            p_items: items
-        });
-
-        if (error) throw error;
-
-        const orderId = data.order_id;
-
-        // Construir mensaje de WhatsApp
-        const totalText = document.getElementById('cart-total').innerText;
-        const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre}\n  [SKU: ${p.sku}] - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
-        const nombreCliente = userProfile.nombre || "Cliente";
-        const envioLabel = tipoEnvioTexto === 'rm' ? 'Región Metropolitana (+$3.500)' : 'Regiones (Por pagar - Starken)';
-
-        const msg = `*NUEVO PEDIDO #${orderId}* 🛒\n\nHola *Papajose SPA*, soy ${nombreCliente}. Confirmo mi pedido:\n\n${itemsList}\n\n*ENVÍO:* ${envioLabel}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia a Cuenta Empresa.`;
-
-        const whatsappWindow = window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
-
-        // Limpiar carrito
-        setTimeout(() => {
-            cart = [];
-            localStorage.removeItem('papajose_cart');
-            updateCartUI();
-            forceCloseCart();
-            mostrarToast(`Pedido #${orderId} registrado con éxito`, "success");
-        }, 500);
-
-        if (!whatsappWindow || whatsappWindow.closed) {
-            await navigator.clipboard.writeText(msg);
-            mostrarToast("Mensaje copiado. Pégalo en WhatsApp.", "info");
+        if (!userProfile) {
+            mostrarToast("Cargando tu perfil...", "info");
+            await cargarPerfil(currentUser.id);
         }
 
-    } catch (error) {
-        console.error(error);
-        mostrarToast("Error al procesar el pedido: " + (error.message || "Intenta nuevamente."), "error");
-    } finally {
-        btn.innerHTML = `Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>`;
-        btn.disabled = false;
+        if (!userProfile || !userProfile.direccion_defecto || !userProfile.rut || !userProfile.telefono) {
+            mostrarToast("Completa tus datos de envío en Mi Cuenta (nombre, RUT, teléfono, dirección)", "error");
+            openAuthModal();
+            return;
+        }
+
+        const btn = document.getElementById('btn-checkout');
+        btn.innerHTML = "Procesando... <i class='fa fa-spinner fa-spin'></i>"; 
+        btn.disabled = true;
+
+        try {
+            let tipoEnvioTexto = "rm";
+            for(const r of document.getElementsByName('tipo_envio')) { 
+                if(r.checked) tipoEnvioTexto = r.value; 
+            }
+            
+            let tipoDocTexto = "Boleta";
+            for(const r of document.getElementsByName('tipo_doc')) { 
+                if(r.checked) tipoDocTexto = r.value; 
+            }
+
+            const direccion = userProfile.direccion_defecto || '';
+            const referencia = userProfile.referencia || '';
+            const dirEnvio = direccion + (referencia ? ` | Ref: ${referencia}` : '');
+
+            // Preparar items en formato para la función RPC
+            const items = cart.map(item => ({
+                product_id: item.id,
+                cantidad: item.qty,
+                precio_historico: item.precio
+            }));
+
+            // Llamar a la función RPC crear_pedido
+            const { data, error } = await supabaseClient.rpc('crear_pedido', {
+                p_user_id: currentUser.id,
+                p_tipo_envio: tipoEnvioTexto,
+                p_costo_envio: costoEnvio,
+                p_tipo_doc: tipoDocTexto,
+                p_total: totalPagarFinal,
+                p_direccion_envio: dirEnvio,
+                p_items: items
+            });
+
+            if (error) throw error;
+
+            const orderId = data.order_id;
+
+            // Mensaje de WhatsApp sin RUT, incluyendo nombre, dirección y teléfono
+            const totalText = document.getElementById('cart-total').innerText;
+            const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre}\n  [SKU: ${p.sku}] - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
+            const nombreCliente = userProfile.nombre || "Cliente";
+            const telefonoCliente = userProfile.telefono || '';
+            const envioLabel = tipoEnvioTexto === 'rm' ? 'Región Metropolitana (+$3.500)' : 'Regiones (Por pagar - Starken)';
+
+            const msg = `*NUEVO PEDIDO #${orderId}* 🛒\n\nHola *Papajose SPA*, soy ${nombreCliente}.\n📞 Tel: ${telefonoCliente}\n📦 Dirección: ${dirEnvio}\n\nMi pedido:\n${itemsList}\n\n*ENVÍO:* ${envioLabel}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
+            
+            const whatsappWindow = window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            // Limpiar carrito y actualizar UI
+            setTimeout(() => {
+                cart = []; 
+                localStorage.removeItem('papajose_cart'); 
+                updateCartUI(); 
+                forceCloseCart(); 
+                mostrarToast(`Pedido #${orderId} registrado con éxito`, "success");
+            }, 500); 
+
+            if (!whatsappWindow || whatsappWindow.closed) {
+                await navigator.clipboard.writeText(msg);
+                mostrarToast("Mensaje copiado. Pégalo en WhatsApp.", "info");
+            }
+
+        } catch (error) {
+            console.error(error);
+            mostrarToast("Error al procesar el pedido: " + (error.message || "Intenta nuevamente."), "error");
+        } finally {
+            btn.innerHTML = `Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>`; 
+            btn.disabled = false;
+        }
     }
-}
 
-    // --- GENERACIÓN DE VISTAS HTML ---
+    // --- GENERACIÓN DE VISTAS HTML (con stock visible) ---
     function cardHTML(p) {
         const btnClass = p.disponible ? "bg-gray-900 text-white hover:bg-beige" : "bg-gray-200 text-gray-400 cursor-not-allowed";
         const btnText = p.disponible ? "Agregar" : "Agotado";
@@ -1198,6 +1280,7 @@
                 <div class="p-4 flex flex-col grow">
                     <h4 class="font-medium text-gray-800 text-sm mb-1 leading-snug line-clamp-2 grow">${p.nombre}</h4>
                     <p class="text-[10px] text-gray-400 font-mono mb-2">SKU: ${p.sku}</p>
+                    <p class="text-[10px] text-gray-500">Stock: <span class="font-bold ${p.stock <= 3 ? 'text-red-500' : 'text-green-600'}">${p.stock}</span></p>
                     <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
                         <span class="font-black text-lg text-gray-900">$${p.precio.toLocaleString()}</span>
                         <button onclick="${action}" class="text-xs font-bold px-3 py-2 rounded-lg transition uppercase ${btnClass}">${btnText}</button>
@@ -1227,6 +1310,7 @@
                             <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-2 leading-tight">${p.nombre}</h1>
                             <p class="text-sm font-mono text-gray-400 mb-4">SKU: ${p.sku}</p>
                             <p class="text-gray-600 leading-relaxed mb-6 font-medium">${p.desc}</p>
+                            <p class="text-sm text-gray-500">Stock disponible: <span class="font-bold ${p.stock <= 3 ? 'text-red-500' : 'text-green-600'}">${p.stock}</span></p>
                         </div>
                     </div>
                 </div>
@@ -1267,7 +1351,7 @@
         setTimeout(() => { 
             t.classList.remove('toast-visible'); 
             setTimeout(() => t.classList.add('hidden'), 300); 
-        }, 2500); // Aumentado a 2.5 segundos para mejor lectura
+        }, 2500);
     }
 
     function initSwipeGestures() {
@@ -1299,5 +1383,3 @@
     
 </body>
 </html>
-
-
