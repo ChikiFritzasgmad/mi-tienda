@@ -44,6 +44,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         /* --- ESTILOS VISUALES --- */
         :root { 
@@ -401,8 +403,11 @@
     </div>
 
     <script>
+        // CONFIGURACIÓN GLOBAL Y SUPABASE
         const WHATSAPP_NUM = "56936416743"; 
-        const DB_URL = "db.json"; 
+        const supabaseUrl = 'https://elwzheytotfsxzrcsioz.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsd3poZXl0b3Rmc3h6cmNzaW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzE0MzIsImV4cCI6MjA4Njc0NzQzMn0.0WLFkRsWPdYJSL_Oo6TtK0t5P_0cv9pJi95uXm9TKTg';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         
         let db = [];
         let cart = JSON.parse(localStorage.getItem('papajose_cart')) || [];
@@ -454,16 +459,35 @@
             mostrarToast("Volviendo al inicio", "info");
         }
 
+        // --- NUEVA LÓGICA DE CARGA: LECTURA DESDE SUPABASE ---
         async function cargarBaseDatos() {
             try {
-                const response = await fetch(`${DB_URL}?v=${Date.now()}`);
-                if (!response.ok) throw new Error("Error al cargar productos");
-                db = await response.json();
+                // Hacemos la consulta a tu nueva tabla en la nube
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('destacado', { ascending: false });
+
+                if (error) throw error;
+
+                // Transformamos los datos de Supabase para que el resto del código no se rompa
+                db = data.map(p => ({
+                    id: p.id,
+                    sku: p.numero_producto || 'S/N',
+                    nombre: p.producto,
+                    desc: p.descripcion || 'Sin descripción',
+                    cat: p.categoria || 'Otros',
+                    precio: Number(p.precio) || 0,
+                    img: p.foto || '',
+                    disponible: p.estado_stock && p.estado_stock.toLowerCase().includes('con stock'),
+                    destacado: p.destacado || 0
+                }));
+
                 procesarBaseDatos();
             } catch (error) {
                 console.error("Error cargando productos:", error);
                 mostrarToast("Error cargando productos. Intenta recargar.", "error");
-                document.getElementById('loading-msg').innerHTML = '<p class="text-red-500 font-bold">Error de conexión.</p>';
+                document.getElementById('loading-msg').innerHTML = '<p class="text-red-500 font-bold">Error de conexión con la Base de Datos.</p>';
             }
         }
 
