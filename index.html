@@ -407,7 +407,9 @@
         const WHATSAPP_NUM = "56936416743"; 
         const supabaseUrl = 'https://elwzheytotfsxzrcsioz.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsd3poZXl0b3Rmc3h6cmNzaW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzE0MzIsImV4cCI6MjA4Njc0NzQzMn0.0WLFkRsWPdYJSL_Oo6TtK0t5P_0cv9pJi95uXm9TKTg';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // EL CAMBIO: Le pusimos "supabaseClient" para que no choque
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         
         let db = [];
         let cart = JSON.parse(localStorage.getItem('papajose_cart')) || [];
@@ -458,12 +460,12 @@
             renderGrid(currentFilteredList);
             mostrarToast("Volviendo al inicio", "info");
         }
-
-        // --- NUEVA LÓGICA DE CARGA: LECTURA DESDE SUPABASE ---
+        
+       // --- NUEVA LÓGICA DE CARGA: LECTURA DESDE SUPABASE ---
         async function cargarBaseDatos() {
             try {
-                // Hacemos la consulta a tu nueva tabla en la nube
-                const { data, error } = await supabase
+                // EL CAMBIO: Usamos supabaseClient
+                const { data, error } = await supabaseClient
                     .from('products')
                     .select('*')
                     .order('destacado', { ascending: false });
@@ -887,3 +889,4 @@
     </script>
 </body>
 </html>
+
