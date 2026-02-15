@@ -1081,143 +1081,101 @@
     }
 
     // --- PROCESAR PEDIDO Y ENVIAR A SUPABASE (con validación de perfil y actualización de stock) ---
-    async function procesarCheckout() {
-        if(cart.length === 0) return;
-        
-        // Si el cliente no ha iniciado sesión, le abrimos el modal
-        if(!currentUser) {
-            mostrarToast("Debes crear una cuenta o iniciar sesión para pedir", "info");
-            openAuthModal();
-            return;
-        }
-
-        // Asegurar que el perfil esté cargado
-        if (!userProfile) {
-            mostrarToast("Cargando tu perfil...", "info");
-            await cargarPerfil(currentUser.id);
-        }
-
-        // Verificar que el perfil tenga los datos obligatorios
-        if (!userProfile || !userProfile.direccion_defecto || !userProfile.rut) {
-            mostrarToast("Completa tus datos de envío en Mi Cuenta antes de continuar", "error");
-            openAuthModal(); // Para que pueda ver/editar su perfil
-            return;
-        }
-
-        const btn = document.getElementById('btn-checkout');
-        btn.innerHTML = "Procesando... <i class='fa fa-spinner fa-spin'></i>"; 
-        btn.disabled = true;
-
-        try {
-            let tipoEnvioTexto = "rm";
-            for(const r of document.getElementsByName('tipo_envio')) { 
-                if(r.checked) tipoEnvioTexto = r.value; 
-            }
-            
-            let tipoDocTexto = "Boleta";
-            for(const r of document.getElementsByName('tipo_doc')) { 
-                if(r.checked) tipoDocTexto = r.value; 
-            }
-
-            // Construir dirección de envío evitando valores nulos
-            const direccion = userProfile.direccion_defecto || '';
-            const referencia = userProfile.referencia || '';
-            const dirEnvio = direccion + (referencia ? ` | Ref: ${referencia}` : '');
-
-            // 1. Guardar la Orden en Supabase (Tabla orders)
-            const { data: order, error: orderError } = await supabaseClient
-                .from('orders')
-                .insert({
-                    user_id: currentUser.id,
-                    estado: 'Pendiente de Pago',
-                    tipo_envio: tipoEnvioTexto,
-                    costo_envio: costoEnvio,
-                    tipo_doc: tipoDocTexto,
-                    total: totalPagarFinal,
-                    direccion_envio: dirEnvio
-                })
-                .select()
-                .single();
-
-            if (orderError) throw orderError;
-
-            // 2. Preparar inserción de items y actualización de stock
-            const itemsToInsert = cart.map(p => ({
-                order_id: order.id,
-                product_id: p.id,
-                cantidad: p.qty,
-                precio_historico: p.precio
-            }));
-
-            // 3. Verificar stock suficiente para cada producto
-            for (const item of cart) {
-                const productoDB = db.find(p => p.id === item.id);
-                if (!productoDB || productoDB.stock < item.qty) {
-                    throw new Error(`Stock insuficiente para ${item.nombre}. Stock disponible: ${productoDB?.stock || 0}`);
-                }
-            }
-
-            // 4. Insertar items en order_items
-            const { error: itemsError } = await supabaseClient
-                .from('order_items')
-                .insert(itemsToInsert);
-                
-            if (itemsError) throw itemsError;
-
-            // 5. Restar stock de cada producto
-            for (const item of cart) {
-                const { error: stockError } = await supabaseClient
-                    .from('products')
-                    .update({ stock: supabaseClient.rpc('decrement', { x: item.qty }) }) // Asumiendo que tienes una función decrement, sino haz update manual
-                    .eq('id', item.id);
-                
-                // Si no tienes función decrement, puedes hacer:
-                // const producto = db.find(p => p.id === item.id);
-                // const nuevoStock = producto.stock - item.qty;
-                // const { error: stockError } = await supabaseClient
-                //     .from('products')
-                //     .update({ stock: nuevoStock })
-                //     .eq('id', item.id);
-                
-                if (stockError) throw stockError;
-            }
-
-            // 6. Abrir WhatsApp con el Número de Pedido y los detalles
-            const totalText = document.getElementById('cart-total').innerText;
-            const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre}\n  [SKU: ${p.sku}] - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
-            const nombreCliente = userProfile.nombre || "Cliente";
-            
-            const envioLabel = tipoEnvioTexto === 'rm' ? 'Región Metropolitana (+$3.500)' : 'Regiones (Por pagar - Starken)';
-
-            const msg = `*NUEVO PEDIDO #${order.id}* 🛒\n\nHola *Papajose SPA*, soy ${nombreCliente}. Confirmo mi pedido:\n\n${itemsList}\n\n*ENVÍO:* ${envioLabel}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia a Cuenta Empresa.`;
-            
-            const whatsappWindow = window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
-            
-            // Limpiar el carrito después de enviar
-            setTimeout(() => {
-                cart = []; 
-                localStorage.removeItem('papajose_cart'); 
-                updateCartUI(); 
-                forceCloseCart(); 
-                mostrarToast(`Pedido #${order.id} registrado con éxito`, "success");
-            }, 500); 
-
-            // Si el navegador bloquea la ventana emergente, copiamos al portapapeles
-            if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed == 'undefined') {
-                await navigator.clipboard.writeText(msg);
-                mostrarToast("Mensaje copiado. Pégalo en WhatsApp.", "info");
-            }
-
-        } catch (error) {
-            console.error(error);
-            // Si ocurrió un error después de crear la orden, deberíamos eliminarla para mantener consistencia
-            // (Esto sería más elegante con una transacción)
-            mostrarToast("Error al procesar el pedido: " + (error.message || "Intenta nuevamente."), "error");
-        } finally {
-            btn.innerHTML = `Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>`; 
-            btn.disabled = false;
-        }
+   async function procesarCheckout() {
+    if(cart.length === 0) return;
+    
+    if(!currentUser) {
+        mostrarToast("Debes iniciar sesión para pedir", "info");
+        openAuthModal();
+        return;
     }
+
+    // Asegurar que el perfil esté cargado
+    if (!userProfile) {
+        mostrarToast("Cargando tu perfil...", "info");
+        await cargarPerfil(currentUser.id);
+    }
+
+    if (!userProfile || !userProfile.direccion_defecto || !userProfile.rut) {
+        mostrarToast("Completa tus datos de envío en Mi Cuenta", "error");
+        openAuthModal();
+        return;
+    }
+
+    const btn = document.getElementById('btn-checkout');
+    btn.innerHTML = "Procesando... <i class='fa fa-spinner fa-spin'></i>"; 
+    btn.disabled = true;
+
+    try {
+        // Obtener tipo de envío
+        let tipoEnvioTexto = "rm";
+        for(const r of document.getElementsByName('tipo_envio')) { 
+            if(r.checked) tipoEnvioTexto = r.value; 
+        }
+        
+        let tipoDocTexto = "Boleta";
+        for(const r of document.getElementsByName('tipo_doc')) { 
+            if(r.checked) tipoDocTexto = r.value; 
+        }
+
+        const direccion = userProfile.direccion_defecto || '';
+        const referencia = userProfile.referencia || '';
+        const dirEnvio = direccion + (referencia ? ` | Ref: ${referencia}` : '');
+
+        // Preparar los items en el formato que espera la función
+        const items = cart.map(item => ({
+            product_id: item.id,
+            cantidad: item.qty,
+            precio_historico: item.precio
+        }));
+
+        // Llamar a la función RPC
+        const { data, error } = await supabaseClient.rpc('crear_pedido', {
+            p_user_id: currentUser.id,
+            p_tipo_envio: tipoEnvioTexto,
+            p_costo_envio: costoEnvio,
+            p_tipo_doc: tipoDocTexto,
+            p_total: totalPagarFinal,
+            p_direccion_envio: dirEnvio,
+            p_items: items
+        });
+
+        if (error) throw error;
+
+        const orderId = data.order_id;
+
+        // Construir mensaje de WhatsApp
+        const totalText = document.getElementById('cart-total').innerText;
+        const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre}\n  [SKU: ${p.sku}] - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
+        const nombreCliente = userProfile.nombre || "Cliente";
+        const envioLabel = tipoEnvioTexto === 'rm' ? 'Región Metropolitana (+$3.500)' : 'Regiones (Por pagar - Starken)';
+
+        const msg = `*NUEVO PEDIDO #${orderId}* 🛒\n\nHola *Papajose SPA*, soy ${nombreCliente}. Confirmo mi pedido:\n\n${itemsList}\n\n*ENVÍO:* ${envioLabel}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia a Cuenta Empresa.`;
+
+        const whatsappWindow = window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
+
+        // Limpiar carrito
+        setTimeout(() => {
+            cart = [];
+            localStorage.removeItem('papajose_cart');
+            updateCartUI();
+            forceCloseCart();
+            mostrarToast(`Pedido #${orderId} registrado con éxito`, "success");
+        }, 500);
+
+        if (!whatsappWindow || whatsappWindow.closed) {
+            await navigator.clipboard.writeText(msg);
+            mostrarToast("Mensaje copiado. Pégalo en WhatsApp.", "info");
+        }
+
+    } catch (error) {
+        console.error(error);
+        mostrarToast("Error al procesar el pedido: " + (error.message || "Intenta nuevamente."), "error");
+    } finally {
+        btn.innerHTML = `Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>`;
+        btn.disabled = false;
+    }
+}
 
     // --- GENERACIÓN DE VISTAS HTML ---
     function cardHTML(p) {
@@ -1341,4 +1299,5 @@
     
 </body>
 </html>
+
 
