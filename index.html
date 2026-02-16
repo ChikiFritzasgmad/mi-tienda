@@ -643,6 +643,7 @@
             cargarProductosPagina(1); // carga inicial
             updateCartUI();
             initSwipeGestures();
+            generarMenuCategorias(); // <-- AÑADIDO PARA QUE APAREZCAN LAS CATEGORÍAS
         });
 
         // --- FUNCIONES DE PAGINACIÓN (NUEVAS) ---
@@ -694,6 +695,11 @@
                 renderGrid(listaFiltrada, page);
                 renderPaginationControls(page, listaFiltrada.length);
                 renderDestacados(db); // destacados con todos
+
+                // 👇 OCULTAR LOADING Y MOSTRAR CATÁLOGO
+                document.getElementById('loading-msg').classList.add('hidden');
+                document.getElementById('seccion-catalogo').classList.remove('hidden');
+
             } catch (error) {
                 console.error(error);
                 mostrarToast("Error cargando productos", "error");
