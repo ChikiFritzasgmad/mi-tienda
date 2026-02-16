@@ -199,8 +199,13 @@
                 </div>
             </div>
 
-            <!-- Columna derecha: usuario y carrito -->
+            <!-- Columna derecha: buscador (escritorio), usuario y carrito -->
             <div class="flex justify-end items-center gap-3">
+                <!-- Buscador de escritorio (restaurado) -->
+                <div class="hidden lg:block relative group mr-2">
+                    <input type="text" onkeyup="buscar(this.value)" placeholder="Buscar producto o SKU..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
+                    <i class="fa fa-search absolute right-4 top-3 text-beige"></i>
+                </div>
                 <button onclick="openAuthModal()" class="relative p-2 group" id="user-btn-header">
                     <i class="fa fa-user text-xl text-gray-400 group-hover:text-black transition" id="user-icon"></i>
                 </button>
@@ -586,7 +591,7 @@
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         
         // Variables globales
-        let db = []; // solo para caché de productos activos (opcional)
+        let db = [];
         let cart = JSON.parse(localStorage.getItem('papajose_cart')) || [];
         let currentPage = 1;
         const itemsPerPage = 20;
@@ -605,7 +610,7 @@
         const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESin Foto%3C/text%3E%3C/svg%3E";
 
         // Variable para controlar edición
-        let productoEnEdicion = null; // guarda el ID cuando se edita
+        let productoEnEdicion = null;
 
         // --- INICIALIZACIÓN ---
         window.addEventListener('popstate', function(event) {
@@ -639,33 +644,47 @@
 
         window.addEventListener('DOMContentLoaded', () => { 
             verificarSesion();
-            cargarTotalProductos(); // para paginación
-            cargarProductosPagina(1); // carga inicial
+            cargarProductosPagina(1); // carga inicial (ya no llamamos a cargarTotalProductos)
             updateCartUI();
             initSwipeGestures();
-            generarMenuCategorias(); // <-- AÑADIDO PARA QUE APAREZCAN LAS CATEGORÍAS
+            generarMenuCategorias();
         });
 
-        // --- FUNCIONES DE PAGINACIÓN (NUEVAS) ---
-        async function cargarTotalProductos() {
-            const { count, error } = await supabaseClient
-                .from('products')
-                .select('*', { count: 'exact', head: true });
-            if (!error) totalProductos = count;
-        }
-
+        // --- FUNCIÓN PRINCIPAL DE CARGA CON FILTROS EN LA BD ---
         async function cargarProductosPagina(page) {
+            // Ocultamos el catálogo y mostramos el mensaje de carga
+            document.getElementById('loading-msg').classList.remove('hidden');
+            document.getElementById('seccion-catalogo').classList.add('hidden');
+
             const from = (page - 1) * itemsPerPage;
             const to = from + itemsPerPage - 1;
+
             try {
-                const { data, error } = await supabaseClient
+                // 1. Armamos la consulta base pidiendo también el conteo total exacto
+                let query = supabaseClient
                     .from('products')
-                    .select('*')
+                    .select('*', { count: 'exact' })
                     .order('destacado', { ascending: false })
                     .range(from, to);
-                if (error) throw error;
+
+                // 2. Aplicamos filtros a la consulta ANTES de descargar los datos
+                if (filtroActual !== 'todas') {
+                    query = query.eq('categoria', filtroActual);
+                }
                 
-                // Mapear a formato interno
+                if (busquedaActual.length > 0) {
+                    // Busca coincidencias en nombre O en sku ignorando mayúsculas (ilike)
+                    query = query.or(`producto.ilike.%${busquedaActual}%,numero_producto.ilike.%${busquedaActual}%`);
+                }
+
+                // 3. Ejecutamos la petición a Supabase
+                const { data, count, error } = await query;
+                if (error) throw error;
+
+                // 4. Actualizamos el total de productos para que los botones se calculen bien
+                totalProductos = count || 0;
+
+                // Mapeamos los datos al formato interno
                 db = data.map(p => ({
                     id: p.id,
                     sku: p.numero_producto || 'S/N',
@@ -679,24 +698,12 @@
                     stock: p.stock || 0
                 }));
 
-                // Aplicar filtro si existe
-                let listaFiltrada = db;
-                if (filtroActual !== 'todas') {
-                    listaFiltrada = db.filter(p => p.cat === filtroActual);
-                }
-                if (busquedaActual.length > 0) {
-                    listaFiltrada = listaFiltrada.filter(p => 
-                        p.nombre.toLowerCase().includes(busquedaActual) ||
-                        p.sku.toLowerCase().includes(busquedaActual)
-                    );
-                }
-                
-                // Actualizar grid
-                renderGrid(listaFiltrada, page);
-                renderPaginationControls(page, listaFiltrada.length);
-                renderDestacados(db); // destacados con todos
+                // 5. Renderizamos en pantalla
+                renderGrid(db, page);
+                renderPaginationControls(page); 
+                renderDestacados(db);
 
-                // 👇 OCULTAR LOADING Y MOSTRAR CATÁLOGO
+                // Mostramos el catálogo
                 document.getElementById('loading-msg').classList.add('hidden');
                 document.getElementById('seccion-catalogo').classList.remove('hidden');
 
@@ -720,7 +727,7 @@
             contenedor.innerHTML = lista.map(p => cardHTML(p)).join(''); 
         }
 
-        function renderPaginationControls(page, itemsCount) {
+        function renderPaginationControls(page) {
             const controls = document.getElementById('pagination-controls');
             const totalPages = Math.ceil(totalProductos / itemsPerPage);
             if (totalPages <= 1) { 
@@ -764,7 +771,7 @@
             
             searchTimeout = setTimeout(() => {
                 busquedaActual = query.toLowerCase();
-                currentPage = 1; // reiniciar a primera página
+                currentPage = 1;
                 cargarProductosPagina(1);
             }, 300); 
         }
@@ -816,7 +823,7 @@
             });
         }
 
-        // --- DESTACADOS (se cargan una vez con todos los productos, pero para no complicar, usamos db completa) ---
+        // --- DESTACADOS ---
         function renderDestacados(lista) {
             const destacados = lista.filter(p => p.destacado === 1 && p.disponible).slice(0, 6); 
             const container = document.getElementById('hero-destacados-container');
@@ -1088,7 +1095,7 @@
             calcularTotal();
         }
 
-        // --- CARRITO Y CHECKOUT (sin cambios mayores) ---
+        // --- CARRITO Y CHECKOUT ---
         function addToCart(id) {
             const p = db.find(x => x.id === id);
             if (!p || p.stock <= 0) { 
@@ -1379,13 +1386,12 @@
             history.back(); 
         }
 
-        // --- FUNCIONES DE ADMIN (NUEVAS Y MEJORADAS) ---
+        // --- FUNCIONES DE ADMIN ---
         function openAdminModal() {
             history.pushState({modal: 'admin'}, null, "");
             document.getElementById('admin-modal').classList.remove('hidden');
             document.body.classList.add('locked');
             cargarProductosAdmin();
-            // Resetear formulario y modo creación
             document.getElementById('producto-form').reset();
             document.getElementById('producto-id').value = '';
             document.getElementById('imagen-actual').classList.add('hidden');
@@ -1464,7 +1470,6 @@
             }
             document.getElementById('btn-guardar-producto').innerText = 'Guardar Cambios';
             document.getElementById('form-titulo').innerText = 'Editar Producto';
-            // Cambiar a pestaña de edición
             switchAdminTab('nuevo');
         }
 
@@ -1493,7 +1498,6 @@
             const imagenFile = document.getElementById('producto-imagen').files[0];
             const productoId = document.getElementById('producto-id').value;
 
-            // Validaciones básicas
             if (precio < 0) {
                 mostrarToast("El precio no puede ser negativo", "error");
                 btn.innerText = productoId ? "Guardar Cambios" : "Crear Producto";
@@ -1510,7 +1514,6 @@
             try {
                 let imagenUrl = null;
                 if (imagenFile) {
-                    // Subir imagen a Storage
                     const fileExt = imagenFile.name.split('.').pop();
                     const fileName = `${sku}-${Date.now()}.${fileExt}`;
                     const { error: uploadError } = await supabaseClient.storage
@@ -1537,14 +1540,12 @@
 
                 let error;
                 if (productoId) {
-                    // Actualizar
                     const { error: updateError } = await supabaseClient
                         .from('products')
                         .update(productoData)
                         .eq('id', productoId);
                     error = updateError;
                 } else {
-                    // Insertar
                     const { error: insertError } = await supabaseClient
                         .from('products')
                         .insert(productoData);
@@ -1553,10 +1554,8 @@
                 if (error) throw error;
 
                 mostrarToast(productoId ? "Producto actualizado" : "Producto creado", "success");
-                cancelarEdicion(); // limpia formulario y vuelve a lista
-                cargarProductosAdmin(); // recargar lista
-                // Recargar catálogo principal si es necesario
-                cargarTotalProductos();
+                cancelarEdicion();
+                cargarProductosAdmin();
                 cargarProductosPagina(currentPage);
             } catch (err) {
                 mostrarToast("Error: " + err.message, "error");
@@ -1574,7 +1573,6 @@
             } else {
                 mostrarToast("Producto eliminado", "success");
                 cargarProductosAdmin();
-                cargarTotalProductos();
                 cargarProductosPagina(currentPage);
             }
         }
