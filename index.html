@@ -43,6 +43,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -233,11 +234,10 @@
                     <p class="text-center text-sm text-gray-500 mt-6">¿Ya tienes cuenta? <span onclick="toggleAuthView()" class="text-beige font-black hover:underline cursor-pointer">Inicia Sesión</span></p>
                 </div>
 
-                <!-- VISTA PERFIL (mejorada) -->
+                <!-- VISTA PERFIL -->
                 <div id="auth-logged-view" class="hidden">
                     <h2 class="text-xl font-black text-gray-900 mb-4">Mi Perfil</h2>
                     
-                    <!-- Vista de solo lectura -->
                     <div id="profile-readonly">
                         <div class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
                             <div>
@@ -264,7 +264,6 @@
                         <button onclick="showEditProfile()" class="w-full bg-beige text-gray-900 font-bold py-3 rounded-xl uppercase text-xs shadow-md mt-4 hover:bg-amber-600 transition">✏️ Editar mis datos</button>
                     </div>
 
-                    <!-- Vista de edición (inicialmente oculta) -->
                     <div id="profile-edit" class="hidden">
                         <h3 class="text-lg font-bold text-gray-800 mb-3">Editar datos</h3>
                         <form id="edit-profile-form" onsubmit="actualizarPerfil(event)" class="space-y-3">
@@ -295,7 +294,6 @@
                         </form>
                     </div>
 
-                    <!-- Botón de cierre de sesión (visible en ambas vistas) -->
                     <button onclick="cerrarSesion()" class="w-full mt-6 text-red-500 text-xs font-bold uppercase hover:underline flex items-center justify-center gap-2">
                         <i class="fa fa-sign-out-alt"></i> Cerrar Sesión
                     </button>
@@ -314,6 +312,14 @@
             <button onclick="openAuthModal(); toggleMobileMenu();" class="w-full text-left px-5 py-4 rounded-xl bg-black text-white font-bold flex items-center gap-3 transition-all mb-6 lg:hidden shadow-md">
                 <i class="fa fa-user-circle text-lg"></i> <span id="mobile-menu-user-txt">Mi Cuenta</span>
             </button>
+            
+            <!-- Botón de administración (solo visible para admin) -->
+            <div id="admin-menu-item" class="hidden mb-4">
+                <button onclick="openAdminModal()" class="w-full text-left px-5 py-4 rounded-xl bg-amber-100 text-amber-800 font-bold flex items-center gap-3 transition-all shadow-md hover:bg-amber-200">
+                    <i class="fa fa-cog"></i> Panel Administración
+                </button>
+            </div>
+            
             <nav class="space-y-2" id="nav-categorias"></nav>
         </div>
         <div class="p-8 border-t border-gray-100 bg-white/50">
@@ -502,6 +508,66 @@
         </div>
     </div>
     
+    <!-- MODAL ADMINISTRACIÓN -->
+    <div id="admin-modal" class="fixed inset-0 z-[250] bg-black bg-opacity-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 z-50 bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition">✕</button>
+            <div class="p-8 overflow-y-auto modal-body-scroll">
+                <h2 class="text-2xl font-black text-gray-900 mb-6">Panel de Administración</h2>
+                
+                <!-- Pestañas -->
+                <div class="flex border-b border-gray-200 mb-6">
+                    <button id="tab-productos" class="py-2 px-4 font-bold text-sm uppercase border-b-2 border-beige text-beige" onclick="switchAdminTab('productos')">Productos</button>
+                    <button id="tab-nuevo" class="py-2 px-4 font-bold text-sm uppercase text-gray-500 hover:text-gray-700" onclick="switchAdminTab('nuevo')">+ Nuevo Producto</button>
+                </div>
+
+                <!-- Vista: Lista de productos -->
+                <div id="admin-productos-view" class="block">
+                    <h3 class="font-bold text-lg mb-4">Lista de Productos</h3>
+                    <div id="admin-productos-list" class="space-y-2">
+                        <!-- Se llenará con JS -->
+                    </div>
+                </div>
+
+                <!-- Vista: Nuevo producto -->
+                <div id="admin-nuevo-view" class="hidden">
+                    <h3 class="font-bold text-lg mb-4">Agregar Nuevo Producto</h3>
+                    <form id="nuevo-producto-form" onsubmit="crearProducto(event)" class="space-y-3">
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase">Nombre</label>
+                            <input type="text" id="nuevo-nombre" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase">SKU (Número de producto)</label>
+                            <input type="text" id="nuevo-sku" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase">Precio</label>
+                            <input type="number" id="nuevo-precio" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase">Stock</label>
+                            <input type="number" id="nuevo-stock" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase">Categoría</label>
+                            <input type="text" id="nuevo-categoria" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase">Descripción</label>
+                            <textarea id="nuevo-desc" rows="3" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase">Imagen</label>
+                            <input type="file" id="nuevo-imagen" accept="image/*" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                        </div>
+                        <button type="submit" class="w-full bg-beige text-gray-900 py-3 rounded-xl font-bold uppercase text-sm shadow-md hover:bg-amber-600 transition">Crear Producto</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div id="toast-modal" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[200] hidden transition-all w-11/12 max-w-sm toast-enter">
         <div class="bg-gray-900 text-white rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4">
             <div class="flex items-center gap-3" id="toast-content"></div>
@@ -538,6 +604,7 @@
         const authModal = document.getElementById('auth-modal');
         const cartSidebar = document.getElementById('cart-sidebar');
         const leftSidebar = document.getElementById('left-sidebar');
+        const adminModal = document.getElementById('admin-modal');
         const stickyBar = document.getElementById('mobile-sticky-bar');
 
         if (!modal.classList.contains('hidden')) {
@@ -546,6 +613,9 @@
         }
         if (!authModal.classList.contains('hidden')) {
             closeAuthModal();
+        }
+        if (adminModal && !adminModal.classList.contains('hidden')) {
+            closeAdminModal();
         }
         if (cartSidebar.classList.contains('translate-x-0')) {
             forceCloseCart(); 
@@ -581,17 +651,24 @@
 
     // --- SISTEMA DE USUARIOS Y AUTENTICACIÓN ---
     async function verificarSesion() {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (session) {
-            currentUser = session.user;
+        const { data: { user }, error } = await supabaseClient.auth.getUser();
+        
+        if (error || !user) {
+            await supabaseClient.auth.signOut();
+            currentUser = null;
+            userProfile = null;
+        } else {
+            currentUser = user;
             await cargarPerfil(currentUser.id);
         }
         actualizarBotonesUsuario();
         
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
-            if (session) {
-                currentUser = session.user;
-                await cargarPerfil(currentUser.id);
+            if (session && session.user) {
+                if (!currentUser || currentUser.id !== session.user.id) {
+                    currentUser = session.user;
+                    await cargarPerfil(currentUser.id);
+                }
             } else {
                 currentUser = null;
                 userProfile = null;
@@ -608,6 +685,7 @@
             .maybeSingle();
         if (!error && data) { 
             userProfile = data; 
+            userProfile.esAdmin = (data.rol === 'admin'); // <-- nuevo
             actualizarOpcionEnvioSegunDireccion();
         } else {
             userProfile = null;
@@ -618,14 +696,24 @@
     function actualizarBotonesUsuario() {
         const icon = document.getElementById('user-icon');
         const mobileTxt = document.getElementById('mobile-menu-user-txt');
+        const adminMenuItem = document.getElementById('admin-menu-item');
+        
         if (currentUser) {
             icon.classList.replace('fa-user', 'fa-user-check');
             icon.classList.replace('text-gray-400', 'text-beige');
             if(mobileTxt) mobileTxt.innerText = "Mi Perfil";
+            
+            // Mostrar opción de admin solo si es admin
+            if (userProfile?.esAdmin) {
+                if(adminMenuItem) adminMenuItem.classList.remove('hidden');
+            } else {
+                if(adminMenuItem) adminMenuItem.classList.add('hidden');
+            }
         } else {
             icon.classList.replace('fa-user-check', 'fa-user');
             icon.classList.replace('text-beige', 'text-gray-400');
             if(mobileTxt) mobileTxt.innerText = "Mi Cuenta";
+            if(adminMenuItem) adminMenuItem.classList.add('hidden');
         }
     }
 
@@ -718,7 +806,8 @@
                     rut: rut,
                     telefono: telefono,
                     direccion_defecto: direccion,
-                    referencia: referencia
+                    referencia: referencia,
+                    rol: 'cliente' // Por defecto cliente
                 });
                 if (profileErr) throw profileErr;
             }
@@ -751,7 +840,6 @@
         if (error) { 
             mostrarToast("Correo o contraseña incorrectos", "error"); 
         } else { 
-            // Actualizar estado y perfil
             currentUser = data.user;
             await cargarPerfil(currentUser.id);
             mostrarToast("¡Bienvenido de vuelta!"); 
@@ -762,7 +850,6 @@
         btn.disabled = false;
     }
 
-    // Funciones para alternar vistas de perfil
     function showEditProfile() {
         document.getElementById('profile-readonly').classList.add('hidden');
         document.getElementById('profile-edit').classList.remove('hidden');
@@ -796,7 +883,6 @@
             mostrarToast("Error al actualizar: " + error.message, "error");
         } else {
             mostrarToast("Perfil actualizado correctamente", "success");
-            // Recargar perfil y actualizar vista de solo lectura
             await cargarPerfil(currentUser.id);
             document.getElementById('display-nombre').innerText = userProfile.nombre || '-';
             document.getElementById('display-rut').innerText = userProfile.rut || '-';
@@ -812,6 +898,13 @@
 
     async function cerrarSesion() {
         await supabaseClient.auth.signOut();
+        currentUser = null;
+        userProfile = null;
+        actualizarBotonesUsuario();
+        document.getElementById('login-form').reset();
+        document.getElementById('edit-profile-form').reset();
+        document.getElementById('auth-logged-view').classList.add('hidden');
+        document.getElementById('auth-login-view').classList.remove('hidden');
         mostrarToast("Sesión cerrada", "info");
         closeAuthModal();
     }
@@ -1266,14 +1359,12 @@
             const referencia = userProfile.referencia || '';
             const dirEnvio = direccion + (referencia ? ` | Ref: ${referencia}` : '');
 
-            // Preparar items en formato para la función RPC
             const items = cart.map(item => ({
                 product_id: item.id,
                 cantidad: item.qty,
                 precio_historico: item.precio
             }));
 
-            // Llamar a la función RPC crear_pedido (debe existir en Supabase)
             const { data, error } = await supabaseClient.rpc('crear_pedido', {
                 p_user_id: currentUser.id,
                 p_tipo_envio: tipoEnvioTexto,
@@ -1288,7 +1379,6 @@
 
             const orderId = data.order_id;
 
-            // Mensaje de WhatsApp sin RUT, incluyendo nombre, dirección y teléfono
             const totalText = document.getElementById('cart-total').innerText;
             const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre}\n  [SKU: ${p.sku}] - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
             const nombreCliente = userProfile.nombre || "Cliente";
@@ -1299,7 +1389,6 @@
             
             const whatsappWindow = window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
             
-            // Limpiar carrito y actualizar UI
             setTimeout(() => {
                 cart = []; 
                 localStorage.removeItem('papajose_cart'); 
@@ -1401,6 +1490,140 @@
         history.back(); 
     }
 
+    // ========== FUNCIONES PARA ADMINISTRADOR ==========
+
+    function openAdminModal() {
+        history.pushState({modal: 'admin'}, null, "");
+        document.getElementById('admin-modal').classList.remove('hidden');
+        document.body.classList.add('locked');
+        cargarProductosAdmin();
+    }
+
+    function closeAdminModal() {
+        document.getElementById('admin-modal').classList.add('hidden');
+        document.body.classList.remove('locked');
+        if(history.state && history.state.modal === 'admin') history.back();
+    }
+
+    function switchAdminTab(tab) {
+        document.getElementById('admin-productos-view').classList.toggle('hidden', tab !== 'productos');
+        document.getElementById('admin-nuevo-view').classList.toggle('hidden', tab !== 'nuevo');
+        
+        const tabProductos = document.getElementById('tab-productos');
+        const tabNuevo = document.getElementById('tab-nuevo');
+        if (tab === 'productos') {
+            tabProductos.classList.add('text-beige', 'border-beige');
+            tabProductos.classList.remove('text-gray-500');
+            tabNuevo.classList.remove('text-beige', 'border-beige');
+            tabNuevo.classList.add('text-gray-500');
+        } else {
+            tabNuevo.classList.add('text-beige', 'border-beige');
+            tabNuevo.classList.remove('text-gray-500');
+            tabProductos.classList.remove('text-beige', 'border-beige');
+            tabProductos.classList.add('text-gray-500');
+        }
+    }
+
+    async function cargarProductosAdmin() {
+        const { data, error } = await supabaseClient
+            .from('products')
+            .select('*')
+            .order('id', { ascending: true });
+        
+        if (error) {
+            mostrarToast("Error al cargar productos", "error");
+            return;
+        }
+
+        const container = document.getElementById('admin-productos-list');
+        container.innerHTML = data.map(p => `
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="font-bold">${p.producto}</p>
+                    <p class="text-xs text-gray-500">SKU: ${p.numero_producto} | Stock: ${p.stock} | Precio: $${p.precio}</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="editarProducto(${p.id})" class="bg-blue-500 text-white px-3 py-1 rounded text-xs font-bold">Editar</button>
+                    <button onclick="eliminarProducto(${p.id})" class="bg-red-500 text-white px-3 py-1 rounded text-xs font-bold">Eliminar</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function crearProducto(e) {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.innerText = "Creando...";
+        btn.disabled = true;
+
+        const nombre = document.getElementById('nuevo-nombre').value;
+        const sku = document.getElementById('nuevo-sku').value;
+        const precio = parseFloat(document.getElementById('nuevo-precio').value);
+        const stock = parseInt(document.getElementById('nuevo-stock').value);
+        const categoria = document.getElementById('nuevo-categoria').value;
+        const desc = document.getElementById('nuevo-desc').value;
+        const imagenFile = document.getElementById('nuevo-imagen').files[0];
+
+        try {
+            let imagenUrl = '';
+            if (imagenFile) {
+                const fileExt = imagenFile.name.split('.').pop();
+                const fileName = `${sku}-${Date.now()}.${fileExt}`;
+                const { error: uploadError } = await supabaseClient.storage
+                    .from('product-images')
+                    .upload(fileName, imagenFile);
+                if (uploadError) throw uploadError;
+                
+                const { data: urlData } = supabaseClient.storage
+                    .from('product-images')
+                    .getPublicUrl(fileName);
+                imagenUrl = urlData.publicUrl;
+            }
+
+            const { error } = await supabaseClient.from('products').insert({
+                producto: nombre,
+                numero_producto: sku,
+                precio: precio,
+                stock: stock,
+                categoria: categoria,
+                descripcion: desc,
+                foto: imagenUrl,
+                estado_stock: stock > 0 ? 'Con Stock' : 'Sin Stock',
+                destacado: 0
+            });
+
+            if (error) throw error;
+
+            mostrarToast("Producto creado con éxito", "success");
+            e.target.reset();
+            switchAdminTab('productos');
+            cargarProductosAdmin();
+        } catch (err) {
+            mostrarToast("Error: " + err.message, "error");
+        } finally {
+            btn.innerText = "Crear Producto";
+            btn.disabled = false;
+        }
+    }
+
+    function editarProducto(id) {
+        // Por ahora solo un aviso, puedes implementar luego
+        alert("Función de editar producto #" + id + " (próximamente)");
+    }
+
+    async function eliminarProducto(id) {
+        if (!confirm("¿Estás seguro de eliminar este producto?")) return;
+        
+        const { error } = await supabaseClient.from('products').delete().eq('id', id);
+        if (error) {
+            mostrarToast("Error al eliminar: " + error.message, "error");
+        } else {
+            mostrarToast("Producto eliminado", "success");
+            cargarProductosAdmin();
+        }
+    }
+
+    // --- TOAST Y GESTOS (sin cambios) ---
     function mostrarToast(msg, type = 'success') {
         const t = document.getElementById('toast-modal');
         const c = document.getElementById('toast-content');
