@@ -1826,12 +1826,13 @@
             container.innerHTML = '<p class="text-gray-500 text-sm"><i class="fa fa-spinner fa-spin text-beige"></i> Cargando pedidos...</p>';
             
             try {
-                // Obtener pedidos con datos del cliente mediante join
+                // Obtener pedidos con datos del cliente y sus productos
                 const { data, error } = await supabaseClient
                     .from('orders')
                     .select(`
                         *,
-                        profiles:user_id ( nombre, telefono )
+                        profiles:user_id ( nombre, telefono ),
+                        order_items ( cantidad, precio_historico, product_id )
                     `)
                     .order('created_at', { ascending: false });
                     
@@ -1841,8 +1842,30 @@
                     container.innerHTML = '<p class="text-gray-500 text-sm">No hay pedidos registrados aún.</p>';
                     return;
                 }
+
+                // Para cada pedido, obtener detalles de productos
+                const pedidosConProductos = await Promise.all(data.map(async (pedido) => {
+                    if (pedido.order_items && pedido.order_items.length > 0) {
+                        const productosIds = pedido.order_items.map(item => item.product_id);
+                        const { data: productosData } = await supabaseClient
+                            .from('products')
+                            .select('id, producto, precio')
+                            .in('id', productosIds);
+                        
+                        // Combinar items con nombre de producto
+                        const itemsConNombres = pedido.order_items.map(item => {
+                            const prod = productosData?.find(p => p.id === item.product_id);
+                            return {
+                                ...item,
+                                nombre_producto: prod ? prod.producto : 'Producto desconocido'
+                            };
+                        });
+                        return { ...pedido, order_items: itemsConNombres };
+                    }
+                    return pedido;
+                }));
                 
-                container.innerHTML = data.map(pedido => {
+                container.innerHTML = pedidosConProductos.map(pedido => {
                     const fecha = new Date(pedido.created_at).toLocaleString('es-CL');
                     const cliente = pedido.profiles || { nombre: 'Desconocido', telefono: '' };
                     
@@ -1854,6 +1877,19 @@
                         'En reparto': 'border-purple-300',
                         'Entregado': 'border-green-300'
                     }[pedido.estado] || 'border-gray-200';
+                    
+                    // Lista de productos del pedido
+                    const productosList = pedido.order_items && pedido.order_items.length > 0 
+                        ? `<div class="mt-3 text-xs bg-gray-50 p-2 rounded-lg">
+                            <p class="font-bold text-gray-600 mb-1">Productos:</p>
+                            ${pedido.order_items.map(item => 
+                                `<div class="flex justify-between text-gray-700">
+                                    <span>${item.cantidad}x ${item.nombre_producto || 'Producto'}</span>
+                                    <span class="font-mono">$${(item.cantidad * item.precio_historico).toLocaleString()}</span>
+                                </div>`
+                            ).join('')}
+                           </div>`
+                        : '';
                     
                     return `
                     <div class="bg-white border-2 ${borderColor} rounded-xl p-4 shadow-sm flex flex-col md:flex-row justify-between gap-4 hover:shadow-md transition">
@@ -1867,6 +1903,7 @@
                             <p class="text-sm font-bold text-gray-800"><i class="fa fa-map-marker-alt text-beige w-4"></i> ${pedido.direccion_envio}</p>
                             <p class="text-xs text-gray-500 mt-1"><i class="fa fa-truck text-gray-400 w-4"></i> Envío: ${pedido.tipo_envio.toUpperCase()} | Doc: ${pedido.tipo_doc}</p>
                             <p class="text-sm font-black text-gray-900 mt-2">Total: $${pedido.total.toLocaleString()}</p>
+                            ${productosList}
                         </div>
                         <div class="flex flex-col justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4">
                             <label class="text-[10px] font-bold text-gray-500 uppercase mb-1">Estado del Envío</label>
