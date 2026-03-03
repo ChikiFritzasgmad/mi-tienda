@@ -21,7 +21,7 @@
     <meta property="og:title" content="Papajose SPA | Catálogo Online">
     <meta property="og:description" content="Encuentra de todo a los mejores precios. Stock actualizado.">
     <meta property="og:image" content="imagenes/logo.webp"> 
-    <meta property="og:url" content="https://comercializadora.papajose.cl">
+    <meta property="og:url" content="https://chikifritzasgmad.github.io/mi-tienda/"> <!-- PRODUCTION: Cambiar a tu dominio real cuando tengas uno -->
     <meta property="og:type" content="website">
 
     <!-- Schema.org -->
@@ -31,7 +31,7 @@
         "@type": "Store",
         "name": "Papajose SPA",
         "description": "Comercializadora de artículos variados. Envíos a todo Chile.",
-        "url": "https://comercializadora.papajose.cl",
+        "url": "https://chikifritzasgmad.github.io/mi-tienda/", <!-- PRODUCTION: Cambiar a tu dominio real -->
         "telephone": "+56936416743",
         "address": {
             "@type": "PostalAddress",
@@ -407,14 +407,14 @@
                     <p class="text-xs font-bold text-gray-500 mt-2 px-2 leading-tight">Selecciona tus productos</p>
                 </div>
                 <div class="flex flex-col items-center group">
-                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-whatsapp"></i></div>
-                    <span class="font-black text-gray-900 text-base">2. Valida</span>
-                    <p class="text-xs font-bold text-gray-500 mt-2 px-2 leading-tight">Confirma stock vía WhatsApp</p>
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-credit-card"></i></div>
+                    <span class="font-black text-gray-900 text-base">2. Paga</span>
+                    <p class="text-xs font-bold text-gray-500 mt-2 px-2 leading-tight">Con Flow (Tarjeta/Transferencia)</p>
                 </div>
                 <div class="flex flex-col items-center group">
                     <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-building-columns"></i></div>
-                    <span class="font-black text-gray-900 text-base">3. Paga</span>
-                    <p class="text-xs font-bold text-gray-500 mt-2 px-2 leading-tight">A <strong>Cuenta Empresa</strong></p>
+                    <span class="font-black text-gray-900 text-base">3. Validamos</span>
+                    <p class="text-xs font-bold text-gray-500 mt-2 px-2 leading-tight">Confirmación automática</p>
                 </div>
                 <div class="flex flex-col items-center group">
                     <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fa fa-box"></i></div>
@@ -520,7 +520,7 @@
                 <span id="cart-total">$0</span>
             </div>
             <button id="btn-checkout" onclick="procesarCheckout()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg flex items-center justify-center gap-3 text-sm">
-                Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>
+                Pagar con Flow <i class="fa fa-credit-card text-lg"></i>
             </button>
         </div>
     </aside>
@@ -652,6 +652,18 @@
     </div>
 
     <script>
+        // =========================================================================
+        //                        CONFIGURACIÓN PARA PRODUCCIÓN
+        // =========================================================================
+        // PRODUCTION: Cuando pases a producción, cambia estos valores:
+        // 1. FLOW_MODE: 'live' en lugar de 'sandbox'
+        // 2. SITE_URL: tu dominio real (ej: https://comercializadora.papajose.cl)
+        // 3. WHATSAPP_NUM: si lo deseas, puedes mantenerlo igual.
+        // =========================================================================
+        const FLOW_MODE = 'sandbox'; // Cambiar a 'live' en producción
+        const SITE_URL = 'https://chikifritzasgmad.github.io/mi-tienda/'; // PRODUCTION: Cambiar a tu dominio real
+        const WHATSAPP_NUM = "56936416743";
+
         // --- FUNCIÓN DE ESCAPE PARA SEGURIDAD XSS ---
         function escapeHTML(str) {
             return String(str).replace(/[&<>"]/g, function(m) {
@@ -664,7 +676,6 @@
         }
 
         // --- CONFIGURACIÓN GLOBAL Y SUPABASE ---
-        const WHATSAPP_NUM = "56936416743"; 
         const supabaseUrl = 'https://elwzheytotfsxzrcsioz.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsd3poZXl0b3Rmc3h6cmNzaW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzE0MzIsImV4cCI6MjA4Njc0NzQzMn0.0WLFkRsWPdYJSL_Oo6TtK0t5P_0cv9pJi95uXm9TKTg';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -704,7 +715,7 @@
         let totalProductos = 0; 
         let filtroActual = 'todas';
         let busquedaActual = '';
-        let lastSearch = '';    // <--- VARIABLE DECLARADA (CORRECCIÓN DEL ERROR)
+        let lastSearch = '';
         
         let hasOpenedCartAutomatically = false; 
         let searchTimeout; 
@@ -791,12 +802,10 @@
             try {
                 let query = supabaseClient.from('products').select('*', { count: 'exact' });
 
-                // LÓGICA INTELIGENTE: Si hay búsqueda, ignorar la categoría
                 if (busquedaActual.length > 0) {
                     query = query.or(`producto.ilike.%${busquedaActual}%,numero_producto.ilike.%${busquedaActual}%`);
-                    query = query.order('id', { ascending: false }); // Orden por defecto en búsquedas
+                    query = query.order('id', { ascending: false });
                 } else {
-                    // Si no hay búsqueda, aplicar el filtro de categoría si no es 'todas'
                     if (filtroActual !== 'todas') {
                         query = query.eq('categoria', filtroActual);
                     }
@@ -875,14 +884,12 @@
             }
         }
 
-        // Función resetAndScrollToTop mejorada (con limpieza de buscadores)
         function resetAndScrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             filtroActual = 'todas';
             busquedaActual = '';
             currentPage = 1;
             
-            // Forzar actualización visual del menú lateral
             document.querySelectorAll('#nav-categorias button').forEach(b => {
                 b.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
             });
@@ -893,7 +900,6 @@
 
             document.getElementById('titulo-grid').innerText = 'Catálogo';
             
-            // Limpieza segura de todos los inputs de búsqueda
             const searchDesktop = document.getElementById('search-desktop');
             const searchMobile = document.getElementById('search-mobile');
             if(searchDesktop) searchDesktop.value = '';
@@ -912,7 +918,6 @@
                 busquedaActual = query.toLowerCase();
                 currentPage = 1;
                 
-                // Si busca algo, desmarcar visualmente los botones de categorías
                 if (busquedaActual.length > 0) {
                     document.querySelectorAll('#nav-categorias button').forEach(b => {
                         b.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
@@ -923,12 +928,10 @@
                 }
                 
                 cargarProductosPagina(1);
-            }, 500); // 500ms para no saturar la BD
+            }, 500);
         }
 
-        // Función filtrar mejorada (cierra menú móvil y limpia buscadores)
         function filtrar(cat, btnElement) {
-            // Cerrar menú móvil inmediatamente para mejor UX
             if(window.innerWidth < 1024 && !document.getElementById('left-sidebar').classList.contains('-translate-x-full')) {
                 toggleMobileMenu();
             }
@@ -954,13 +957,11 @@
             window.scrollTo({ top: document.getElementById('seccion-catalogo').getBoundingClientRect().top + window.pageYOffset - 110, behavior: 'smooth' });
         }
 
-        // Función generarMenuCategorias mejorada (marca "Todo" activo desde el inicio)
         function generarMenuCategorias() {
             const nav = document.getElementById('nav-categorias');
             nav.innerHTML = ''; 
             const btnTodas = document.createElement('button');
             
-            // Al crearlo, si filtroActual es 'todas', lo pintamos como activo
             btnTodas.className = (filtroActual === 'todas') 
                 ? "w-full text-left px-5 py-3 rounded-xl bg-gray-50 font-bold text-beige flex items-center gap-3 transition-all group border-l-4 border-beige"
                 : "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
@@ -1028,13 +1029,11 @@
                     if (!currentUser || currentUser.id !== session.user.id) {
                         currentUser = session.user;
                         await cargarPerfil(currentUser.id);
-                        // Al iniciar sesión, sincronizar carrito con BD
                         await sincronizarCarritoConBD();
                     }
                 } else {
                     currentUser = null;
                     userProfile = null;
-                    // Al cerrar sesión, limpiar carrito local y forzar recarga desde BD vacía
                     cart = [];
                     localStorage.removeItem('papajose_cart');
                     updateCartUI();
@@ -1094,10 +1093,9 @@
                 document.getElementById('auth-login-view').classList.add('hidden');
                 document.getElementById('auth-register-view').classList.add('hidden');
                 document.getElementById('auth-logged-view').classList.remove('hidden');
-                document.getElementById('auth-recover-view')?.classList.add('hidden'); // Ocultar recuperación
-                switchUserTab('perfil'); // Por defecto abre en sus datos
+                document.getElementById('auth-recover-view')?.classList.add('hidden');
+                switchUserTab('perfil');
                 
-                // Unir dirección para visualización rápida
                 const dirCompleta = `${userProfile.calle || ''} ${userProfile.numero_casa || ''}, ${userProfile.comuna || ''}, ${userProfile.region || ''}`;
                 
                 document.getElementById('display-nombre').innerText = escapeHTML(userProfile.nombre || '-');
@@ -1106,14 +1104,12 @@
                 document.getElementById('display-direccion').innerText = dirCompleta.trim().length > 3 ? dirCompleta : (userProfile.direccion_defecto || '-');
                 document.getElementById('display-referencia').innerText = escapeHTML(userProfile.referencia || '-');
                 
-                // Llenar form de edición
                 document.getElementById('edit-nombre').value = userProfile.nombre || '';
                 document.getElementById('edit-rut').value = userProfile.rut || '';
                 document.getElementById('edit-telefono').value = userProfile.telefono || '';
                 document.getElementById('edit-calle').value = userProfile.calle || '';
                 document.getElementById('edit-numero').value = userProfile.numero_casa || '';
                 
-                // Seleccionar región y comuna
                 if(userProfile.region) {
                     document.getElementById('edit-region').value = userProfile.region;
                     actualizarComunas('edit');
@@ -1150,7 +1146,6 @@
             document.getElementById('auth-recover-view')?.classList.add('hidden');
         }
 
-        // --- RECUPERACIÓN DE CONTRASEÑA ---
         function mostrarRecuperarPass() {
             document.getElementById('auth-login-view').classList.add('hidden');
             document.getElementById('auth-register-view').classList.add('hidden');
@@ -1171,7 +1166,7 @@
             btn.disabled = true;
 
             const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin, // o una página específica
+                redirectTo: window.location.origin,
             });
 
             if (error) {
@@ -1184,7 +1179,6 @@
             btn.disabled = false;
         }
 
-        // --- HISTORIAL DE PEDIDOS ---
         function switchUserTab(tab) {
             const btnPerfil = document.getElementById('tab-mi-perfil');
             const btnPedidos = document.getElementById('tab-mis-pedidos');
@@ -1231,12 +1225,20 @@
                 }
 
                 contenedor.innerHTML = data.map(pedido => {
-                    // Color según estado
                     let bgEstado = 'bg-yellow-100 text-yellow-800';
-                    if (pedido.estado && pedido.estado.toLowerCase().includes('pago')) bgEstado = 'bg-blue-100 text-blue-800';
-                    if (pedido.estado && pedido.estado.toLowerCase().includes('reparto')) bgEstado = 'bg-green-100 text-green-800';
+                    if (pedido.estado && pedido.estado.toLowerCase().includes('pagado')) bgEstado = 'bg-green-100 text-green-800';
+                    else if (pedido.estado && pedido.estado.toLowerCase().includes('pendiente de pago flow')) bgEstado = 'bg-blue-100 text-blue-800';
+                    else if (pedido.estado && pedido.estado.toLowerCase().includes('rechazado')) bgEstado = 'bg-red-100 text-red-800';
+                    else if (pedido.estado && pedido.estado.toLowerCase().includes('expirado')) bgEstado = 'bg-gray-100 text-gray-800';
 
                     const fecha = new Date(pedido.created_at).toLocaleDateString('es-CL');
+                    
+                    let botonPagar = '';
+                    if (pedido.estado === 'Pendiente de Pago Flow' && pedido.payment_url) {
+                        botonPagar = `<button onclick="window.location.href='${escapeHTML(pedido.payment_url)}'" class="mt-2 bg-blue-500 text-white text-xs px-3 py-1 rounded-full">Pagar ahora</button>`;
+                    } else if (pedido.estado === 'Pendiente de Pago Flow') {
+                        botonPagar = `<button onclick="reintentarPago(${pedido.id})" class="mt-2 bg-blue-500 text-white text-xs px-3 py-1 rounded-full">Reintentar pago</button>`;
+                    }
                     
                     return `
                     <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
@@ -1251,6 +1253,7 @@
                             <span class="text-xs text-gray-500">Envío: ${escapeHTML(pedido.tipo_envio.toUpperCase())}</span>
                             <span class="font-black text-gray-900">$${pedido.total.toLocaleString()}</span>
                         </div>
+                        ${botonPagar ? `<div class="mt-2 text-right">${botonPagar}</div>` : ''}
                     </div>`;
                 }).join('');
 
@@ -1260,7 +1263,6 @@
             }
         }
 
-        // --- REGISTRO Y EDICIÓN DE PERFIL ---
         async function registrarUsuario(e) {
             e.preventDefault();
             const email = document.getElementById('reg-email').value;
@@ -1282,7 +1284,6 @@
             const comuna = document.getElementById('reg-comuna').value;
             const ref = document.getElementById('reg-referencia').value;
 
-            // Formatear dirección vieja por compatibilidad
             const direccionCompatibilidad = `${calle} ${num}, ${comuna}, ${region}`;
 
             try {
@@ -1372,8 +1373,8 @@
                 mostrarToast("Error al actualizar: " + error.message, "error");
             } else {
                 mostrarToast("Perfil actualizado correctamente", "success");
-                await cargarPerfil(currentUser.id); // Recarga para actualizar visual
-                openAuthModal(); // Refresca los datos en pantalla
+                await cargarPerfil(currentUser.id);
+                openAuthModal();
             }
             btn.innerText = "Guardar cambios";
             btn.disabled = false;
@@ -1399,13 +1400,11 @@
         }
 
         function actualizarOpcionEnvioSegunDireccion() {
-            // Buscamos si en la interfaz de registro/edición tienen Metropolitana elegida
             let esRM = false;
             let comunaSeleccionada = '';
             const selectorRegRegion = document.getElementById('reg-region');
             if (selectorRegRegion && selectorRegRegion.value) {
                 esRM = esRegionMetropolitana(selectorRegRegion.value);
-                // Obtener comuna seleccionada si existe
                 const selectorComuna = document.getElementById('reg-comuna');
                 if (selectorComuna) comunaSeleccionada = selectorComuna.value;
             } else if (userProfile) {
@@ -1417,14 +1416,13 @@
             const radioRegiones = document.querySelector('input[name="tipo_envio"][value="regiones"]');
             const rmCostoLabel = document.getElementById('rm-costo-label');
             
-            // Determinar tarifa según comuna (si es RM)
             if (esRM && comunaSeleccionada) {
                 if (comunasRM.centricas.includes(comunaSeleccionada)) {
                     costoEnvio = 3500;
                 } else if (comunasRM.perifericas.includes(comunaSeleccionada)) {
                     costoEnvio = 4500;
                 } else {
-                    costoEnvio = 3500; // por defecto
+                    costoEnvio = 3500;
                 }
             } else {
                 costoEnvio = 3500;
@@ -1452,7 +1450,6 @@
             if (item) item.qty++;
             else cart.push({ ...p, qty: 1 });
             
-            // Sincronizar con BD si el usuario está logueado
             if (currentUser) {
                 await syncCartToDB();
             } else {
@@ -1494,7 +1491,6 @@
         async function removeFromCart(id) {
             cart = cart.filter(i => i.id !== id);
             if (currentUser) {
-                // Eliminar item de la BD
                 await supabaseClient
                     .from('cart_items')
                     .delete()
@@ -1601,9 +1597,8 @@
             let tipoEnvio = "rm";
             for(const r of radios) { if(r.checked) tipoEnvio = r.value; }
             
-            // Si es RM, usar costoEnvio ya calculado (puede ser 3500 o 4500 según comuna)
             if (tipoEnvio === 'rm') {
-                // costoEnvio ya tiene el valor adecuado por actualizarOpcionEnvioSegunDireccion
+                // costoEnvio ya tiene el valor adecuado
             } else {
                 costoEnvio = 0;
             }
@@ -1623,7 +1618,6 @@
         async function sincronizarCarritoConBD() {
             if (!currentUser) return;
             
-            // Obtener carrito actual de la BD
             const { data: dbCart, error } = await supabaseClient
                 .from('cart_items')
                 .select('product_id, quantity')
@@ -1634,21 +1628,14 @@
                 return;
             }
             
-            // Convertir a mapa para fácil acceso
             const dbCartMap = new Map();
             dbCart.forEach(item => dbCartMap.set(item.product_id, item.quantity));
             
-            // Fusionar con carrito local
             const mergedCart = [];
             const processed = new Set();
             
-            // Primero, items del carrito local
             for (let item of cart) {
                 const dbQty = dbCartMap.get(item.id) || 0;
-                const totalQty = Math.max(item.qty, dbQty); // Priorizar la mayor cantidad (o podríamos sumar)
-                // Para evitar duplicados, usamos la mayor (o sumamos). Elegimos sumar para no perder items.
-                // Pero cuidado con stock: deberíamos validar contra stock actual.
-                // Simplificamos: sumamos cantidades.
                 const p = db.find(x => x.id === item.id);
                 const maxStock = p ? p.stock : Infinity;
                 const finalQty = Math.min(item.qty + dbQty, maxStock);
@@ -1658,10 +1645,8 @@
                 processed.add(item.id);
             }
             
-            // Luego, items que están solo en BD
             for (let [prodId, qty] of dbCartMap.entries()) {
                 if (!processed.has(prodId)) {
-                    // Buscar producto en db actual
                     const p = db.find(x => x.id === prodId);
                     if (p && p.stock > 0) {
                         mergedCart.push({ 
@@ -1678,11 +1663,9 @@
                 }
             }
             
-            // Actualizar carrito local y BD
             cart = mergedCart;
             localStorage.setItem('papajose_cart', JSON.stringify(cart));
             
-            // Actualizar BD con el carrito fusionado (eliminar todos y reinsertar)
             await supabaseClient
                 .from('cart_items')
                 .delete()
@@ -1703,13 +1686,11 @@
         async function syncCartToDB() {
             if (!currentUser) return;
             
-            // Primero, eliminar todos los items del usuario en BD
             await supabaseClient
                 .from('cart_items')
                 .delete()
                 .eq('user_id', currentUser.id);
             
-            // Insertar los items actuales
             if (cart.length > 0) {
                 const inserts = cart.map(item => ({
                     user_id: currentUser.id,
@@ -1717,6 +1698,34 @@
                     quantity: item.qty
                 }));
                 await supabaseClient.from('cart_items').insert(inserts);
+            }
+        }
+
+        // --- NUEVAS FUNCIONES PARA FLOW ---
+        async function crearPagoFlow(orderId) {
+            const { data, error } = await supabaseClient.functions.invoke('create-flow-payment', {
+                body: { order_id: orderId }
+            });
+
+            if (error) {
+                console.error(error);
+                throw new Error(error.message || 'Error al comunicarse con Flow');
+            }
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            return data.url; // URL de pago de Flow
+        }
+
+        async function reintentarPago(orderId) {
+            try {
+                mostrarToast("Generando nuevo link de pago...", "info");
+                const flowUrl = await crearPagoFlow(orderId);
+                window.location.href = flowUrl;
+            } catch (error) {
+                mostrarToast("Error al generar pago: " + error.message, "error");
             }
         }
 
@@ -1744,6 +1753,7 @@
                 
                 const items = cart.map(item => ({ product_id: item.id, cantidad: item.qty, precio_historico: item.precio }));
                 
+                // Crear pedido en la BD
                 const { data, error } = await supabaseClient.rpc('crear_pedido', {
                     p_user_id: currentUser.id,
                     p_tipo_envio: tipoEnvioTexto,
@@ -1756,16 +1766,11 @@
                 if (error) throw error;
                 
                 const orderId = data.order_id;
-                const totalText = document.getElementById('cart-total').innerText;
-                const itemsList = cart.map(p => `• (${p.qty}) ${p.nombre}\n  [SKU: ${p.sku}] - $${(p.precio * p.qty).toLocaleString()}`).join('\n');
-                const nombreCliente = userProfile.nombre || "Cliente";
-                const telefonoCliente = userProfile.telefono || '';
-                const envioLabel = tipoEnvioTexto === 'rm' ? `Región Metropolitana (+$${costoEnvio.toLocaleString()})` : 'Regiones (Por pagar - Starken)';
-                
-                const msg = `*NUEVO PEDIDO #${orderId}* 🛒\n\nHola *Papajose SPA*, soy ${nombreCliente}.\n📞 Tel: ${telefonoCliente}\n📦 Dirección: ${dirEnvio}\n\nMi pedido:\n${itemsList}\n\n*ENVÍO:* ${envioLabel}\n*DOCUMENTO:* ${tipoDocTexto}\n*TOTAL A PAGAR:* ${totalText}\n\nQuedo atento a los datos de transferencia.`;
-                const whatsappWindow = window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
-                
-                // Limpiar carrito después del pedido
+
+                // Llamar a Flow para obtener la URL de pago
+                const flowUrl = await crearPagoFlow(orderId);
+
+                // Limpiar carrito local y en BD
                 cart = []; 
                 if (currentUser) {
                     await supabaseClient
@@ -1776,17 +1781,15 @@
                 localStorage.removeItem('papajose_cart'); 
                 updateCartUI(); 
                 forceCloseCart(); 
-                mostrarToast(`Pedido #${orderId} registrado`, "success");
-                
-                if (!whatsappWindow || whatsappWindow.closed) {
-                    await navigator.clipboard.writeText(msg);
-                    mostrarToast("Mensaje copiado. Pégalo en WhatsApp.", "info");
-                }
+                mostrarToast(`Pedido #${orderId} registrado. Redirigiendo a pago...`, "success");
+
+                // Redirigir a Flow
+                window.location.href = flowUrl;
+
             } catch (error) {
                 console.error(error);
                 mostrarToast("Error al procesar: " + (error.message || "Intenta nuevamente."), "error");
-            } finally {
-                btn.innerHTML = `Ir a Pagar <i class="fab fa-whatsapp text-lg"></i>`; 
+                btn.innerHTML = `Pagar con Flow <i class="fa fa-credit-card text-lg"></i>`; 
                 btn.disabled = false;
             }
         }
@@ -1866,7 +1869,7 @@
             document.getElementById('admin-modal').classList.remove('hidden');
             document.body.classList.add('locked');
             cargarProductosAdmin();
-            cancelarEdicion(); // Resetear formulario por seguridad
+            cancelarEdicion();
         }
 
         function closeAdminModal() {
@@ -1875,9 +1878,7 @@
             if(history.state && history.state.modal === 'admin') history.back();
         }
 
-        // Función switchAdminTab mejorada (con seguridad y soporte para pedidos)
         function switchAdminTab(tab) {
-            // Verificar que sea admin (por si acaso)
             if (!userProfile?.esAdmin) {
                 mostrarToast("Acceso no autorizado", "error");
                 closeAdminModal();
@@ -1903,7 +1904,6 @@
             if (tab === 'pedidos') cargarPedidosLogistica();
         }
 
-        // Función cancelarEdicion simplificada
         function cancelarEdicion() {
             document.getElementById('producto-form').reset();
             document.getElementById('producto-id').value = '';
@@ -1911,7 +1911,6 @@
             document.getElementById('btn-guardar-producto').innerText = 'Crear Producto';
             document.getElementById('form-titulo').innerText = 'Agregar Nuevo Producto';
             productoEnEdicion = null;
-            // Forzamos el cambio a la pestaña de productos
             switchAdminTab('productos');
         }
 
@@ -1920,7 +1919,7 @@
             const { data, error } = await supabaseClient.from('products').select('*').order('id', { ascending: false });
             if (error) { mostrarToast("Error al cargar", "error"); return; }
             
-            adminDb = data; // Guardamos en memoria para el buscador instantáneo
+            adminDb = data;
             renderListaAdmin(adminDb);
         }
 
@@ -2033,7 +2032,7 @@
 
                 cancelarEdicion();
                 cargarProductosAdmin();
-                cargarProductosPagina(currentPage); // Refrescar tienda pública
+                cargarProductosPagina(currentPage);
             } catch (err) {
                 mostrarToast("Error: " + err.message, "error");
            } finally {
@@ -2094,10 +2093,13 @@
                     const cliente = pedido.profiles || { nombre: 'Desconocido', telefono: '' };
                     const borderColor = {
                         'Pendiente de pago': 'border-red-300',
-                        'Pago validado': 'border-yellow-300',
-                        'En preparación': 'border-blue-300',
-                        'En reparto': 'border-purple-300',
-                        'Entregado': 'border-green-300'
+                        'Pendiente de Pago Flow': 'border-blue-300',
+                        'Pagado': 'border-yellow-300',
+                        'En preparación': 'border-purple-300',
+                        'En reparto': 'border-indigo-300',
+                        'Entregado': 'border-green-300',
+                        'Rechazado': 'border-gray-300',
+                        'Expirado': 'border-gray-400'
                     }[pedido.estado] || 'border-gray-200';
                     
                     const productosList = pedido.order_items && pedido.order_items.length > 0 
@@ -2130,10 +2132,13 @@
                             <label class="text-[10px] font-bold text-gray-500 uppercase mb-1">Estado del Envío</label>
                             <select onchange="cambiarEstadoPedido(${pedido.id}, this.value)" class="p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold outline-none cursor-pointer focus:ring-1 focus:ring-beige">
                                 <option value="Pendiente de pago" ${pedido.estado === 'Pendiente de pago' ? 'selected' : ''}>⏳ Pendiente de pago</option>
-                                <option value="Pago validado" ${pedido.estado === 'Pago validado' ? 'selected' : ''}>✅ Pago validado</option>
+                                <option value="Pendiente de Pago Flow" ${pedido.estado === 'Pendiente de Pago Flow' ? 'selected' : ''}>🔄 Pendiente Flow</option>
+                                <option value="Pagado" ${pedido.estado === 'Pagado' ? 'selected' : ''}>✅ Pagado</option>
                                 <option value="En preparación" ${pedido.estado === 'En preparación' ? 'selected' : ''}>📦 En preparación</option>
                                 <option value="En reparto" ${pedido.estado === 'En reparto' ? 'selected' : ''}>🚚 En reparto</option>
                                 <option value="Entregado" ${pedido.estado === 'Entregado' ? 'selected' : ''}>🎉 Entregado</option>
+                                <option value="Rechazado" ${pedido.estado === 'Rechazado' ? 'selected' : ''}>❌ Rechazado</option>
+                                <option value="Expirado" ${pedido.estado === 'Expirado' ? 'selected' : ''}>⏰ Expirado</option>
                             </select>
                         </div>
                     </div>`;
