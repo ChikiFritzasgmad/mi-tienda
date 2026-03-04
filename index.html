@@ -175,6 +175,11 @@
             border-radius: 0 !important;
             margin: 0 !important;
         }
+
+        /* Estilos para el modal de detalles del pedido */
+        .order-detail-item {
+            @apply flex justify-between py-2 border-b border-gray-100 text-sm;
+        }
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
@@ -466,8 +471,9 @@
                     <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300"><i class="fa fa-chevron-down"></i></span>
                 </summary>
                 <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 font-medium">
-                    <p>🤝 <strong>Sin intermediarios:</strong> Pago directo a Cuenta Empresa.</p>
-                    <p>📄 <strong>Documentación:</strong> Boleta o Factura en 24 horas.</p>
+                    <p>🔒 <strong>Pasarela de pago Flow:</strong> Todos los pagos se procesan a través de Flow, una plataforma segura que acepta tarjetas de crédito, débito y transferencias bancarias. Tus datos financieros nunca son almacenados en nuestros servidores.</p>
+                    <p class="mt-2">📄 <strong>Documentación:</strong> Boleta o Factura en 24 horas hábiles.</p>
+                    <p class="mt-2">✅ <strong>Garantía de fábrica:</strong> Todos los productos cuentan con garantía legal de 3 meses y soporte directo del fabricante.</p>
                 </div>
             </details>
 
@@ -477,11 +483,88 @@
                     <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300"><i class="fa fa-chevron-down"></i></span>
                 </summary>
                 <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 font-medium">
-                    <p>✅ <strong>Garantía Real:</strong> Cambios y devoluciones sin costo si el producto falla.</p>
+                    <p>✅ <strong>Garantía Real:</strong> Cambios y devoluciones sin costo si el producto falla (dentro de los primeros 3 meses).</p>
                 </div>
             </details>
         </section>
+
+        <!-- ========== FOOTER LEGAL ========== -->
+        <footer class="max-w-6xl mx-auto mt-20 border-t border-gray-200 pt-10 pb-6 text-xs text-gray-500">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center md:text-left">
+                <div>
+                    <h4 class="font-bold text-gray-700 mb-2 uppercase tracking-wider">Legal</h4>
+                    <ul class="space-y-1">
+                        <li><button onclick="abrirLegal('terminos')" class="hover:text-beige transition">Términos y condiciones</button></li>
+                        <li><button onclick="abrirLegal('privacidad')" class="hover:text-beige transition">Política de privacidad</button></li>
+                        <li><button onclick="abrirLegal('cookies')" class="hover:text-beige transition">Política de cookies</button></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-700 mb-2 uppercase tracking-wider">Consumidor</h4>
+                    <ul class="space-y-1">
+                        <li><button onclick="abrirLegal('derechos')" class="hover:text-beige transition">Derechos del consumidor</button></li>
+                        <li><button onclick="abrirLegal('cambios')" class="hover:text-beige transition">Cambios y devoluciones</button></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-700 mb-2 uppercase tracking-wider">Contacto</h4>
+                    <ul class="space-y-1">
+                        <li><a href="mailto:contacto@papajose.cl" class="hover:text-beige transition">contacto@papajose.cl</a></li>
+                        <li><a href="tel:+56936416743" class="hover:text-beige transition">+56 9 3641 6743</a></li>
+                    </ul>
+                </div>
+                <div class="col-span-2 md:col-span-2">
+                    <p class="text-gray-400">© 2026 Papajose SPA - Todos los derechos reservados. Prohibida la reproducción total o parcial del contenido de esta tienda.</p>
+                </div>
+            </div>
+        </footer>
     </main>
+
+    <!-- ========== MODAL LEGAL ========== -->
+    <div id="legal-modal" class="fixed inset-0 z-[300] bg-black bg-opacity-50 hidden items-center justify-center p-4">
+        <div class="bg-white max-w-2xl w-full max-h-[80vh] rounded-2xl overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 id="legal-modal-title" class="text-xl font-black text-gray-900">Términos y condiciones</h3>
+                <button onclick="cerrarLegal()" class="text-gray-400 hover:text-black text-2xl">&times;</button>
+            </div>
+            <div id="legal-modal-content" class="p-6 overflow-y-auto text-sm text-gray-700 leading-relaxed space-y-4">
+                <!-- Se cargará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL DETALLE PEDIDO ========== -->
+    <div id="order-detail-modal" class="fixed inset-0 z-[300] bg-black bg-opacity-50 hidden items-center justify-center p-4">
+        <div class="bg-white max-w-2xl w-full max-h-[80vh] rounded-2xl overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-black text-gray-900">Detalle del pedido</h3>
+                <button onclick="cerrarDetallePedido()" class="text-gray-400 hover:text-black text-2xl">&times;</button>
+            </div>
+            <div id="order-detail-content" class="p-6 overflow-y-auto text-sm text-gray-700">
+                <!-- Se cargará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== LOADER DE PAGO SEGURO (NUEVO) ========== -->
+    <div id="payment-loader-modal" class="fixed inset-0 z-[300] bg-white hidden flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div class="text-center max-w-sm w-full">
+            <div class="relative w-24 h-24 mx-auto mb-8">
+                <svg class="animate-spin w-full h-full text-gray-200" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                    <path class="opacity-75" fill="#D2B48C" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center text-3xl text-gray-800">
+                    <i class="fa fa-lock"></i>
+                </div>
+            </div>
+            <h2 class="text-2xl font-black text-gray-900 mb-2">Conexión Segura</h2>
+            <p class="text-gray-500 font-medium mb-6">Generando entorno de pago encriptado con Flow. Por favor no cierres esta ventana...</p>
+            <div class="flex items-center justify-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-widest">
+                <i class="fa fa-shield-alt"></i> Transacción 100% Protegida
+            </div>
+        </div>
+    </div>
 
     <!-- ========== CARRITO LATERAL ========== -->
     <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[160] shadow-2xl transform translate-x-full flex flex-col h-full">
@@ -573,6 +656,18 @@
                             <input type="text" id="admin-search-input" onkeyup="filtrarAdmin(this.value)" placeholder="Buscar producto o SKU en Admin..." class="w-full p-3 pl-10 bg-white border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-beige outline-none">
                             <i class="fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                         </div>
+                    </div>
+                    <!-- Filtros rápidos por categoría (NUEVO) -->
+                    <div class="flex flex-wrap gap-2 mb-4" id="admin-category-filters">
+                        <button onclick="filtrarAdminPorCategoria('')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="">Todas</button>
+                        <button onclick="filtrarAdminPorCategoria('Hogar')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="Hogar">Hogar</button>
+                        <button onclick="filtrarAdminPorCategoria('Electrónica y accesorios')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="Electrónica y accesorios">Electrónica</button>
+                        <button onclick="filtrarAdminPorCategoria('Belleza e Higiene')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="Belleza e Higiene">Belleza</button>
+                        <button onclick="filtrarAdminPorCategoria('Deportes y Outdoor')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="Deportes y Outdoor">Deportes</button>
+                        <button onclick="filtrarAdminPorCategoria('Juguetes')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="Juguetes">Juguetes</button>
+                        <button onclick="filtrarAdminPorCategoria('Ropa y Accesorios')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="Ropa y Accesorios">Ropa</button>
+                        <button onclick="filtrarAdminPorCategoria('Vehiculos')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="Vehiculos">Vehículos</button>
+                        <button onclick="filtrarAdminPorCategoria('Otros')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="Otros">Otros</button>
                     </div>
                     <div id="admin-productos-list" class="space-y-3"></div>
                 </div>
@@ -725,6 +820,10 @@
         let currentUser = null;
         let userProfile = null;
         let productoEnEdicion = null;
+
+        // Variables para filtro en admin
+        let filtroAdminCategoria = '';
+        let filtroAdminTexto = '';
 
         const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESin Foto%3C/text%3E%3C/svg%3E";
 
@@ -1233,13 +1332,6 @@
 
                     const fecha = new Date(pedido.created_at).toLocaleDateString('es-CL');
                     
-                    let botonPagar = '';
-                    if (pedido.estado === 'Pendiente de Pago Flow' && pedido.payment_url) {
-                        botonPagar = `<button onclick="window.location.href='${escapeHTML(pedido.payment_url)}'" class="mt-2 bg-blue-500 text-white text-xs px-3 py-1 rounded-full">Pagar ahora</button>`;
-                    } else if (pedido.estado === 'Pendiente de Pago Flow') {
-                        botonPagar = `<button onclick="reintentarPago(${pedido.id})" class="mt-2 bg-blue-500 text-white text-xs px-3 py-1 rounded-full">Reintentar pago</button>`;
-                    }
-                    
                     return `
                     <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
                         <div class="flex justify-between items-start mb-2">
@@ -1253,7 +1345,9 @@
                             <span class="text-xs text-gray-500">Envío: ${escapeHTML(pedido.tipo_envio.toUpperCase())}</span>
                             <span class="font-black text-gray-900">$${pedido.total.toLocaleString()}</span>
                         </div>
-                        ${botonPagar ? `<div class="mt-2 text-right">${botonPagar}</div>` : ''}
+                        <div class="mt-3 text-right">
+                            <button onclick="verDetallePedido(${pedido.id})" class="text-beige font-bold text-xs underline hover:no-underline">Ver detalle</button>
+                        </div>
                     </div>`;
                 }).join('');
 
@@ -1261,6 +1355,75 @@
                 console.error(err);
                 contenedor.innerHTML = '<p class="text-center text-sm text-red-400 mt-6">Error al cargar el historial.</p>';
             }
+        }
+
+        // --- NUEVA FUNCIÓN PARA VER DETALLE DE PEDIDO ---
+        async function verDetallePedido(orderId) {
+            try {
+                // Obtener datos del pedido
+                const { data: pedido, error: pedidoError } = await supabaseClient
+                    .from('orders')
+                    .select('*, profiles:user_id ( nombre, telefono )')
+                    .eq('id', orderId)
+                    .single();
+
+                if (pedidoError) throw pedidoError;
+
+                // Obtener items del pedido con nombre del producto
+                const { data: items, error: itemsError } = await supabaseClient
+                    .from('order_items')
+                    .select('*, product:product_id ( producto )')
+                    .eq('order_id', orderId);
+
+                if (itemsError) throw itemsError;
+
+                const fecha = new Date(pedido.created_at).toLocaleString('es-CL');
+                const cliente = pedido.profiles || { nombre: 'Desconocido', telefono: '' };
+
+                let itemsHTML = '';
+                let subtotal = 0;
+                items.forEach(item => {
+                    const subtotalItem = item.cantidad * item.precio_historico;
+                    subtotal += subtotalItem;
+                    itemsHTML += `
+                        <div class="order-detail-item">
+                            <span>${item.cantidad} x ${escapeHTML(item.product?.producto || 'Producto')}</span>
+                            <span class="font-mono">$${subtotalItem.toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+
+                const modalContent = document.getElementById('order-detail-content');
+                modalContent.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <p class="text-xs text-gray-500">Pedido #${pedido.id} - ${fecha}</p>
+                            <p class="font-bold text-lg">$${pedido.total.toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm mb-2">Productos</h4>
+                            ${itemsHTML}
+                        </div>
+                        <div class="border-t pt-3">
+                            <p><span class="font-bold">Envío:</span> ${escapeHTML(pedido.tipo_envio.toUpperCase())} - $${pedido.costo_envio.toLocaleString()}</p>
+                            <p><span class="font-bold">Documento:</span> ${escapeHTML(pedido.tipo_doc)}</p>
+                            <p><span class="font-bold">Dirección:</span> ${escapeHTML(pedido.direccion_envio)}</p>
+                            <p><span class="font-bold">Estado:</span> ${escapeHTML(pedido.estado)}</p>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('order-detail-modal').classList.remove('hidden');
+                document.body.classList.add('locked');
+            } catch (error) {
+                console.error(error);
+                mostrarToast("Error al cargar detalle del pedido", "error");
+            }
+        }
+
+        function cerrarDetallePedido() {
+            document.getElementById('order-detail-modal').classList.add('hidden');
+            document.body.classList.remove('locked');
         }
 
         async function registrarUsuario(e) {
@@ -1701,34 +1864,27 @@
             }
         }
 
-        // --- NUEVAS FUNCIONES PARA FLOW ---
-        async function crearPagoFlow(orderId) {
-            const { data, error } = await supabaseClient.functions.invoke('create-flow-payment', {
-                body: { order_id: orderId }
-            });
-
-            if (error) {
-                console.error(error);
-                throw new Error(error.message || 'Error al comunicarse con Flow');
-            }
-
-            if (data.error) {
-                throw new Error(data.error);
-            }
-
-            return data.url; // URL de pago de Flow
-        }
-
-        async function reintentarPago(orderId) {
-            try {
-                mostrarToast("Generando nuevo link de pago...", "info");
-                const flowUrl = await crearPagoFlow(orderId);
-                window.location.href = flowUrl;
-            } catch (error) {
-                mostrarToast("Error al generar pago: " + error.message, "error");
+        // --- NUEVA FUNCIÓN mostrarLoaderPago ---
+        function mostrarLoaderPago(mostrar) {
+            const loader = document.getElementById('payment-loader-modal');
+            if (mostrar) {
+                forceCloseCart();
+                closeAuthModal();
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+                setTimeout(() => loader.classList.remove('opacity-0'), 10);
+                document.body.classList.add('locked');
+            } else {
+                loader.classList.add('opacity-0');
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    document.body.classList.remove('locked');
+                }, 300);
             }
         }
 
+        // --- NUEVA FUNCIÓN procesarCheckout (eliminadas crearPagoFlow y reintentarPago) ---
         async function procesarCheckout() {
             if(cart.length === 0) return;
             if(!currentUser) { mostrarToast("Debes iniciar sesión para pedir", "info"); openAuthModal(); return; }
@@ -1739,9 +1895,8 @@
                 return;
             }
 
-            const btn = document.getElementById('btn-checkout');
-            btn.innerHTML = "Procesando... <i class='fa fa-spinner fa-spin'></i>"; 
-            btn.disabled = true;
+            // 1. Mostramos la pantalla de conexión segura
+            mostrarLoaderPago(true);
 
             try {
                 let tipoEnvioTexto = "rm";
@@ -1751,46 +1906,46 @@
                 
                 const dirEnvio = `${userProfile.calle} ${userProfile.numero_casa}, ${userProfile.comuna}, ${userProfile.region}` + (userProfile.referencia ? ` | Ref: ${userProfile.referencia}` : '');
                 
-                const items = cart.map(item => ({ product_id: item.id, cantidad: item.qty, precio_historico: item.precio }));
+                // Extraemos solo ID y cantidad. Ignoramos el precio para mayor seguridad, el servidor lo calculará.
+                const items = cart.map(item => ({ product_id: item.id, cantidad: item.qty }));
                 
-                // Crear pedido en la BD
-                const { data, error } = await supabaseClient.rpc('crear_pedido', {
-                    p_user_id: currentUser.id,
-                    p_tipo_envio: tipoEnvioTexto,
-                    p_costo_envio: tipoEnvioTexto === 'rm' ? costoEnvio : 0,
-                    p_tipo_doc: tipoDocTexto,
-                    p_total: totalPagarFinal,
-                    p_direccion_envio: dirEnvio,
-                    p_items: items
+                // 2. Preparamos el paquete de datos para la Edge Function
+                const payload = {
+                    tipoEnvioTexto: tipoEnvioTexto,
+                    costoEnvio: tipoEnvioTexto === 'rm' ? costoEnvio : 0,
+                    tipoDocTexto: tipoDocTexto,
+                    dirEnvio: dirEnvio,
+                    items: items
+                };
+
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                // 3. Un solo viaje a la Edge Function
+                const response = await fetch('https://elwzheytotfsxzrcsioz.supabase.co/functions/v1/create-flow-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify(payload)
                 });
-                if (error) throw error;
-                
-                const orderId = data.order_id;
 
-                // Llamar a Flow para obtener la URL de pago
-                const flowUrl = await crearPagoFlow(orderId);
+                const result = await response.json();
 
-                // Limpiar carrito local y en BD
-                cart = []; 
-                if (currentUser) {
-                    await supabaseClient
-                        .from('cart_items')
-                        .delete()
-                        .eq('user_id', currentUser.id);
-                }
-                localStorage.removeItem('papajose_cart'); 
-                updateCartUI(); 
-                forceCloseCart(); 
-                mostrarToast(`Pedido #${orderId} registrado. Redirigiendo a pago...`, "success");
+                if (!response.ok) throw new Error(result.error || 'Error al comunicarse con Flow');
+                if (result.error) throw new Error(result.error);
 
-                // Redirigir a Flow
-                window.location.href = flowUrl;
+                // 4. Limpiamos el carrito (ya que el servidor procesó la orden)
+                await supabaseClient.from('cart_items').delete().eq('user_id', currentUser.id);
+                localStorage.setItem('papajose_pending_order', result.order_id);
+
+                // 5. Redirección instantánea
+                window.location.href = result.url;
 
             } catch (error) {
                 console.error(error);
-                mostrarToast("Error al procesar: " + (error.message || "Intenta nuevamente."), "error");
-                btn.innerHTML = `Pagar con Flow <i class="fa fa-credit-card text-lg"></i>`; 
-                btn.disabled = false;
+                mostrarLoaderPago(false);
+                mostrarToast("Error: " + (error.message || "No se pudo conectar con el banco."), "error");
             }
         }
 
@@ -1920,16 +2075,49 @@
             if (error) { mostrarToast("Error al cargar", "error"); return; }
             
             adminDb = data;
-            renderListaAdmin(adminDb);
+            aplicarFiltrosAdmin();
+        }
+
+        function aplicarFiltrosAdmin() {
+            let filtrados = adminDb;
+            
+            // Filtro por categoría
+            if (filtroAdminCategoria) {
+                filtrados = filtrados.filter(p => p.categoria === filtroAdminCategoria);
+            }
+            
+            // Filtro por texto (nombre o SKU)
+            if (filtroAdminTexto) {
+                const texto = filtroAdminTexto.toLowerCase();
+                filtrados = filtrados.filter(p => 
+                    p.producto.toLowerCase().includes(texto) || 
+                    (p.numero_producto && p.numero_producto.toLowerCase().includes(texto))
+                );
+            }
+            
+            renderListaAdmin(filtrados);
+            
+            // Resaltar botón de categoría activo
+            document.querySelectorAll('#admin-category-filters button').forEach(btn => {
+                const cat = btn.getAttribute('data-categoria');
+                if (cat === filtroAdminCategoria) {
+                    btn.classList.add('bg-beige', 'text-white', 'border-beige');
+                    btn.classList.remove('bg-white', 'text-gray-700');
+                } else {
+                    btn.classList.remove('bg-beige', 'text-white', 'border-beige');
+                    btn.classList.add('bg-white', 'text-gray-700');
+                }
+            });
         }
 
         function filtrarAdmin(query) {
-            const q = query.toLowerCase();
-            const filtrados = adminDb.filter(p => 
-                p.producto.toLowerCase().includes(q) || 
-                (p.numero_producto && p.numero_producto.toLowerCase().includes(q))
-            );
-            renderListaAdmin(filtrados);
+            filtroAdminTexto = query;
+            aplicarFiltrosAdmin();
+        }
+
+        function filtrarAdminPorCategoria(categoria) {
+            filtroAdminCategoria = categoria;
+            aplicarFiltrosAdmin();
         }
 
         function renderListaAdmin(lista) {
@@ -2188,6 +2376,58 @@
                     else if (diffX < 0 && !document.getElementById('left-sidebar').classList.contains('-translate-x-full')) { handleBackAction(); }
                 }
             }, {passive: true});
+        }
+
+        // --- FUNCIONES PARA MODAL LEGAL (footer) ---
+        function abrirLegal(tipo) {
+            const titulo = document.getElementById('legal-modal-title');
+            const contenido = document.getElementById('legal-modal-content');
+            let texto = '';
+
+            switch(tipo) {
+                case 'terminos':
+                    titulo.innerText = 'Términos y condiciones';
+                    texto = `<p><strong>1. Aceptación de los términos</strong><br>Al acceder y utilizar este sitio web, usted acepta cumplir con estos términos y condiciones. Si no está de acuerdo, no utilice este sitio.</p>
+                    <p><strong>2. Uso del sitio</strong><br>Este sitio es para uso personal y no comercial. No puede modificar, copiar, distribuir ni transmitir ningún contenido sin autorización previa.</p>
+                    <p><strong>3. Propiedad intelectual</strong><br>Todos los contenidos, logos, imágenes y diseños son propiedad de Papajose SPA o de sus respectivos titulares.</p>
+                    <p><strong>4. Precios y disponibilidad</strong><br>Los precios están sujetos a cambio sin previo aviso. La disponibilidad de productos puede variar.</p>
+                    <p><strong>5. Envíos y entregas</strong><br>Los plazos de entrega son estimados y pueden sufrir demoras por causas externas. No nos responsabilizamos por pérdidas o daños ocasionados por la empresa de transporte una vez entregado el paquete.</p>`;
+                    break;
+                case 'privacidad':
+                    titulo.innerText = 'Política de privacidad';
+                    texto = `<p><strong>1. Datos personales</strong><br>Recopilamos su nombre, correo, teléfono y dirección para procesar pedidos y mejorar nuestro servicio.</p>
+                    <p><strong>2. Uso de la información</strong><br>Sus datos serán utilizados únicamente para la gestión de compras, envíos y comunicaciones relacionadas. No compartiremos su información con terceros sin su consentimiento, excepto cuando sea necesario para el cumplimiento legal.</p>
+                    <p><strong>3. Seguridad</strong><br>Implementamos medidas de seguridad para proteger sus datos, pero ningún sistema es 100% seguro. Usted proporciona su información bajo su propio riesgo.</p>
+                    <p><strong>4. Derechos ARCO</strong><br>Puede solicitar acceso, rectificación, cancelación u oposición de sus datos escribiendo a contacto@papajose.cl</p>`;
+                    break;
+                case 'cookies':
+                    titulo.innerText = 'Política de cookies';
+                    texto = `<p>Este sitio utiliza cookies propias y de terceros para mejorar la experiencia de navegación y realizar análisis estadísticos. Al continuar navegando, usted acepta el uso de cookies.</p>
+                    <p>Puede configurar su navegador para rechazar todas las cookies o para que le avise cuando se envía una cookie. Sin embargo, algunas funcionalidades del sitio podrían no funcionar correctamente.</p>`;
+                    break;
+                case 'derechos':
+                    titulo.innerText = 'Derechos del consumidor';
+                    texto = `<p><strong>Garantía legal</strong><br>De acuerdo con la Ley N° 19.496, todos los productos tienen una garantía legal mínima de 3 meses. Si el producto presenta fallas de fábrica, puede solicitar su cambio o devolución.</p>
+                    <p><strong>Plazo de arrepentimiento</strong><br>Puede desistir de su compra dentro de los 10 días siguientes a la recepción del producto, siempre que éste se encuentre en perfectas condiciones y con su embalaje original. El costo de devolución será por cuenta del cliente, salvo que el producto esté defectuoso.</p>
+                    <p><strong>Reclamos</strong><br>Para ejercer sus derechos, contáctenos en contacto@papajose.cl o al +56936416743.</p>`;
+                    break;
+                case 'cambios':
+                    titulo.innerText = 'Cambios y devoluciones';
+                    texto = `<p><strong>Cambios por falla</strong><br>Si el producto presenta fallas dentro de los 3 meses posteriores a la compra, puede solicitar un cambio sin costo adicional. Nos haremos cargo del transporte de retiro y entrega del nuevo producto.</p>
+                    <p><strong>Cambios por talla o color</strong><br>No se aceptan cambios por talla, color o gusto personal, a menos que se acuerde previamente y el cliente asuma los costos de envío.</p>
+                    <p><strong>Devoluciones</strong><br>Para devoluciones, debe contactarnos dentro de los 10 días hábiles posteriores a la recepción. El producto debe estar sin uso, con etiquetas y en su empaque original. El reembolso se realizará una vez recibido y verificado el producto.</p>`;
+                    break;
+                default:
+                    return;
+            }
+            contenido.innerHTML = texto;
+            document.getElementById('legal-modal').classList.remove('hidden');
+            document.body.classList.add('locked');
+        }
+
+        function cerrarLegal() {
+            document.getElementById('legal-modal').classList.add('hidden');
+            document.body.classList.remove('locked');
         }
     </script>
 </body>
