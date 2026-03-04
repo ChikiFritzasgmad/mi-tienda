@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-NDG1TN8LS4"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -17,37 +16,15 @@
     <title>Papajose SPA | Comercializadora</title>
     <meta name="description" content="Comercializadora de artículos variados. Envíos a todo Chile. Compra segura y trato directo.">
     
-    <!-- Open Graph -->
     <meta property="og:title" content="Papajose SPA | Catálogo Online">
     <meta property="og:description" content="Encuentra de todo a los mejores precios. Stock actualizado.">
     <meta property="og:image" content="imagenes/logo.webp"> 
-    <meta property="og:url" content="https://chikifritzasgmad.github.io/mi-tienda/"> <!-- PRODUCTION: Cambiar a tu dominio real cuando tengas uno -->
-    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://chikifritzasgmad.github.io/mi-tienda/"> <meta property="og:type" content="website">
 
-    <!-- Schema.org -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Store",
-        "name": "Papajose SPA",
-        "description": "Comercializadora de artículos variados. Envíos a todo Chile.",
-        "url": "https://chikifritzasgmad.github.io/mi-tienda/", <!-- PRODUCTION: Cambiar a tu dominio real -->
-        "telephone": "+56936416743",
-        "address": {
-            "@type": "PostalAddress",
-            "addressCountry": "CL"
-        },
-        "priceRange": "$$",
-        "image": "imagenes/logo.webp"
-    }
-    </script>
-
-    <!-- Tailwind y Font Awesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
     
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -118,10 +95,8 @@
         }
 
         .menu-bg-color { background-color: var(--pastel-menu); }
-
         .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
         .no-stock { filter: grayscale(100%); opacity: 0.7; }
         
         details > summary { list-style: none; }
@@ -144,14 +119,7 @@
 
         /* Modal producto */
         @media (min-width: 768px) {
-            .product-modal-desktop {
-                max-width: 800px;
-                max-height: 85vh;
-                margin: 5vh auto;
-                border-radius: 24px;
-                overflow: hidden;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            }
+            .product-modal-desktop { max-width: 800px; max-height: 85vh; margin: 5vh auto; border-radius: 24px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
         }
 
         html { scroll-behavior: smooth; }
@@ -161,42 +129,22 @@
             background-size: 20px 20px;
         }
 
-        .modal-body-scroll {
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain; 
-        }
+        .modal-body-scroll { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 
-        /* Estilos para admin modal a pantalla completa */
-        .admin-modal-full {
-            width: 100vw !important;
-            max-width: 100vw !important;
-            height: 100vh !important;
-            max-height: 100vh !important;
-            border-radius: 0 !important;
-            margin: 0 !important;
-        }
-
-        /* Estilos para el modal de detalles del pedido */
-        .order-detail-item {
-            @apply flex justify-between py-2 border-b border-gray-100 text-sm;
+        /* Modales a pantalla completa */
+        .modal-full-screen {
+            width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0 !important; margin: 0 !important;
         }
     </style>
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
 
-    <!-- ========== HEADER MEJORADO CON GRID ========== -->
     <header class="fixed top-0 w-full bg-white z-[50] border-b border-gray-50 h-20 shadow-sm transition-all duration-300 header-desktop-adjust">
         <div class="h-full grid grid-cols-3 items-center px-4 md:px-6">
-            <!-- Columna izquierda: menú hamburguesa (solo móvil) -->
             <div class="flex justify-start">
-                <button onclick="toggleMobileMenu()" 
-                        aria-label="Abrir menú"
-                        class="lg:hidden text-2xl text-beige hover:text-black transition">
-                    <i class="fa fa-bars"></i>
-                </button>
+                <button onclick="toggleMobileMenu()" aria-label="Abrir menú" class="lg:hidden text-2xl text-beige hover:text-black transition"><i class="fa fa-bars"></i></button>
             </div>
             
-            <!-- Columna central: logo y título (clickeable) -->
             <div class="flex justify-center">
                 <div onclick="resetAndScrollToTop()" class="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-50 shadow-sm cursor-pointer hover:bg-gray-50 transition-all active:scale-95">
                     <img src="imagenes/logo.webp" class="w-7 h-7 rounded-full object-cover bg-white shadow-sm" alt="Logo" width="28" height="28" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%23D2B48C%22/%3E%3Ctext x=%2216%22 y=%2216%22 font-family=%22Arial%22 font-size=%2210%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22%3EPJ%3C/text%3E%3C/svg%3E'">
@@ -204,9 +152,7 @@
                 </div>
             </div>
 
-            <!-- Columna derecha: buscador (escritorio), usuario y carrito -->
             <div class="flex justify-end items-center gap-3">
-                <!-- Buscador de escritorio (con ID) -->
                 <div class="hidden lg:block relative group mr-2">
                     <input type="text" id="search-desktop" onkeyup="buscar(this.value)" placeholder="Buscar producto o SKU..." class="bg-gray-50/50 border border-transparent rounded-full px-5 py-2.5 w-64 text-sm focus:ring-1 focus:ring-beige focus:bg-white focus:border-beige transition-all">
                     <i class="fa fa-search absolute right-4 top-3 text-beige"></i>
@@ -223,17 +169,14 @@
         </div>
     </header>
 
-    <!-- Overlays -->
     <div id="menu-overlay" class="overlay-base" onclick="handleBackAction()"></div>
     <div id="cart-overlay" class="overlay-base" onclick="forceCloseCart()"></div>
 
-    <!-- ========== MODAL DE AUTENTICACIÓN ========== -->
     <div id="auth-modal" class="fixed inset-0 z-[200] bg-black bg-opacity-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 z-50 bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition">✕</button>
             <div class="p-8 overflow-y-auto modal-body-scroll">
                 
-                <!-- Login -->
                 <div id="auth-login-view">
                     <h2 class="text-2xl font-black text-gray-900 mb-6 tracking-tight">Iniciar Sesión</h2>
                     <form id="login-form" onsubmit="iniciarSesion(event)" class="space-y-4">
@@ -247,7 +190,6 @@
                     <p class="text-center text-sm text-gray-500 mt-6">¿Eres nuevo? <span onclick="toggleAuthView()" class="text-beige font-black hover:underline cursor-pointer">Regístrate aquí</span></p>
                 </div>
 
-                <!-- Registro con campos de dirección estructurados -->
                 <div id="auth-register-view" class="hidden">
                     <h2 class="text-2xl font-black text-gray-900 mb-2 tracking-tight">Crear Cuenta</h2>
                     <p class="text-xs text-gray-500 mb-6 uppercase font-bold tracking-widest text-beige">Datos para el despachador 🚚</p>
@@ -277,7 +219,6 @@
                     <p class="text-center text-sm text-gray-500 mt-6">¿Ya tienes cuenta? <span onclick="toggleAuthView()" class="text-beige font-black hover:underline cursor-pointer">Inicia Sesión</span></p>
                 </div>
 
-                <!-- Vista de perfil con pestañas (Mis Datos / Mis Pedidos) -->
                 <div id="auth-logged-view" class="hidden">
                     <div class="flex border-b border-gray-200 mb-4">
                         <button id="tab-mi-perfil" class="py-2 px-4 font-bold text-sm uppercase border-b-2 border-beige text-beige" onclick="switchUserTab('perfil')">Mis Datos</button>
@@ -326,7 +267,6 @@
                     </div>
                 </div>
 
-                <!-- Vista de recuperación de contraseña (oculta inicialmente) -->
                 <div id="auth-recover-view" class="hidden">
                     <h2 class="text-2xl font-black text-gray-900 mb-2 tracking-tight">Recuperar contraseña</h2>
                     <p class="text-sm text-gray-600 mb-6">Te enviaremos un enlace para restablecer tu contraseña al correo electrónico.</p>
@@ -342,7 +282,6 @@
         </div>
     </div>
 
-    <!-- ========== MENÚ LATERAL IZQUIERDO ========== -->
     <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] menu-bg-color border-r border-gray-100 z-[150] pt-24 transform -translate-x-full lg:translate-x-0 shadow-2xl flex flex-col justify-between h-full">
         <div class="p-6 overflow-y-auto">
             <div class="flex justify-between items-center mb-8 lg:hidden">
@@ -353,7 +292,6 @@
                 <i class="fa fa-user-circle text-lg"></i> <span id="mobile-menu-user-txt">Mi Cuenta</span>
             </button>
 
-            <!-- Botón de administración (solo visible para admin) -->
             <div id="admin-menu-item" class="hidden mb-4">
                 <button onclick="openAdminModal()" class="w-full text-left px-5 py-4 rounded-xl bg-amber-100 text-amber-800 font-bold flex items-center gap-3 transition-all shadow-md hover:bg-amber-200">
                     <i class="fa fa-cog"></i> Panel Administración
@@ -373,10 +311,8 @@
         </div>
     </aside>
 
-    <!-- ========== CONTENIDO PRINCIPAL ========== -->
     <main id="main-content" class="pt-28 px-4 md:px-12 layout-desktop min-h-screen">
         
-        <!-- Buscador móvil (con ID) -->
         <div class="lg:hidden sticky-search-container">
             <div class="relative w-full">
                 <input type="text" id="search-mobile" onkeyup="buscar(this.value)" placeholder="Buscar por nombre o SKU..." class="w-full bg-gray-50 border border-transparent p-4 pl-12 rounded-2xl shadow-sm focus:ring-1 focus:ring-beige focus:bg-white transition">
@@ -384,7 +320,6 @@
             </div>
         </div>
 
-        <!-- Hero (destacados) -->
         <section id="hero-section" class="relative glass-panel text-gray-800 py-12 px-6 md:px-12 mb-12 rounded-[2rem] overflow-hidden shadow-lg fade-in-up hidden">
             <div class="relative z-10 max-w-6xl mx-auto">
                 <div class="text-center mb-8">
@@ -400,7 +335,6 @@
             </div>
         </section>
 
-        <!-- Proceso de compra -->
         <section class="mb-16 py-10 px-4 bg-white/95 border-2 border-gray-100 rounded-3xl shadow-md">
             <h3 class="text-center font-black text-gray-900 text-sm uppercase tracking-widest mb-10 border-b pb-4 border-gray-200">
                 <i class="fa fa-check-circle text-green-500 mr-2"></i> Proceso de Compra Seguro
@@ -429,13 +363,11 @@
             </div>
         </section>
 
-        <!-- Carga inicial -->
         <div id="loading-msg" class="text-center py-20 glass-panel rounded-2xl mb-10">
             <i class="fa fa-circle-notch fa-spin text-4xl text-beige mb-4"></i>
             <p class="text-gray-900 font-bold">Cargando inventario actualizado...</p>
         </div>
 
-        <!-- Catálogo con paginación -->
         <section id="seccion-catalogo" class="hidden mb-12">
             <div class="glass-panel p-6 rounded-2xl mb-6 flex items-center justify-between shadow-sm">
                 <h2 id="titulo-grid" class="text-xl font-black text-gray-900 uppercase tracking-widest">Catálogo</h2>
@@ -444,7 +376,6 @@
             
             <div id="grid-productos" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 mb-8"></div>
             
-            <!-- Controles de paginación -->
             <div id="pagination-controls" class="flex justify-center items-center gap-4 py-6 hidden">
                 <button onclick="changePage(-1)" id="btn-prev" class="bg-white px-4 py-2 rounded-full shadow font-bold text-sm border">Anterior</button>
                 <span id="page-indicator" class="font-bold text-gray-900 bg-white px-4 py-2 rounded-full shadow border">Pág 1</span>
@@ -452,7 +383,6 @@
             </div>
         </section>
 
-        <!-- Acordeones informativos -->
         <section class="max-w-3xl mx-auto mb-20 space-y-4">
             <details class="group glass-panel rounded-2xl p-6 cursor-pointer open:ring-1 open:ring-beige/30 transition-all shadow-sm">
                 <summary class="flex justify-between items-center font-bold text-gray-900 list-none select-none">
@@ -464,89 +394,136 @@
                     <p class="mt-2">Hoy evolucionamos con nuestra propia plataforma para ofrecerte un <strong>trato directo, sin comisiones ocultas y precios realmente justos</strong>.</p>
                 </div>
             </details>
-
-            <details class="group glass-panel rounded-2xl p-6 cursor-pointer open:ring-1 open:ring-beige/30 transition-all shadow-sm">
-                <summary class="flex justify-between items-center font-bold text-gray-900 list-none select-none">
-                    <div class="flex items-center gap-3"><i class="fa fa-shield-alt text-beige text-xl"></i><span class="uppercase tracking-wider text-sm">Confianza y Pagos</span></div>
-                    <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300"><i class="fa fa-chevron-down"></i></span>
-                </summary>
-                <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 font-medium">
-                    <p>🔒 <strong>Pasarela de pago Flow:</strong> Todos los pagos se procesan a través de Flow, una plataforma segura que acepta tarjetas de crédito, débito y transferencias bancarias. Tus datos financieros nunca son almacenados en nuestros servidores.</p>
-                    <p class="mt-2">📄 <strong>Documentación:</strong> Boleta o Factura en 24 horas hábiles.</p>
-                    <p class="mt-2">✅ <strong>Garantía de fábrica:</strong> Todos los productos cuentan con garantía legal de 3 meses y soporte directo del fabricante.</p>
-                </div>
-            </details>
-
-            <details class="group glass-panel rounded-2xl p-6 cursor-pointer open:ring-1 open:ring-beige/30 transition-all shadow-sm">
-                <summary class="flex justify-between items-center font-bold text-gray-900 list-none select-none">
-                    <div class="flex items-center gap-3"><i class="fa fa-rotate-left text-beige text-xl"></i><span class="uppercase tracking-wider text-sm">Garantía</span></div>
-                    <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300"><i class="fa fa-chevron-down"></i></span>
-                </summary>
-                <div class="mt-6 text-gray-800 text-sm md:text-base leading-relaxed border-t border-gray-200 pt-4 font-medium">
-                    <p>✅ <strong>Garantía Real:</strong> Cambios y devoluciones sin costo si el producto falla (dentro de los primeros 3 meses).</p>
-                </div>
-            </details>
         </section>
 
-        <!-- ========== FOOTER LEGAL ========== -->
         <footer class="max-w-6xl mx-auto mt-20 border-t border-gray-200 pt-10 pb-6 text-xs text-gray-500">
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center md:text-left">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-left">
                 <div>
-                    <h4 class="font-bold text-gray-700 mb-2 uppercase tracking-wider">Legal</h4>
-                    <ul class="space-y-1">
+                    <h4 class="font-bold text-gray-700 mb-4 uppercase tracking-wider">Legal</h4>
+                    <ul class="space-y-2">
                         <li><button onclick="abrirLegal('terminos')" class="hover:text-beige transition">Términos y condiciones</button></li>
                         <li><button onclick="abrirLegal('privacidad')" class="hover:text-beige transition">Política de privacidad</button></li>
                         <li><button onclick="abrirLegal('cookies')" class="hover:text-beige transition">Política de cookies</button></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-bold text-gray-700 mb-2 uppercase tracking-wider">Consumidor</h4>
-                    <ul class="space-y-1">
+                    <h4 class="font-bold text-gray-700 mb-4 uppercase tracking-wider">Consumidor</h4>
+                    <ul class="space-y-2">
                         <li><button onclick="abrirLegal('derechos')" class="hover:text-beige transition">Derechos del consumidor</button></li>
                         <li><button onclick="abrirLegal('cambios')" class="hover:text-beige transition">Cambios y devoluciones</button></li>
                     </ul>
                 </div>
-                <div>
-                    <h4 class="font-bold text-gray-700 mb-2 uppercase tracking-wider">Contacto</h4>
-                    <ul class="space-y-1">
-                        <li><a href="mailto:contacto@papajose.cl" class="hover:text-beige transition">contacto@papajose.cl</a></li>
-                        <li><a href="tel:+56936416743" class="hover:text-beige transition">+56 9 3641 6743</a></li>
-                    </ul>
+                <div class="col-span-2">
+                    <h4 class="font-bold text-gray-700 mb-4 uppercase tracking-wider">Acerca de nosotros</h4>
+                    <p class="mb-2">Comercializadora de artículos variados comprometida con el servicio directo y los precios justos.</p>
+                    <p><a href="mailto:contacto@papajose.cl" class="hover:text-beige transition">contacto@papajose.cl</a></p>
                 </div>
-                <div class="col-span-2 md:col-span-2">
-                    <p class="text-gray-400">© 2026 Papajose SPA - Todos los derechos reservados. Prohibida la reproducción total o parcial del contenido de esta tienda.</p>
-                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                <p>© 2026 Papajose SPA - Todos los derechos reservados. Prohibida la reproducción total o parcial del contenido de esta tienda.</p>
             </div>
         </footer>
     </main>
 
-    <!-- ========== MODAL LEGAL ========== -->
-    <div id="legal-modal" class="fixed inset-0 z-[300] bg-black bg-opacity-50 hidden items-center justify-center p-4">
-        <div class="bg-white max-w-2xl w-full max-h-[80vh] rounded-2xl overflow-hidden flex flex-col">
-            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-                <h3 id="legal-modal-title" class="text-xl font-black text-gray-900">Términos y condiciones</h3>
-                <button onclick="cerrarLegal()" class="text-gray-400 hover:text-black text-2xl">&times;</button>
+    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[160] shadow-2xl transform translate-x-full flex flex-col h-full">
+        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
+            <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
+            <button onclick="forceCloseCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
+        </div>
+        <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
+        <div class="p-5 bg-white border-t border-gray-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] flex-shrink-0">
+            
+            <div class="mb-4 bg-blue-50 border border-blue-100 p-3 rounded-xl flex items-start gap-3">
+                <i class="fa fa-truck-fast text-blue-500 mt-0.5"></i>
+                <div>
+                    <p class="text-xs font-bold text-blue-900">Despacho rápido</p>
+                    <p class="text-[10px] text-blue-700 mt-0.5">Tu pedido será procesado y despachado entre <strong>1 a 2 días hábiles</strong> tras confirmar el pago.</p>
+                </div>
             </div>
-            <div id="legal-modal-content" class="p-6 overflow-y-auto text-sm text-gray-700 leading-relaxed space-y-4">
-                <!-- Se cargará dinámicamente -->
+
+            <div class="mb-4 flex flex-col gap-3">
+                <div>
+                    <h4 class="font-bold text-[10px] uppercase text-gray-400 mb-2 tracking-wider">Documento Tributario</h4>
+                    <div class="flex gap-2">
+                        <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer p-2 border border-gray-200 rounded-lg hover:border-beige transition bg-white has-[:checked]:border-beige has-[:checked]:bg-orange-50/30">
+                            <input type="radio" name="tipo_doc" value="Boleta" checked class="accent-beige w-3 h-3">
+                            <span class="font-bold text-gray-700 text-xs">Boleta</span>
+                        </label>
+                        <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer p-2 border border-gray-200 rounded-lg hover:border-beige transition bg-white has-[:checked]:border-beige has-[:checked]:bg-orange-50/30">
+                            <input type="radio" name="tipo_doc" value="Factura" class="accent-beige w-3 h-3">
+                            <span class="font-bold text-gray-700 text-xs">Factura</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div class="flex justify-between text-xs text-gray-600 mb-1">
+                        <span>Subtotal:</span>
+                        <span id="cart-subtotal" class="font-medium">$0</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600">
+                        <span id="cart-envio-label">Costo de envío:</span>
+                        <span id="cart-envio-monto" class="font-medium text-beige">Calculando...</span>
+                    </div>
+                </div>
             </div>
+            
+            <div class="flex justify-between items-end mb-4">
+                <span class="text-sm font-bold text-gray-500 uppercase">Total Final</span> 
+                <span id="cart-total" class="text-2xl font-black text-gray-900">$0</span>
+            </div>
+            <button id="btn-checkout" onclick="procesarCheckout()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg flex items-center justify-center gap-3 text-sm">
+                Pagar con Flow <img src="https://www.flow.cl/images/brand/flow-logo.svg" alt="Flow" class="h-4 brightness-0 invert opacity-90">
+            </button>
+        </div>
+    </aside>
+
+    <div id="mobile-sticky-bar" onclick="toggleCart()" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[60] shadow-lg flex justify-between items-center lg:hidden hidden fade-in-up cursor-pointer">
+        <div class="flex flex-col pointer-events-none">
+            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Productos</span>
+            <span id="mobile-total-sticky" class="text-xl font-black text-gray-900">$0</span>
+        </div>
+        <button class="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm shadow-xl">Ver Carrito <i class="fa fa-shopping-cart"></i></button>
+    </div>
+
+    <button id="desktop-floating-cart" onclick="toggleCart()" class="hidden lg:flex fixed bottom-8 right-8 bg-black text-white px-6 py-3 rounded-full font-bold shadow-2xl z-[55] hover:scale-105 transition-transform items-center gap-3 border-2 border-white hover:bg-beige">
+        <i class="fa fa-shopping-bag"></i>
+        <span id="desktop-floating-total">$0</span>
+    </button>
+
+    <a href="https://wa.me/56936416743?text=Hola%20Papajose%20SPA,%20necesito%20ayuda%20con%20soporte%20o%20el%20estado%20de%20mi%20pedido." target="_blank" id="whatsapp-float-btn" class="fixed bottom-8 left-8 bg-[#25D366] text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_4px_14px_rgba(37,211,102,0.4)] z-[55] hover:scale-110 transition-transform border-2 border-white" aria-label="Soporte por WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <div id="product-modal" onclick="if(event.target === this) closeProductModal()" class="fixed inset-0 z-[200] bg-black bg-opacity-50 hidden items-center justify-center p-4">
+        <div class="bg-white product-modal-desktop w-full max-w-4xl max-h-[85vh] flex flex-col rounded-2xl shadow-2xl relative h-full">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 z-50 bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-lg hover:bg-red-100 hover:text-red-500 transition">✕</button>
+            <div id="modal-content" class="flex-1 flex flex-col overflow-hidden relative h-full"></div>
         </div>
     </div>
 
-    <!-- ========== MODAL DETALLE PEDIDO ========== -->
-    <div id="order-detail-modal" class="fixed inset-0 z-[300] bg-black bg-opacity-50 hidden items-center justify-center p-4">
-        <div class="bg-white max-w-2xl w-full max-h-[80vh] rounded-2xl overflow-hidden flex flex-col">
-            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-xl font-black text-gray-900">Detalle del pedido</h3>
-                <button onclick="cerrarDetallePedido()" class="text-gray-400 hover:text-black text-2xl">&times;</button>
-            </div>
-            <div id="order-detail-content" class="p-6 overflow-y-auto text-sm text-gray-700">
-                <!-- Se cargará dinámicamente -->
-            </div>
+    <div id="legal-modal" class="fixed inset-0 z-[300] bg-white hidden flex-col modal-full-screen overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+            <h3 id="legal-modal-title" class="text-xl md:text-2xl font-black text-gray-900 uppercase tracking-tight">Cargando...</h3>
+            <button onclick="cerrarLegal()" class="text-gray-400 hover:text-black w-10 h-10 rounded-full hover:bg-gray-200 flex items-center justify-center transition text-2xl">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+            <div id="legal-modal-content" class="max-w-4xl mx-auto p-6 md:p-12 text-sm md:text-base text-gray-700 leading-relaxed space-y-6">
+                </div>
         </div>
     </div>
 
-    <!-- ========== LOADER DE PAGO SEGURO (NUEVO) ========== -->
+    <div id="order-detail-modal" class="fixed inset-0 z-[300] bg-white hidden flex-col modal-full-screen overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+            <h3 class="text-xl md:text-2xl font-black text-gray-900 uppercase tracking-tight">Detalle de tu Pedido</h3>
+            <button onclick="cerrarDetallePedido()" class="text-gray-400 hover:text-black w-10 h-10 rounded-full hover:bg-gray-200 flex items-center justify-center transition text-2xl">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto bg-gray-100">
+            <div id="order-detail-content" class="max-w-4xl mx-auto p-4 md:p-8">
+                </div>
+        </div>
+    </div>
+
     <div id="payment-loader-modal" class="fixed inset-0 z-[300] bg-white hidden flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0">
         <div class="text-center max-w-sm w-full">
             <div class="relative w-24 h-24 mx-auto mb-8">
@@ -566,81 +543,13 @@
         </div>
     </div>
 
-    <!-- ========== CARRITO LATERAL ========== -->
-    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white z-[160] shadow-2xl transform translate-x-full flex flex-col h-full">
-        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
-            <h2 class="text-xl font-black uppercase text-gray-800">Tu Carrito</h2>
-            <button onclick="forceCloseCart()" class="text-gray-400 hover:text-black transition text-xl w-10 h-10 rounded-full hover:bg-white flex items-center justify-center">✕</button>
-        </div>
-        <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
-        <div class="p-5 bg-white border-t border-gray-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] flex-shrink-0">
-            <div class="mb-4 flex gap-4 text-xs">
-                <div class="flex-1">
-                    <h4 class="font-bold text-[10px] uppercase text-gray-400 mb-2 tracking-wider">Envío (Obligatorio)</h4>
-                    <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50 mb-2">
-                        <input type="radio" name="tipo_envio" value="rm" checked onchange="calcularTotal(); actualizarOpcionEnvioSegunDireccion();" class="accent-black w-3 h-3">
-                        <div><span class="block font-bold text-gray-700 text-[11px]">RM</span><span class="text-[10px] text-gray-500" id="rm-costo-label">+$3.500</span></div>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50">
-                        <input type="radio" name="tipo_envio" value="regiones" onchange="calcularTotal();" class="accent-black w-3 h-3">
-                        <div><span class="block font-bold text-gray-700 text-[11px]">Regiones</span><span class="text-[10px] text-gray-500">Por pagar (Starken)</span></div>
-                    </label>
-                </div>
-                <div class="flex-1">
-                    <h4 class="font-bold text-[10px] uppercase text-gray-400 mb-2 tracking-wider">Doc.</h4>
-                    <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50 mb-2">
-                        <input type="radio" name="tipo_doc" value="Boleta" checked class="accent-black w-3 h-3">
-                        <span class="font-bold text-gray-700 text-[11px]">Boleta</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer p-2 border border-gray-100 rounded-lg hover:border-beige transition bg-gray-50">
-                        <input type="radio" name="tipo_doc" value="Factura" class="accent-black w-3 h-3">
-                        <span class="font-bold text-gray-700 text-[11px]">Factura</span>
-                    </label>
-                </div>
-            </div>
-            <div class="flex justify-between text-2xl font-black text-gray-900 mb-4">
-                <span>Total Final</span> 
-                <span id="cart-total">$0</span>
-            </div>
-            <button id="btn-checkout" onclick="procesarCheckout()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition-all shadow-lg flex items-center justify-center gap-3 text-sm">
-                Pagar con Flow <i class="fa fa-credit-card text-lg"></i>
-            </button>
-        </div>
-    </aside>
-
-    <!-- Barra flotante móvil -->
-    <div id="mobile-sticky-bar" onclick="toggleCart()" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-[60] shadow-lg flex justify-between items-center lg:hidden hidden fade-in-up cursor-pointer">
-        <div class="flex flex-col pointer-events-none">
-            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Productos</span>
-            <span id="mobile-total-sticky" class="text-xl font-black text-gray-900">$0</span>
-        </div>
-        <button class="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm shadow-xl">Ver Carrito <i class="fa fa-shopping-cart"></i></button>
-    </div>
-
-    <!-- Botón flotante desktop -->
-    <button id="desktop-floating-cart" onclick="toggleCart()" class="hidden lg:flex fixed bottom-8 right-8 bg-black text-white px-6 py-3 rounded-full font-bold shadow-2xl z-[55] hover:scale-105 transition-transform items-center gap-3 border-2 border-white hover:bg-beige">
-        <i class="fa fa-shopping-bag"></i>
-        <span id="desktop-floating-total">$0</span>
-    </button>
-
-    <!-- ========== MODAL PRODUCTO ========== -->
-    <div id="product-modal" onclick="if(event.target === this) closeProductModal()" class="fixed inset-0 z-[200] bg-black bg-opacity-50 hidden items-center justify-center p-4">
-        <div class="bg-white product-modal-desktop w-full max-w-4xl max-h-[85vh] flex flex-col rounded-2xl shadow-2xl relative h-full">
-            <button onclick="closeProductModal()" class="absolute top-4 right-4 z-50 bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-lg hover:bg-red-100 hover:text-red-500 transition">✕</button>
-            <div id="modal-content" class="flex-1 flex flex-col overflow-hidden relative h-full"></div>
-        </div>
-    </div>
-
-    <!-- ========== MODAL ADMINISTRACIÓN (PANTALLA COMPLETA) ========== -->
     <div id="admin-modal" class="fixed inset-0 z-[250] bg-black bg-opacity-50 hidden items-center justify-center p-0">
         <div class="bg-white admin-modal-full flex flex-col overflow-hidden">
-            <!-- Header del modal admin -->
             <div class="flex justify-between items-center p-6 border-b border-gray-200 bg-gray-50">
                 <h2 class="text-2xl font-black text-gray-900">Panel de Administración</h2>
                 <button onclick="closeAdminModal()" class="text-gray-500 hover:text-black text-2xl w-10 h-10 rounded-full hover:bg-gray-200 flex items-center justify-center transition">✕</button>
             </div>
             
-            <!-- Pestañas de admin (Productos, Nuevo, Pedidos) -->
             <div class="flex border-b border-gray-200 px-6 pt-4">
                 <button id="tab-productos" class="py-2 px-4 font-bold text-sm uppercase border-b-2 border-beige text-beige" onclick="switchAdminTab('productos')">Productos</button>
                 <button id="tab-nuevo" class="py-2 px-4 font-bold text-sm uppercase text-gray-500 hover:text-gray-700" onclick="switchAdminTab('nuevo')">+ Nuevo Producto</button>
@@ -648,7 +557,6 @@
             </div>
 
             <div class="flex-1 overflow-y-auto p-6">
-                <!-- Vista: Lista de productos -->
                 <div id="admin-productos-view" class="block max-w-5xl mx-auto">
                     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                         <h3 class="font-bold text-lg">Inventario Actual</h3>
@@ -657,7 +565,6 @@
                             <i class="fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                         </div>
                     </div>
-                    <!-- Filtros rápidos por categoría (NUEVO) -->
                     <div class="flex flex-wrap gap-2 mb-4" id="admin-category-filters">
                         <button onclick="filtrarAdminPorCategoria('')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="">Todas</button>
                         <button onclick="filtrarAdminPorCategoria('Hogar')" class="px-3 py-1 text-xs font-bold rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-beige hover:text-white transition" data-categoria="Hogar">Hogar</button>
@@ -672,53 +579,30 @@
                     <div id="admin-productos-list" class="space-y-3"></div>
                 </div>
 
-                <!-- Vista: Nuevo/Editar producto -->
                 <div id="admin-nuevo-view" class="hidden max-w-2xl mx-auto">
                     <h3 class="font-bold text-lg mb-4" id="form-titulo">Agregar Nuevo Producto</h3>
                     <form id="producto-form" onsubmit="guardarProducto(event)" class="space-y-4">
                         <input type="hidden" id="producto-id" value="">
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label>
-                            <input type="text" id="producto-nombre" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none">
-                        </div>
+                        <div><label class="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label><input type="text" id="producto-nombre" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none"></div>
                         <div class="flex gap-4">
-                            <div class="flex-1">
-                                <label class="text-xs font-bold text-gray-500 uppercase ml-1">SKU</label>
-                                <input type="text" id="producto-sku" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none">
-                            </div>
-                            <div class="flex-1">
-                                <label class="text-xs font-bold text-gray-500 uppercase ml-1">Precio</label>
-                                <input type="number" id="producto-precio" min="0" step="1" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none">
-                            </div>
-                            <div class="flex-1">
-                                <label class="text-xs font-bold text-gray-500 uppercase ml-1">Stock</label>
-                                <input type="number" id="producto-stock" min="0" step="1" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none">
-                            </div>
+                            <div class="flex-1"><label class="text-xs font-bold text-gray-500 uppercase ml-1">SKU</label><input type="text" id="producto-sku" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none"></div>
+                            <div class="flex-1"><label class="text-xs font-bold text-gray-500 uppercase ml-1">Precio</label><input type="number" id="producto-precio" min="0" step="1" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none"></div>
+                            <div class="flex-1"><label class="text-xs font-bold text-gray-500 uppercase ml-1">Stock</label><input type="number" id="producto-stock" min="0" step="1" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none"></div>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase ml-1">Categoría</label>
                             <select id="producto-categoria" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none">
-                                <option value="">Seleccione una categoría...</option>
-                                <option value="Hogar">Hogar</option>
-                                <option value="Electrónica y accesorios">Electrónica y accesorios</option>
-                                <option value="Belleza e Higiene">Belleza e Higiene</option>
-                                <option value="Deportes y Outdoor">Deportes y Outdoor</option>
-                                <option value="Juguetes">Juguetes</option>
-                                <option value="Ropa y Accesorios">Ropa y Accesorios</option>
-                                <option value="Vehiculos">Vehiculos</option>
-                                <option value="Otros">Otros</option>
+                                <option value="">Seleccione...</option>
+                                <option value="Hogar">Hogar</option><option value="Electrónica y accesorios">Electrónica y accesorios</option><option value="Belleza e Higiene">Belleza e Higiene</option><option value="Deportes y Outdoor">Deportes y Outdoor</option><option value="Juguetes">Juguetes</option><option value="Ropa y Accesorios">Ropa y Accesorios</option><option value="Vehiculos">Vehiculos</option><option value="Otros">Otros</option>
                             </select>
                         </div>
+                        <div><label class="text-xs font-bold text-gray-500 uppercase ml-1">Descripción</label><textarea id="producto-desc" rows="3" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none"></textarea></div>
                         <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase ml-1">Descripción</label>
-                            <textarea id="producto-desc" rows="3" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none"></textarea>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase ml-1">Imagen</label>
-                            <input type="file" id="producto-imagen" accept="image/*" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none">
+                            <label class="text-xs font-bold text-gray-500 uppercase ml-1">Imagen URL</label>
+                            <input type="text" id="producto-imagen-url" placeholder="https://ejemplo.com/imagen.webp" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-sm outline-none">
                             <div id="imagen-actual" class="mt-2 hidden">
-                                <p class="text-xs text-gray-500">Imagen actual:</p>
-                                <img id="imagen-preview" src="" class="h-20 w-20 object-contain border rounded mt-1">
+                                <p class="text-xs text-gray-500">Preview:</p>
+                                <img id="imagen-preview" src="" class="h-20 w-20 object-contain border rounded mt-1 bg-white">
                             </div>
                         </div>
                         <div class="flex gap-3 pt-4 border-t border-gray-200 mt-4">
@@ -728,18 +612,14 @@
                     </form>
                 </div>
 
-                <!-- Vista: Gestión de Pedidos (Logística) -->
                 <div id="admin-pedidos-view" class="hidden max-w-5xl mx-auto">
                     <h3 class="font-bold text-lg mb-6 border-b pb-2">Gestión de Logística y Envíos</h3>
-                    <div id="admin-lista-pedidos" class="space-y-4">
-                        <!-- Se llenará con JavaScript -->
-                    </div>
+                    <div id="admin-lista-pedidos" class="space-y-4"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ========== TOAST ========== -->
     <div id="toast-modal" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[200] hidden transition-all w-11/12 max-w-sm toast-enter">
         <div class="bg-gray-900 text-white rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4">
             <div class="flex items-center gap-3" id="toast-content"></div>
@@ -748,18 +628,12 @@
 
     <script>
         // =========================================================================
-        //                        CONFIGURACIÓN PARA PRODUCCIÓN
-        // =========================================================================
-        // PRODUCTION: Cuando pases a producción, cambia estos valores:
-        // 1. FLOW_MODE: 'live' en lugar de 'sandbox'
-        // 2. SITE_URL: tu dominio real (ej: https://comercializadora.papajose.cl)
-        // 3. WHATSAPP_NUM: si lo deseas, puedes mantenerlo igual.
+        // CONFIGURACIÓN PARA PRODUCCIÓN
         // =========================================================================
         const FLOW_MODE = 'sandbox'; // Cambiar a 'live' en producción
-        const SITE_URL = 'https://chikifritzasgmad.github.io/mi-tienda/'; // PRODUCTION: Cambiar a tu dominio real
+        const SITE_URL = 'https://chikifritzasgmad.github.io/mi-tienda/'; 
         const WHATSAPP_NUM = "56936416743";
 
-        // --- FUNCIÓN DE ESCAPE PARA SEGURIDAD XSS ---
         function escapeHTML(str) {
             return String(str).replace(/[&<>"]/g, function(m) {
                 if (m === '&') return '&amp;';
@@ -770,12 +644,10 @@
             });
         }
 
-        // --- CONFIGURACIÓN GLOBAL Y SUPABASE ---
         const supabaseUrl = 'https://elwzheytotfsxzrcsioz.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsd3poZXl0b3Rmc3h6cmNzaW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzE0MzIsImV4cCI6MjA4Njc0NzQzMn0.0WLFkRsWPdYJSL_Oo6TtK0t5P_0cv9pJi95uXm9TKTg';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         
-        // --- DICCIONARIO DE REGIONES Y COMUNAS ---
         const regionesYComunas = {
             "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
             "Tarapacá": ["Iquique", "Alto Hospicio", "Pozo Almonte", "Camiña", "Colchane", "Huara", "Pica"],
@@ -795,15 +667,13 @@
             "Magallanes": ["Punta Arenas", "Laguna Blanca", "Río Verde", "San Gregorio", "Cabo de Hornos", "Antártica", "Porvenir", "Primavera", "Timaukel", "Natales", "Torres del Paine"]
         };
 
-        // --- COMUNAS DE RM PARA TARIFAS DIFERENCIADAS ---
         const comunasRM = {
             centricas: ["Santiago", "Providencia", "Las Condes", "Ñuñoa", "La Reina", "Vitacura", "Lo Barnechea", "Macul", "San Joaquín", "Pedro Aguirre Cerda", "San Miguel", "Estación Central", "Quinta Normal", "Recoleta", "Independencia", "Conchalí", "Renca", "Cerro Navia", "Lo Prado", "Pudahuel", "Cerrillos", "Maipú", "La Florida", "Peñalolén", "La Granja", "La Cisterna", "El Bosque", "San Ramón", "La Pintana", "Puente Alto", "San Bernardo"],
             perifericas: ["Colina", "Lampa", "Tiltil", "Pirque", "San José de Maipo", "Buin", "Calera de Tango", "Paine", "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro", "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor"]
         };
 
-        // Variables globales
         let db = []; 
-        let adminDb = []; // Copia local para búsqueda de admin
+        let adminDb = []; 
         let cart = JSON.parse(localStorage.getItem('papajose_cart')) || [];
         let currentPage = 1;
         const itemsPerPage = 20;
@@ -821,13 +691,11 @@
         let userProfile = null;
         let productoEnEdicion = null;
 
-        // Variables para filtro en admin
         let filtroAdminCategoria = '';
         let filtroAdminTexto = '';
 
         const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESin Foto%3C/text%3E%3C/svg%3E";
 
-        // --- INICIALIZACIÓN ---
         window.addEventListener('popstate', function(event) {
             const modal = document.getElementById('product-modal');
             const authModal = document.getElementById('auth-modal');
@@ -854,10 +722,23 @@
             updateCartUI();
             initSwipeGestures();
             generarMenuCategorias();
-            cargarSelectoresRegion(); // Iniciar los selectores de Chile
+            cargarSelectoresRegion(); 
+            
+            // Listener para el input de URL de imagen en Admin
+            document.getElementById('producto-imagen-url').addEventListener('input', function(e) {
+                const url = e.target.value;
+                const previewDiv = document.getElementById('imagen-actual');
+                const previewImg = document.getElementById('imagen-preview');
+                
+                if(url && url.startsWith('http')) {
+                    previewImg.src = url;
+                    previewDiv.classList.remove('hidden');
+                } else {
+                    previewDiv.classList.add('hidden');
+                }
+            });
         });
 
-        // --- MANEJO DE DIRECCIONES (REGIONES Y COMUNAS) ---
         function cargarSelectoresRegion() {
             const selectReg = document.getElementById('reg-region');
             const selectEdit = document.getElementById('edit-region');
@@ -887,10 +768,10 @@
                 selectComuna.innerHTML = '<option value="">Primero seleccione Región</option>';
                 selectComuna.disabled = true;
             }
+            // Importante: Recalcular el envío al cambiar la dirección
             actualizarOpcionEnvioSegunDireccion();
         }
 
-        // --- CARGA DE PRODUCTOS Y BUSCADOR INTELIGENTE ---
         async function cargarProductosPagina(page) {
             document.getElementById('loading-msg').classList.remove('hidden');
             document.getElementById('seccion-catalogo').classList.add('hidden');
@@ -947,7 +828,7 @@
         function renderGrid(lista, page) {
             const contenedor = document.getElementById('grid-productos');
             const cantidad = document.getElementById('cantidad-productos');
-            cantidad.innerText = totalProductos; // Muestra el total real de la base de datos
+            cantidad.innerText = totalProductos; 
             
             if(lista.length === 0) { 
                 contenedor.innerHTML = `<div class="col-span-full py-10 text-center text-gray-500 bg-white/80 rounded-xl p-6"><p>No se encontraron productos.</p></div>`; 
@@ -1151,6 +1032,7 @@
             if (!error && data) { 
                 userProfile = data; 
                 userProfile.esAdmin = (data.rol === 'admin');
+                // Al cargar el perfil, actualizamos el costo de envío
                 actualizarOpcionEnvioSegunDireccion();
             } else {
                 userProfile = null;
@@ -1346,7 +1228,7 @@
                             <span class="font-black text-gray-900">$${pedido.total.toLocaleString()}</span>
                         </div>
                         <div class="mt-3 text-right">
-                            <button onclick="verDetallePedido(${pedido.id})" class="text-beige font-bold text-xs underline hover:no-underline">Ver detalle</button>
+                            <button onclick="verDetallePedido(${pedido.id})" class="text-beige font-bold text-xs underline hover:no-underline bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">Ver detalle completo</button>
                         </div>
                     </div>`;
                 }).join('');
@@ -1357,8 +1239,14 @@
             }
         }
 
-        // --- NUEVA FUNCIÓN PARA VER DETALLE DE PEDIDO ---
+        // --- NUEVA FUNCIÓN PARA VER DETALLE DE PEDIDO (PANTALLA COMPLETA Y FOTOS) ---
         async function verDetallePedido(orderId) {
+            const modalContent = document.getElementById('order-detail-content');
+            modalContent.innerHTML = '<p class="text-center text-gray-500"><i class="fa fa-spinner fa-spin"></i> Cargando detalles...</p>';
+            document.getElementById('order-detail-modal').classList.remove('hidden');
+            document.getElementById('order-detail-modal').classList.add('flex');
+            document.body.classList.add('locked');
+
             try {
                 // Obtener datos del pedido
                 const { data: pedido, error: pedidoError } = await supabaseClient
@@ -1369,10 +1257,10 @@
 
                 if (pedidoError) throw pedidoError;
 
-                // Obtener items del pedido con nombre del producto
+                // Obtener items del pedido con nombre y FOTO del producto
                 const { data: items, error: itemsError } = await supabaseClient
                     .from('order_items')
-                    .select('*, product:product_id ( producto )')
+                    .select('*, product:product_id ( producto, foto )')
                     .eq('order_id', orderId);
 
                 if (itemsError) throw itemsError;
@@ -1380,49 +1268,102 @@
                 const fecha = new Date(pedido.created_at).toLocaleString('es-CL');
                 const cliente = pedido.profiles || { nombre: 'Desconocido', telefono: '' };
 
+                // Colores para el estado
+                let colorEstado = 'text-yellow-600 bg-yellow-50 border-yellow-200';
+                let iconEstado = 'fa-clock';
+                const estLower = (pedido.estado || '').toLowerCase();
+                
+                if (estLower.includes('pagado')) { colorEstado = 'text-green-600 bg-green-50 border-green-200'; iconEstado = 'fa-check-circle'; }
+                else if (estLower.includes('reparto')) { colorEstado = 'text-indigo-600 bg-indigo-50 border-indigo-200'; iconEstado = 'fa-truck-fast'; }
+                else if (estLower.includes('entregado')) { colorEstado = 'text-green-800 bg-green-100 border-green-300'; iconEstado = 'fa-box-open'; }
+                else if (estLower.includes('rechazado') || estLower.includes('expirado')) { colorEstado = 'text-red-600 bg-red-50 border-red-200'; iconEstado = 'fa-times-circle'; }
+
                 let itemsHTML = '';
                 let subtotal = 0;
                 items.forEach(item => {
                     const subtotalItem = item.cantidad * item.precio_historico;
                     subtotal += subtotalItem;
                     itemsHTML += `
-                        <div class="order-detail-item">
-                            <span>${item.cantidad} x ${escapeHTML(item.product?.producto || 'Producto')}</span>
-                            <span class="font-mono">$${subtotalItem.toLocaleString()}</span>
+                        <div class="flex gap-4 py-4 border-b border-gray-100 items-center">
+                            <div class="w-16 h-16 bg-white border border-gray-200 rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
+                                <img src="${escapeHTML(item.product?.foto || PLACEHOLDER_SVG)}" class="max-w-full max-h-full object-contain" alt="Producto">
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-gray-800 leading-tight">${escapeHTML(item.product?.producto || 'Producto')}</p>
+                                <p class="text-xs text-gray-500 mt-1">Cant: ${item.cantidad} x $${item.precio_historico.toLocaleString()}</p>
+                            </div>
+                            <div class="font-black text-gray-900">$${subtotalItem.toLocaleString()}</div>
                         </div>
                     `;
                 });
 
-                const modalContent = document.getElementById('order-detail-content');
                 modalContent.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="bg-gray-50 p-4 rounded-xl">
-                            <p class="text-xs text-gray-500">Pedido #${pedido.id} - ${fecha}</p>
-                            <p class="font-bold text-lg">$${pedido.total.toLocaleString()}</p>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center flex-wrap gap-4">
+                            <div>
+                                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Orden de Compra</p>
+                                <h4 class="text-2xl font-black text-gray-900">#${pedido.id}</h4>
+                                <p class="text-xs text-gray-500 mt-1"><i class="fa fa-calendar-alt"></i> ${fecha}</p>
+                            </div>
+                            <div class="px-4 py-2 rounded-xl border ${colorEstado} flex items-center gap-2 font-bold text-sm">
+                                <i class="fa ${iconEstado}"></i> ${escapeHTML(pedido.estado)}
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="font-bold text-sm mb-2">Productos</h4>
-                            ${itemsHTML}
+                        
+                        <div class="p-6">
+                            <h4 class="font-black text-lg mb-4 text-gray-800">Resumen de Productos</h4>
+                            <div class="mb-6">
+                                ${itemsHTML}
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-2">
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>Subtotal</span>
+                                    <span>$${subtotal.toLocaleString()}</span>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-600 pb-2 border-b border-gray-200">
+                                    <span>Envío (${escapeHTML(pedido.tipo_envio.toUpperCase())})</span>
+                                    <span>$${pedido.costo_envio.toLocaleString()}</span>
+                                </div>
+                                <div class="flex justify-between text-lg font-black text-gray-900 pt-2">
+                                    <span>Total Pagado</span>
+                                    <span>$${pedido.total.toLocaleString()}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="border-t pt-3">
-                            <p><span class="font-bold">Envío:</span> ${escapeHTML(pedido.tipo_envio.toUpperCase())} - $${pedido.costo_envio.toLocaleString()}</p>
-                            <p><span class="font-bold">Documento:</span> ${escapeHTML(pedido.tipo_doc)}</p>
-                            <p><span class="font-bold">Dirección:</span> ${escapeHTML(pedido.direccion_envio)}</p>
-                            <p><span class="font-bold">Estado:</span> ${escapeHTML(pedido.estado)}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="font-black text-md mb-4 text-gray-800"><i class="fa fa-map-location-dot text-beige mr-2"></i> Datos de Despacho</h4>
+                            <p class="text-sm font-bold text-gray-900 mb-1">${escapeHTML(cliente.nombre)}</p>
+                            <p class="text-sm text-gray-600 mb-1"><i class="fa fa-phone w-4 text-gray-400"></i> ${escapeHTML(cliente.telefono)}</p>
+                            <p class="text-sm text-gray-600 mt-3 bg-gray-50 p-3 rounded-lg border border-gray-100">${escapeHTML(pedido.direccion_envio)}</p>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="font-black text-md mb-4 text-gray-800"><i class="fa fa-file-invoice text-beige mr-2"></i> Documento Tributario</h4>
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400 text-xl border border-gray-100">
+                                    <i class="fa fa-receipt"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-900">Solicitaste: ${escapeHTML(pedido.tipo_doc)}</p>
+                                    <p class="text-xs text-gray-500 mt-1">Será enviado a tu correo.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
 
-                document.getElementById('order-detail-modal').classList.remove('hidden');
-                document.body.classList.add('locked');
             } catch (error) {
                 console.error(error);
-                mostrarToast("Error al cargar detalle del pedido", "error");
+                modalContent.innerHTML = '<p class="text-center text-red-500 font-bold p-8">Error al cargar detalle del pedido. Intenta nuevamente.</p>';
             }
         }
 
         function cerrarDetallePedido() {
             document.getElementById('order-detail-modal').classList.add('hidden');
+            document.getElementById('order-detail-modal').classList.remove('flex');
             document.body.classList.remove('locked');
         }
 
@@ -1552,6 +1493,13 @@
             document.getElementById('edit-profile-form').reset();
             document.getElementById('auth-logged-view').classList.add('hidden');
             document.getElementById('auth-login-view').classList.remove('hidden');
+            
+            // Forzar actualización visual de envío y vaciar carrito local para evitar cruces
+            cart = [];
+            localStorage.removeItem('papajose_cart');
+            actualizarOpcionEnvioSegunDireccion();
+            updateCartUI();
+            
             mostrarToast("Sesión cerrada", "info");
             closeAuthModal();
         }
@@ -1562,44 +1510,54 @@
             return lower.includes('metropolitana') || lower.includes('rm') || lower.includes('santiago');
         }
 
+        // --- NUEVA LÓGICA DE ENVÍO AUTOMÁTICO ---
         function actualizarOpcionEnvioSegunDireccion() {
             let esRM = false;
             let comunaSeleccionada = '';
+            
+            // Primero revisamos si el usuario está llenando el form de registro o edición
             const selectorRegRegion = document.getElementById('reg-region');
-            if (selectorRegRegion && selectorRegRegion.value) {
+            const selectorEditRegion = document.getElementById('edit-region');
+            
+            if (selectorEditRegion && selectorEditRegion.value && !document.getElementById('profile-edit').classList.contains('hidden')) {
+                esRM = esRegionMetropolitana(selectorEditRegion.value);
+                comunaSeleccionada = document.getElementById('edit-comuna').value;
+            } else if (selectorRegRegion && selectorRegRegion.value && !document.getElementById('auth-register-view').classList.contains('hidden')) {
                 esRM = esRegionMetropolitana(selectorRegRegion.value);
-                const selectorComuna = document.getElementById('reg-comuna');
-                if (selectorComuna) comunaSeleccionada = selectorComuna.value;
+                comunaSeleccionada = document.getElementById('reg-comuna').value;
             } else if (userProfile) {
+                // Si ya está logueado y no está editando, leemos de su perfil guardado
                 esRM = esRegionMetropolitana(userProfile.region || userProfile.direccion_defecto);
                 comunaSeleccionada = userProfile.comuna || '';
             }
 
-            const radioRM = document.querySelector('input[name="tipo_envio"][value="rm"]');
-            const radioRegiones = document.querySelector('input[name="tipo_envio"][value="regiones"]');
-            const rmCostoLabel = document.getElementById('rm-costo-label');
-            
-            if (esRM && comunaSeleccionada) {
-                if (comunasRM.centricas.includes(comunaSeleccionada)) {
-                    costoEnvio = 3500;
-                } else if (comunasRM.perifericas.includes(comunaSeleccionada)) {
-                    costoEnvio = 4500;
-                } else {
-                    costoEnvio = 3500;
-                }
+            // Calculamos el costo base
+            if (esRM) {
+                costoEnvio = 3500; // Tarifa plana RM temporal. Aquí puedes agregar tu lógica de comunasRM si quieres tarifas diferenciadas.
             } else {
-                costoEnvio = 3500;
-            }
-            
-            if (rmCostoLabel) {
-                rmCostoLabel.innerText = `+$${costoEnvio.toLocaleString()}`;
+                costoEnvio = 0; // Regiones es por pagar
             }
 
-            if (radioRM && radioRegiones) {
-                if (esRM) radioRM.checked = true;
-                else radioRegiones.checked = true;
-                calcularTotal();
+            // Actualizamos la UI del Carrito
+            const envioMontoEl = document.getElementById('cart-envio-monto');
+            const envioLabelEl = document.getElementById('cart-envio-label');
+            
+            if (envioMontoEl && envioLabelEl) {
+                if (userProfile || (selectorRegRegion && selectorRegRegion.value)) {
+                    if (esRM) {
+                        envioLabelEl.innerText = "Envío RM:";
+                        envioMontoEl.innerText = `+$${costoEnvio.toLocaleString()}`;
+                    } else {
+                        envioLabelEl.innerText = "Envío a Regiones:";
+                        envioMontoEl.innerText = "Por Pagar (Starken)";
+                    }
+                } else {
+                    envioLabelEl.innerText = "Costo de envío:";
+                    envioMontoEl.innerText = "Inicia sesión para calcular";
+                }
             }
+
+            calcularTotal();
         }
 
         // --- CARRITO Y CHECKOUT ---
@@ -1684,6 +1642,9 @@
                 overlay.classList.add('open'); 
                 document.body.classList.add('locked');
                 if(window.innerWidth < 1024) stickyBar.classList.add('hidden');
+                
+                // Forzar recálculo de envío al abrir si ya inició sesión
+                if(currentUser && userProfile) actualizarOpcionEnvioSegunDireccion();
             } else history.back();
         }
         
@@ -1754,30 +1715,35 @@
             calcularTotal();
         }
 
+        // --- CÁLCULO DE TOTAL AUTOMATIZADO ---
         function calcularTotal() {
             let subtotal = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
-            const radios = document.getElementsByName('tipo_envio');
-            let tipoEnvio = "rm";
-            for(const r of radios) { if(r.checked) tipoEnvio = r.value; }
             
-            if (tipoEnvio === 'rm') {
-                // costoEnvio ya tiene el valor adecuado
-            } else {
-                costoEnvio = 0;
+            // Leemos el DOM para ver si la UI actualizó la variable global costoEnvio 
+            // (Si no hay usuario logueado, costoEnvio es 3500 por defecto pero no deberíamos sumarlo aún,
+            // aunque para mostrar un estimado está bien. La función del backend hará el cálculo real final).
+            
+            let envio = 0;
+            if (userProfile) {
+                 envio = costoEnvio; 
             }
-            totalPagarFinal = subtotal + (tipoEnvio === 'rm' ? costoEnvio : 0);
+
+            totalPagarFinal = subtotal + envio;
             
             const subtotalFmt = `$${subtotal.toLocaleString()}`;
             document.getElementById('mobile-total-sticky').innerText = subtotalFmt;
             document.getElementById('desktop-floating-total').innerText = subtotalFmt;
             document.getElementById('header-total').innerText = subtotalFmt;
+            
+            const subEl = document.getElementById('cart-subtotal');
+            if (subEl) subEl.innerText = subtotalFmt;
+
             document.getElementById('cart-total').innerText = `$${totalPagarFinal.toLocaleString()}`;
             
             if(cart.length > 0) document.getElementById('header-total').classList.add('opacity-100'); 
             else document.getElementById('header-total').classList.remove('opacity-100');
         }
 
-        // --- SINCRONIZACIÓN DEL CARRITO CON BASE DE DATOS ---
         async function sincronizarCarritoConBD() {
             if (!currentUser) return;
             
@@ -1864,7 +1830,6 @@
             }
         }
 
-        // --- NUEVA FUNCIÓN mostrarLoaderPago ---
         function mostrarLoaderPago(mostrar) {
             const loader = document.getElementById('payment-loader-modal');
             if (mostrar) {
@@ -1884,7 +1849,7 @@
             }
         }
 
-        // --- NUEVA FUNCIÓN procesarCheckout (eliminadas crearPagoFlow y reintentarPago) ---
+        // --- CHECKOUT ACTUALIZADO PARA ENVÍO AUTOMÁTICO ---
         async function procesarCheckout() {
             if(cart.length === 0) return;
             if(!currentUser) { mostrarToast("Debes iniciar sesión para pedir", "info"); openAuthModal(); return; }
@@ -1895,12 +1860,12 @@
                 return;
             }
 
-            // 1. Mostramos la pantalla de conexión segura
             mostrarLoaderPago(true);
 
             try {
-                let tipoEnvioTexto = "rm";
-                for(const r of document.getElementsByName('tipo_envio')) { if(r.checked) tipoEnvioTexto = r.value; }
+                // Ya no leemos radio buttons de envío, lo calculamos de los datos reales del usuario
+                let tipoEnvioCalculado = esRegionMetropolitana(userProfile.region || userProfile.direccion_defecto) ? "rm" : "regiones";
+                
                 let tipoDocTexto = "Boleta";
                 for(const r of document.getElementsByName('tipo_doc')) { if(r.checked) tipoDocTexto = r.value; }
                 
@@ -1909,10 +1874,9 @@
                 // Extraemos solo ID y cantidad. Ignoramos el precio para mayor seguridad, el servidor lo calculará.
                 const items = cart.map(item => ({ product_id: item.id, cantidad: item.qty }));
                 
-                // 2. Preparamos el paquete de datos para la Edge Function
                 const payload = {
-                    tipoEnvioTexto: tipoEnvioTexto,
-                    costoEnvio: tipoEnvioTexto === 'rm' ? costoEnvio : 0,
+                    tipoEnvioTexto: tipoEnvioCalculado,
+                    costoEnvio: costoEnvio, // Enviamos el estimado, pero el servidor igual validará
                     tipoDocTexto: tipoDocTexto,
                     dirEnvio: dirEnvio,
                     items: items
@@ -1920,7 +1884,6 @@
 
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
-                // 3. Un solo viaje a la Edge Function
                 const response = await fetch('https://elwzheytotfsxzrcsioz.supabase.co/functions/v1/create-flow-payment', {
                     method: 'POST',
                     headers: {
@@ -1935,11 +1898,9 @@
                 if (!response.ok) throw new Error(result.error || 'Error al comunicarse con Flow');
                 if (result.error) throw new Error(result.error);
 
-                // 4. Limpiamos el carrito (ya que el servidor procesó la orden)
                 await supabaseClient.from('cart_items').delete().eq('user_id', currentUser.id);
                 localStorage.setItem('papajose_pending_order', result.order_id);
 
-                // 5. Redirección instantánea
                 window.location.href = result.url;
 
             } catch (error) {
@@ -2018,7 +1979,7 @@
             history.back(); 
         }
 
-        // --- ADMINISTRADOR: Productos y Pedidos ---
+        // --- ADMINISTRADOR ---
         function openAdminModal() {
             history.pushState({modal: 'admin'}, null, "");
             document.getElementById('admin-modal').classList.remove('hidden');
@@ -2069,7 +2030,6 @@
             switchAdminTab('productos');
         }
 
-        // --- ADMIN: Productos ---
         async function cargarProductosAdmin() {
             const { data, error } = await supabaseClient.from('products').select('*').order('id', { ascending: false });
             if (error) { mostrarToast("Error al cargar", "error"); return; }
@@ -2081,12 +2041,10 @@
         function aplicarFiltrosAdmin() {
             let filtrados = adminDb;
             
-            // Filtro por categoría
             if (filtroAdminCategoria) {
                 filtrados = filtrados.filter(p => p.categoria === filtroAdminCategoria);
             }
             
-            // Filtro por texto (nombre o SKU)
             if (filtroAdminTexto) {
                 const texto = filtroAdminTexto.toLowerCase();
                 filtrados = filtrados.filter(p => 
@@ -2097,7 +2055,6 @@
             
             renderListaAdmin(filtrados);
             
-            // Resaltar botón de categoría activo
             document.querySelectorAll('#admin-category-filters button').forEach(btn => {
                 const cat = btn.getAttribute('data-categoria');
                 if (cat === filtroAdminCategoria) {
@@ -2129,13 +2086,13 @@
             container.innerHTML = lista.map(p => `
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center justify-between">
                     <div class="flex items-center gap-4">
-                        <img src="${escapeHTML(p.foto)}" class="w-12 h-12 rounded object-cover border" width="48" height="48" onerror="this.src='${PLACEHOLDER_SVG}'">
+                        <img src="${escapeHTML(p.foto)}" class="w-12 h-12 rounded object-cover border bg-white" width="48" height="48" onerror="this.src='${PLACEHOLDER_SVG}'">
                         <div>
                             <p class="font-bold text-sm text-gray-800">${escapeHTML(p.producto)}</p>
                             <p class="text-[10px] text-gray-500">SKU: ${escapeHTML(p.numero_producto)} | Stock: ${p.stock} | Precio: $${p.precio} | Cat: ${escapeHTML(p.categoria)}</p>
                         </div>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 shrink-0">
                         <button onclick="editarProducto(${p.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fa fa-pen"></i></button>
                         <button onclick="eliminarProducto(${p.id})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fa fa-trash"></i></button>
                     </div>
@@ -2155,6 +2112,7 @@
             document.getElementById('producto-stock').value = data.stock;
             document.getElementById('producto-categoria').value = data.categoria || '';
             document.getElementById('producto-desc').value = data.descripcion || '';
+            document.getElementById('producto-imagen-url').value = data.foto || '';
             
             if (data.foto) {
                 document.getElementById('imagen-preview').src = data.foto;
@@ -2179,23 +2137,13 @@
             const stock = parseInt(document.getElementById('producto-stock').value);
             const categoria = document.getElementById('producto-categoria').value;
             const desc = document.getElementById('producto-desc').value;
-            const imagenFile = document.getElementById('producto-imagen').files[0];
+            const imagenUrl = document.getElementById('producto-imagen-url').value;
             const productoId = document.getElementById('producto-id').value;
 
             if (precio < 0) { mostrarToast("El precio no puede ser negativo", "error"); btn.innerText = productoId ? "Guardar Cambios" : "Crear Producto"; btn.disabled = false; return; }
             if (stock < 0) { mostrarToast("El stock no puede ser negativo", "error"); btn.innerText = productoId ? "Guardar Cambios" : "Crear Producto"; btn.disabled = false; return; }
 
             try {
-                let imagenUrl = null;
-                if (imagenFile) {
-                    const fileExt = imagenFile.name.split('.').pop();
-                    const fileName = `${sku}-${Date.now()}.${fileExt}`;
-                    const { error: uploadError } = await supabaseClient.storage.from('product-images').upload(fileName, imagenFile);
-                    if (uploadError) throw uploadError;
-                    const { data: urlData } = supabaseClient.storage.from('product-images').getPublicUrl(fileName);
-                    imagenUrl = urlData.publicUrl;
-                }
-
                 const productoData = {
                     producto: nombre,
                     numero_producto: sku,
@@ -2203,10 +2151,10 @@
                     stock: stock,
                     categoria: categoria,
                     descripcion: desc,
+                    foto: imagenUrl,
                     estado_stock: stock > 0 ? 'Con Stock' : 'Sin Stock',
                     destacado: 0
                 };
-                if (imagenUrl) productoData.foto = imagenUrl;
 
                 if (productoId) {
                     const { error } = await supabaseClient.from('products').update(productoData).eq('id', productoId);
@@ -2241,7 +2189,6 @@
             }
         }
 
-        // --- ADMIN: Pedidos (Logística) ---
         async function cargarPedidosLogistica() {
             const container = document.getElementById('admin-lista-pedidos');
             container.innerHTML = '<p class="text-gray-500 text-sm"><i class="fa fa-spinner fa-spin text-beige"></i> Cargando pedidos...</p>';
@@ -2351,7 +2298,6 @@
             else { mostrarToast(`Pedido #${id} actualizado`, "success"); cargarPedidosLogistica(); }
         }
 
-        // --- TOAST Y GESTOS ---
         function mostrarToast(msg, type = 'success') {
             const t = document.getElementById('toast-modal');
             const c = document.getElementById('toast-content');
@@ -2378,7 +2324,7 @@
             }, {passive: true});
         }
 
-        // --- FUNCIONES PARA MODAL LEGAL (footer) ---
+        // --- FUNCIONES PARA MODAL LEGAL ---
         function abrirLegal(tipo) {
             const titulo = document.getElementById('legal-modal-title');
             const contenido = document.getElementById('legal-modal-content');
@@ -2387,46 +2333,105 @@
             switch(tipo) {
                 case 'terminos':
                     titulo.innerText = 'Términos y condiciones';
-                    texto = `<p><strong>1. Aceptación de los términos</strong><br>Al acceder y utilizar este sitio web, usted acepta cumplir con estos términos y condiciones. Si no está de acuerdo, no utilice este sitio.</p>
-                    <p><strong>2. Uso del sitio</strong><br>Este sitio es para uso personal y no comercial. No puede modificar, copiar, distribuir ni transmitir ningún contenido sin autorización previa.</p>
-                    <p><strong>3. Propiedad intelectual</strong><br>Todos los contenidos, logos, imágenes y diseños son propiedad de Papajose SPA o de sus respectivos titulares.</p>
-                    <p><strong>4. Precios y disponibilidad</strong><br>Los precios están sujetos a cambio sin previo aviso. La disponibilidad de productos puede variar.</p>
-                    <p><strong>5. Envíos y entregas</strong><br>Los plazos de entrega son estimados y pueden sufrir demoras por causas externas. No nos responsabilizamos por pérdidas o daños ocasionados por la empresa de transporte una vez entregado el paquete.</p>`;
+                    texto = `
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">1. Aceptación de los términos</h4>
+                            <p>Al acceder y utilizar este sitio web, usted acepta cumplir con estos términos y condiciones. Si no está de acuerdo, no utilice este sitio.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">2. Uso del sitio</h4>
+                            <p>Este sitio es para uso personal y no comercial. No puede modificar, copiar, distribuir ni transmitir ningún contenido sin autorización previa.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">3. Propiedad intelectual</h4>
+                            <p>Todos los contenidos, logos, imágenes y diseños son propiedad de Papajose SPA o de sus respectivos titulares.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">4. Precios y disponibilidad</h4>
+                            <p>Los precios están sujetos a cambio sin previo aviso. La disponibilidad de productos puede variar y está sujeta a confirmación en el momento del pago.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">5. Envíos y entregas</h4>
+                            <p>Los plazos de entrega son estimados (1 a 2 días hábiles) y pueden sufrir demoras por causas externas. No nos responsabilizamos por pérdidas o daños ocasionados por la empresa de transporte externa una vez entregado el paquete a ellos.</p>
+                        </div>`;
                     break;
                 case 'privacidad':
                     titulo.innerText = 'Política de privacidad';
-                    texto = `<p><strong>1. Datos personales</strong><br>Recopilamos su nombre, correo, teléfono y dirección para procesar pedidos y mejorar nuestro servicio.</p>
-                    <p><strong>2. Uso de la información</strong><br>Sus datos serán utilizados únicamente para la gestión de compras, envíos y comunicaciones relacionadas. No compartiremos su información con terceros sin su consentimiento, excepto cuando sea necesario para el cumplimiento legal.</p>
-                    <p><strong>3. Seguridad</strong><br>Implementamos medidas de seguridad para proteger sus datos, pero ningún sistema es 100% seguro. Usted proporciona su información bajo su propio riesgo.</p>
-                    <p><strong>4. Derechos ARCO</strong><br>Puede solicitar acceso, rectificación, cancelación u oposición de sus datos escribiendo a contacto@papajose.cl</p>`;
+                    texto = `
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">1. Datos personales</h4>
+                            <p>Recopilamos su nombre, correo, teléfono y dirección con el único fin de procesar pedidos y coordinar la logística de envío.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">2. Uso de la información</h4>
+                            <p>Sus datos serán utilizados únicamente para la gestión de compras, envíos y comunicaciones relacionadas. No compartiremos, venderemos ni arrendaremos su información con terceros sin su consentimiento explícito, excepto cuando sea estrictamente necesario para el cumplimiento de obligaciones legales o logísticas (ej. empresa de transporte).</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">3. Seguridad Transaccional</h4>
+                            <p>Todos los pagos son procesados externamente por la pasarela Flow. <strong>Papajose SPA no almacena ni tiene acceso a los datos de sus tarjetas de crédito o cuentas bancarias en ningún momento.</strong></p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">4. Derechos ARCO</h4>
+                            <p>Puede solicitar acceso, rectificación, cancelación u oposición del uso de sus datos personales escribiendo directamente a contacto@papajose.cl</p>
+                        </div>`;
                     break;
                 case 'cookies':
                     titulo.innerText = 'Política de cookies';
-                    texto = `<p>Este sitio utiliza cookies propias y de terceros para mejorar la experiencia de navegación y realizar análisis estadísticos. Al continuar navegando, usted acepta el uso de cookies.</p>
-                    <p>Puede configurar su navegador para rechazar todas las cookies o para que le avise cuando se envía una cookie. Sin embargo, algunas funcionalidades del sitio podrían no funcionar correctamente.</p>`;
+                    texto = `
+                        <div class="mb-8">
+                            <p>Este sitio utiliza cookies propias y de terceros estrictamente para mejorar la experiencia de navegación (mantener su sesión iniciada, recordar los artículos en su carrito de compras) y realizar análisis estadísticos anónimos sobre el tráfico del sitio web a través de Google Analytics.</p>
+                        </div>
+                        <div class="mb-8">
+                            <p>Al continuar navegando en nuestra tienda, usted acepta explícitamente el uso de estas cookies. Puede configurar su navegador de internet para rechazar todas las cookies o para que le avise cuando se envía una cookie. Sin embargo, si decide bloquear las cookies, es probable que no pueda completar el proceso de compra de manera exitosa.</p>
+                        </div>`;
                     break;
                 case 'derechos':
                     titulo.innerText = 'Derechos del consumidor';
-                    texto = `<p><strong>Garantía legal</strong><br>De acuerdo con la Ley N° 19.496, todos los productos tienen una garantía legal mínima de 3 meses. Si el producto presenta fallas de fábrica, puede solicitar su cambio o devolución.</p>
-                    <p><strong>Plazo de arrepentimiento</strong><br>Puede desistir de su compra dentro de los 10 días siguientes a la recepción del producto, siempre que éste se encuentre en perfectas condiciones y con su embalaje original. El costo de devolución será por cuenta del cliente, salvo que el producto esté defectuoso.</p>
-                    <p><strong>Reclamos</strong><br>Para ejercer sus derechos, contáctenos en contacto@papajose.cl o al +56936416743.</p>`;
+                    texto = `
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Garantía legal (3x3)</h4>
+                            <p>De acuerdo con la Ley N° 19.496 sobre Protección de los Derechos de los Consumidores, todos nuestros productos nuevos cuentan con una garantía legal mínima de <strong>3 meses</strong>. Si el producto presenta fallas de fábrica que no sean imputables al consumidor, usted tiene el derecho irrenunciable a elegir entre: el cambio del producto, la reparación gratuita o la devolución de lo pagado.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Plazo de arrepentimiento (Derecho a Retracto)</h4>
+                            <p>Usted puede desistir de su compra (arrepentirse) dentro de los <strong>10 días</strong> siguientes a la recepción del producto, siempre y cuando éste se encuentre sin uso, en perfectas condiciones y con su embalaje, sellos y etiquetas originales intactos. En este caso, el costo de devolución (envío) será de exclusiva cuenta del cliente.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Canal de Reclamos</h4>
+                            <p>Para ejercer cualquiera de estos derechos, contáctenos de forma directa al correo contacto@papajose.cl o a nuestro canal de atención vía WhatsApp al +56936416743.</p>
+                        </div>`;
                     break;
                 case 'cambios':
                     titulo.innerText = 'Cambios y devoluciones';
-                    texto = `<p><strong>Cambios por falla</strong><br>Si el producto presenta fallas dentro de los 3 meses posteriores a la compra, puede solicitar un cambio sin costo adicional. Nos haremos cargo del transporte de retiro y entrega del nuevo producto.</p>
-                    <p><strong>Cambios por talla o color</strong><br>No se aceptan cambios por talla, color o gusto personal, a menos que se acuerde previamente y el cliente asuma los costos de envío.</p>
-                    <p><strong>Devoluciones</strong><br>Para devoluciones, debe contactarnos dentro de los 10 días hábiles posteriores a la recepción. El producto debe estar sin uso, con etiquetas y en su empaque original. El reembolso se realizará una vez recibido y verificado el producto.</p>`;
+                    texto = `
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Cambios por falla o defecto</h4>
+                            <p>Si el producto presenta fallas comprobables dentro de los 3 meses posteriores a la compra, puede solicitar un cambio sin costo adicional. En estos casos, Papajose SPA se hará cargo de los costos de transporte involucrados en el retiro del producto defectuoso y la entrega del nuevo producto o, en su defecto, coordinará el reembolso total.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Cambios por insatisfacción, talla o color</h4>
+                            <p>Como política de la empresa, sí aceptamos cambios por gusto, talla o color dentro de un plazo de 10 días, pero están sujetos a la disponibilidad de stock. En estos escenarios, <strong>el cliente deberá asumir los costos íntegros de envío de ida y vuelta</strong>. El producto a cambiar no debe presentar indicios de uso.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Proceso de Devolución de Dinero</h4>
+                            <p>Una vez que recibamos el producto devuelto y nuestro equipo verifique que cumple con las condiciones (sin uso, embalaje original), el reembolso se emitirá en un plazo máximo de 7 días hábiles al mismo medio de pago utilizado o mediante transferencia bancaria a la cuenta indicada por el cliente titular de la compra.</p>
+                        </div>`;
                     break;
                 default:
                     return;
             }
             contenido.innerHTML = texto;
-            document.getElementById('legal-modal').classList.remove('hidden');
+            
+            const modal = document.getElementById('legal-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             document.body.classList.add('locked');
         }
 
         function cerrarLegal() {
-            document.getElementById('legal-modal').classList.add('hidden');
+            const modal = document.getElementById('legal-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
             document.body.classList.remove('locked');
         }
     </script>
