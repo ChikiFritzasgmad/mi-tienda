@@ -2384,23 +2384,89 @@
             switch(tipo) {
                 case 'terminos':
                     titulo.innerText = 'Términos y condiciones';
-                    texto = `...`; // (mismo contenido que original)
+                    texto = `
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">1. Aceptación de los términos</h4>
+                            <p>Al acceder y utilizar este sitio web, usted acepta cumplir con estos términos y condiciones. Si no está de acuerdo, no utilice este sitio.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">2. Uso del sitio</h4>
+                            <p>Este sitio es para uso personal y no comercial. No puede modificar, copiar, distribuir ni transmitir ningún contenido sin autorización previa.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">3. Propiedad intelectual</h4>
+                            <p>Todos los contenidos, logos, imágenes y diseños son propiedad de Papajose SPA o de sus respectivos titulares.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">4. Precios y disponibilidad</h4>
+                            <p>Los precios están sujetos a cambio sin previo aviso. La disponibilidad de productos puede variar y está sujeta a confirmación en el momento del pago.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">5. Envíos y entregas</h4>
+                            <p>Los plazos de entrega son estimados (1 a 2 días hábiles) y pueden sufrir demoras por causas externas. No nos responsabilizamos por pérdidas o daños ocasionados por la empresa de transporte externa una vez entregado el paquete a ellos.</p>
+                        </div>`;
                     break;
                 case 'privacidad':
                     titulo.innerText = 'Política de privacidad';
-                    texto = `...`;
+                    texto = `
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">1. Datos personales</h4>
+                            <p>Recopilamos su nombre, correo, teléfono y dirección con el único fin de procesar pedidos y coordinar la logística de envío.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">2. Uso de la información</h4>
+                            <p>Sus datos serán utilizados únicamente para la gestión de compras, envíos y comunicaciones relacionadas. No compartiremos, venderemos ni arrendaremos su información con terceros sin su consentimiento explícito, excepto cuando sea estrictamente necesario para el cumplimiento de obligaciones legales o logísticas (ej. empresa de transporte).</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">3. Seguridad Transaccional</h4>
+                            <p>Todos los pagos son procesados externamente por la pasarela Flow. <strong>Papajose SPA no almacena ni tiene acceso a los datos de sus tarjetas de crédito o cuentas bancarias en ningún momento.</strong></p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">4. Derechos ARCO</h4>
+                            <p>Puede solicitar acceso, rectificación, cancelación u oposición del uso de sus datos personales escribiendo directamente a contacto@papajose.cl</p>
+                        </div>`;
                     break;
                 case 'cookies':
                     titulo.innerText = 'Política de cookies';
-                    texto = `...`;
+                    texto = `
+                        <div class="mb-8">
+                            <p>Este sitio utiliza cookies propias y de terceros estrictamente para mejorar la experiencia de navegación (mantener su sesión iniciada, recordar los artículos en su carrito de compras) y realizar análisis estadísticos anónimos sobre el tráfico del sitio web a través de Google Analytics.</p>
+                        </div>
+                        <div class="mb-8">
+                            <p>Al continuar navegando en nuestra tienda, usted acepta explícitamente el uso de estas cookies. Puede configurar su navegador de internet para rechazar todas las cookies o para que le avise cuando se envía una cookie. Sin embargo, si decide bloquear las cookies, es probable que no pueda completar el proceso de compra de manera exitosa.</p>
+                        </div>`;
                     break;
                 case 'derechos':
                     titulo.innerText = 'Derechos del consumidor';
-                    texto = `...`;
+                    texto = `
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Garantía legal (3x3)</h4>
+                            <p>De acuerdo con la Ley N° 19.496 sobre Protección de los Derechos de los Consumidores, todos nuestros productos nuevos cuentan con una garantía legal mínima de <strong>3 meses</strong>. Si el producto presenta fallas de fábrica que no sean imputables al consumidor, usted tiene el derecho irrenunciable a elegir entre: el cambio del producto, la reparación gratuita o la devolución de lo pagado.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Plazo de arrepentimiento (Derecho a Retracto)</h4>
+                            <p>Usted puede desistir de su compra (arrepentirse) dentro de los <strong>10 días</strong> siguientes a la recepción del producto, siempre y cuando éste se encuentre sin uso, en perfectas condiciones y con su embalaje, sellos y etiquetas originales intactos. En este caso, el costo de devolución (envío) será de exclusiva cuenta del cliente.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Canal de Reclamos</h4>
+                            <p>Para ejercer cualquiera de estos derechos, contáctenos de forma directa al correo contacto@papajose.cl o a nuestro canal de atención vía WhatsApp al +56936416743.</p>
+                        </div>`;
                     break;
                 case 'cambios':
                     titulo.innerText = 'Cambios y devoluciones';
-                    texto = `...`;
+                    texto = `
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Cambios por falla o defecto</h4>
+                            <p>Si el producto presenta fallas comprobables dentro de los 3 meses posteriores a la compra, puede solicitar un cambio sin costo adicional. En estos casos, Papajose SPA se hará cargo de los costos de transporte involucrados en el retiro del producto defectuoso y la entrega del nuevo producto o, en su defecto, coordinará el reembolso total.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Cambios por insatisfacción, talla o color</h4>
+                            <p>Como política de la empresa, sí aceptamos cambios por gusto, talla o color dentro de un plazo de 10 días, pero están sujetos a la disponibilidad de stock. En estos escenarios, <strong>el cliente deberá asumir los costos íntegros de envío de ida y vuelta</strong>. El producto a cambiar no debe presentar indicios de uso.</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Proceso de Devolución de Dinero</h4>
+                            <p>Una vez que recibamos el producto devuelto y nuestro equipo verifique que cumple con las condiciones (sin uso, embalaje original), el reembolso se emitirá en un plazo máximo de 7 días hábiles al mismo medio de pago utilizado o mediante transferencia bancaria a la cuenta indicada por el cliente titular de la compra.</p>
+                        </div>`;
                     break;
                 default:
                     return;
@@ -2422,3 +2488,4 @@
     </script>
 </body>
 </html>
+
