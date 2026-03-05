@@ -839,7 +839,20 @@
         }
 
         async function actualizarPerfil(e) {
-            e.preventDefault();
+            const rut = document.getElementById('edit-rut').value;
+            const telefono = document.getElementById('edit-telefono').value;
+
+            // --- NUEVOS GUARDIAS DE SEGURIDAD ---
+            if (!validarRUT(rut)) { 
+                mostrarToast("El RUT ingresado no es válido", "error"); 
+                return; 
+            }
+            if (!validarTelefono(telefono)) { 
+                mostrarToast("El teléfono debe ser válido (Ej: +56912345678)", "error"); 
+                return; 
+            }
+            // ------------------------------------
+
             const btn = document.getElementById('btn-update-profile');
             btn.innerText = "Guardando...";
             btn.disabled = true;
