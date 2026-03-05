@@ -749,6 +749,20 @@
             const emailConfirm = document.getElementById('reg-email-confirm').value;
             if(email !== emailConfirm) { mostrarToast("Los correos no coinciden", "error"); return; }
             
+            const rut = document.getElementById('reg-rut').value;
+            const telefono = document.getElementById('reg-telefono').value;
+
+            // --- NUEVOS GUARDIAS DE SEGURIDAD ---
+            if (!validarRUT(rut)) { 
+                mostrarToast("El RUT ingresado no es válido", "error"); 
+                return; 
+            }
+            if (!validarTelefono(telefono)) { 
+                mostrarToast("El teléfono debe ser válido (Ej: +56912345678)", "error"); 
+                return; 
+            }
+            // ------------------------------------
+
             const btn = document.getElementById('btn-reg-submit');
             btn.innerText = "Creando cuenta..."; 
             btn.disabled = true;
@@ -1669,6 +1683,32 @@
         // =========================================================================
         // TOAST Y UTILIDADES
         // =========================================================================
+
+        // Herramienta 1: Valida RUT chileno usando el algoritmo Módulo 11
+        function validarRUT(rut) {
+            let valor = rut.replace(/\./g, '').replace(/-/g, '').trim();
+            if(valor.length < 8) return false;
+            let cuerpo = valor.slice(0, -1);
+            let dv = valor.slice(-1).toUpperCase();
+            if (!/^[0-9]+$/.test(cuerpo)) return false;
+            let suma = 0; let multiplo = 2;
+            for (let i = 1; i <= cuerpo.length; i++) {
+                let index = multiplo * valor.charAt(cuerpo.length - i);
+                suma = suma + index;
+                if (multiplo < 7) { multiplo = multiplo + 1; } else { multiplo = 2; }
+            }
+            let dvEsperado = 11 - (suma % 11);
+            dvEsperado = (dvEsperado == 11) ? 0 : dvEsperado;
+            dvEsperado = (dvEsperado == 10) ? "K" : dvEsperado;
+            return dv == dvEsperado;
+        }
+
+        // Herramienta 2: Valida que el teléfono sea chileno (+569 o 9 seguido de 8 números)
+        function validarTelefono(telefono) {
+            const regex = /^(\+?56)?9\d{8}$/;
+            return regex.test(telefono.replace(/\s/g, ''));
+        }
+
         function mostrarToast(msg, type = 'success') {
             const t = document.getElementById('toast-modal');
             const c = document.getElementById('toast-content');
