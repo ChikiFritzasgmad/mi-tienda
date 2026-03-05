@@ -1,4 +1,3 @@
-  <script>
         // =========================================================================
         // CONFIGURACIÓN Y VARIABLES GLOBALES
         // =========================================================================
@@ -1808,4 +1807,3 @@
             modal.classList.remove('flex');
             document.body.classList.remove('locked');
         }
-    </script>
