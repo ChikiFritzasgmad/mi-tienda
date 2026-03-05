@@ -769,9 +769,6 @@
             
             const pass = document.getElementById('reg-pass').value;
             const nombre = document.getElementById('reg-nombre').value;
-            const rut = document.getElementById('reg-rut').value;
-            const telefono = document.getElementById('reg-telefono').value;
-            
             const calle = document.getElementById('reg-calle').value;
             const num = document.getElementById('reg-numero').value;
             const region = document.getElementById('reg-region').value;
