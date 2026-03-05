@@ -839,6 +839,7 @@
         }
 
         async function actualizarPerfil(e) {
+                e.preventDefault();
             const rut = document.getElementById('edit-rut').value;
             const telefono = document.getElementById('edit-telefono').value;
 
