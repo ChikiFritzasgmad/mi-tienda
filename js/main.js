@@ -70,13 +70,14 @@
         // =========================================================================
         // EVENTOS INICIALES
         // =========================================================================
-        window.addEventListener('popstate', function(event) {
+       window.addEventListener('popstate', function(event) {
             const modal = document.getElementById('product-modal');
             const authModal = document.getElementById('auth-modal');
             const cartSidebar = document.getElementById('cart-sidebar');
             const leftSidebar = document.getElementById('left-sidebar');
             const adminModal = document.getElementById('admin-modal');
             const stickyBar = document.getElementById('mobile-sticky-bar');
+            const paymentLoader = document.getElementById('payment-loader-modal'); // <-- Capturamos la pantalla de pago
 
             if (!modal.classList.contains('hidden')) { modal.classList.add('hidden'); document.body.classList.remove('locked'); }
             if (!authModal.classList.contains('hidden')) { closeAuthModal(); }
@@ -88,8 +89,12 @@
                 document.body.classList.remove('locked');
                 if(cart.length > 0 && window.innerWidth < 1024) stickyBar.classList.remove('translate-y-full');
             }
+            
+            // --- NUEVO: ESCONDER PANTALLA DE PAGO AL RETROCEDER ---
+            if (paymentLoader && !paymentLoader.classList.contains('hidden')) { 
+                mostrarLoaderPago(false); 
+            }
         });
-
         window.addEventListener('DOMContentLoaded', () => { 
             verificarSesion();
             cargarProductosPagina(1); 
