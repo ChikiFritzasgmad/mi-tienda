@@ -5,6 +5,9 @@ const FLOW_MODE = 'sandbox'; // Cambiar a 'live' en producción
 const SITE_URL = 'https://chikifritzasgmad.github.io/mi-tienda/'; 
 const WHATSAPP_NUM = "56936416743";
 
+// Variable para controlar la cancelación del pago
+let abortController = null;
+
 // Función mejorada de escape HTML (seguridad XSS)
 function escapeHTML(str) {
     if (str === null || str === undefined) return '';
@@ -71,6 +74,12 @@ const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000
 // EVENTOS INICIALES
 // =========================================================================
 window.addEventListener('popstate', function(event) {
+    // Si hay un pago en curso, lo cancelamos
+    if (abortController) {
+        abortController.abort();
+        abortController = null;
+    }
+
     const modal = document.getElementById('product-modal');
     const authModal = document.getElementById('auth-modal');
     const cartSidebar = document.getElementById('cart-sidebar');
@@ -121,6 +130,13 @@ window.addEventListener('popstate', function(event) {
 });
 
 window.addEventListener('DOMContentLoaded', () => { 
+    // Ocultar loader si estaba visible (por ejemplo, al volver de Flow)
+    const paymentLoader = document.getElementById('payment-loader-modal');
+    if (paymentLoader && !paymentLoader.classList.contains('hidden')) {
+        paymentLoader.classList.add('hidden');
+        document.body.classList.remove('locked');
+    }
+    
     verificarSesion();
     cargarProductosPagina(1); 
     updateCartUI();
@@ -773,6 +789,50 @@ function cerrarDetallePedido() {
     document.body.classList.remove('locked');
 }
 
+// --- VALIDACIONES PROFESIONALES ---
+function validarRUT(rut) {
+    if (!rut || typeof rut !== 'string') return false;
+    
+    // Limpiar formato: eliminar puntos y guión
+    let rutLimpio = rut.replace(/\./g, '').replace(/-/g, '').trim().toUpperCase();
+    
+    // Debe tener al menos 8 caracteres (7 números + dígito verificador)
+    if (rutLimpio.length < 8) return false;
+    
+    // Separar cuerpo y dígito verificador
+    const cuerpo = rutLimpio.slice(0, -1);
+    const dvIngresado = rutLimpio.slice(-1);
+    
+    // Validar que el cuerpo sean solo números
+    if (!/^\d+$/.test(cuerpo)) return false;
+    
+    // Calcular dígito verificador esperado
+    let suma = 0;
+    let multiplo = 2;
+    
+    for (let i = cuerpo.length - 1; i >= 0; i--) {
+        suma += parseInt(cuerpo.charAt(i)) * multiplo;
+        multiplo = multiplo < 7 ? multiplo + 1 : 2;
+    }
+    
+    const dvEsperado = 11 - (suma % 11);
+    let dvChar = '';
+    
+    if (dvEsperado === 11) dvChar = '0';
+    else if (dvEsperado === 10) dvChar = 'K';
+    else dvChar = dvEsperado.toString();
+    
+    return dvIngresado === dvChar;
+}
+
+function validarTelefono(telefono) {
+    if (!telefono) return false;
+    // Permite: +56912345678, 56912345678, 912345678
+    const regex = /^(\+?56)?9\d{8}$/;
+    return regex.test(telefono.replace(/\s/g, ''));
+}
+// --------------------------------
+
 async function registrarUsuario(e) {
     e.preventDefault();
     const email = document.getElementById('reg-email').value;
@@ -782,7 +842,6 @@ async function registrarUsuario(e) {
     const rut = document.getElementById('reg-rut').value;
     const telefono = document.getElementById('reg-telefono').value;
 
-    // --- NUEVOS GUARDIAS DE SEGURIDAD ---
     if (!validarRUT(rut)) { 
         mostrarToast("El RUT ingresado no es válido", "error"); 
         return; 
@@ -791,7 +850,6 @@ async function registrarUsuario(e) {
         mostrarToast("El teléfono debe ser válido (Ej: +56912345678)", "error"); 
         return; 
     }
-    // ------------------------------------
 
     const btn = document.getElementById('btn-reg-submit');
     btn.innerText = "Creando cuenta..."; 
@@ -870,7 +928,6 @@ async function actualizarPerfil(e) {
     const rut = document.getElementById('edit-rut').value;
     const telefono = document.getElementById('edit-telefono').value;
 
-    // --- NUEVOS GUARDIAS DE SEGURIDAD ---
     if (!validarRUT(rut)) { 
         mostrarToast("El RUT ingresado no es válido", "error"); 
         return; 
@@ -879,7 +936,6 @@ async function actualizarPerfil(e) {
         mostrarToast("El teléfono debe ser válido (Ej: +56912345678)", "error"); 
         return; 
     }
-    // ------------------------------------
 
     const btn = document.getElementById('btn-update-profile');
     btn.innerText = "Guardando...";
@@ -1170,6 +1226,11 @@ function calcularTotal() {
 async function sincronizarCarritoConBD() {
     if (!currentUser) return;
     
+    // Asegurar que db esté cargada
+    if (db.length === 0) {
+        await cargarProductosPagina(1);
+    }
+    
     const { data: dbCart, error } = await supabaseClient
         .from('cart_items')
         .select('product_id, quantity')
@@ -1272,9 +1333,19 @@ function mostrarLoaderPago(mostrar) {
     }
 }
 
+// Control de doble clic en el botón de pagar
+function togglePagoButton(disabled) {
+    const btnPagar = document.getElementById('btn-checkout');
+    if (btnPagar) {
+        btnPagar.disabled = disabled;
+        btnPagar.classList.toggle('opacity-50', disabled);
+        btnPagar.classList.toggle('cursor-not-allowed', disabled);
+    }
+}
+
 async function procesarCheckout() {
-    if(cart.length === 0) return;
-    if(!currentUser) { mostrarToast("Debes iniciar sesión para pedir", "info"); openAuthModal(); return; }
+    if (cart.length === 0) return;
+    if (!currentUser) { mostrarToast("Debes iniciar sesión para pedir", "info"); openAuthModal(); return; }
     if (!userProfile) { mostrarToast("Cargando tu perfil...", "info"); await cargarPerfil(currentUser.id); }
     if (!userProfile || !userProfile.calle || !userProfile.rut || !userProfile.telefono) {
         mostrarToast("Completa tus datos de envío en Mi Cuenta", "error");
@@ -1282,18 +1353,21 @@ async function procesarCheckout() {
         return;
     }
 
+    // Crear un nuevo AbortController para esta operación
+    abortController = new AbortController();
+    const signal = abortController.signal;
+
     mostrarLoaderPago(true);
+    togglePagoButton(true);
 
     try {
         let tipoEnvioCalculado = esRegionMetropolitana(userProfile.region || userProfile.direccion_defecto) ? "rm" : "regiones";
-        
         let tipoDocTexto = "Boleta";
-        for(const r of document.getElementsByName('tipo_doc')) { if(r.checked) tipoDocTexto = r.value; }
-        
+        for (const r of document.getElementsByName('tipo_doc')) { if (r.checked) tipoDocTexto = r.value; }
+
         const dirEnvio = `${userProfile.calle} ${userProfile.numero_casa}, ${userProfile.comuna}, ${userProfile.region}` + (userProfile.referencia ? ` | Ref: ${userProfile.referencia}` : '');
-        
         const items = cart.map(item => ({ product_id: item.id, cantidad: item.qty }));
-        
+
         const payload = {
             tipoEnvioTexto: tipoEnvioCalculado,
             costoEnvio: costoEnvio,
@@ -1303,34 +1377,69 @@ async function procesarCheckout() {
         };
 
         const { data: { session } } = await supabaseClient.auth.getSession();
-        
+
         const response = await fetch('https://elwzheytotfsxzrcsioz.supabase.co/functions/v1/create-flow-payment', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${session.access_token}`
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            signal // asociamos la señal para poder abortar
         });
+
+        // Si la petición fue abortada, no continuamos
+        if (signal.aborted) {
+            console.log('Pago cancelado por el usuario');
+            mostrarLoaderPago(false);
+            mostrarToast("Proceso de pago cancelado", "info");
+            abortController = null;
+            togglePagoButton(false);
+            return;
+        }
 
         const result = await response.json();
 
         if (!response.ok) throw new Error(result.error || 'Error al comunicarse con Flow');
         if (result.error) throw new Error(result.error);
 
-        await supabaseClient.from('cart_items').delete().eq('user_id', currentUser.id);
+        // Antes de redirigir, verificamos nuevamente que no se haya cancelado
+        if (signal.aborted) {
+            mostrarLoaderPago(false);
+            mostrarToast("Proceso de pago cancelado", "info");
+            abortController = null;
+            togglePagoButton(false);
+            return;
+        }
+
+        // Guardar el ID de la orden pendiente
         localStorage.setItem('papajose_pending_order', result.order_id);
 
-        // --- NUEVO: CERRAR EL CARRITO ANTES DE IR A FLOW ---
-        forceCloseCart(); 
-        
-        // Ir a Flow
+        // Vaciar carrito en BD y localStorage
+        await supabaseClient.from('cart_items').delete().eq('user_id', currentUser.id);
+        cart = [];
+        localStorage.removeItem('papajose_cart');
+        updateCartUI();
+
+        forceCloseCart();
+
+        // Redirigir a Flow
         window.location.href = result.url;
 
     } catch (error) {
-        console.error(error);
-        mostrarLoaderPago(false);
-        mostrarToast("Error: " + (error.message || "No se pudo conectar con el banco."), "error");
+        // Si el error es por aborto, no mostramos mensaje de error
+        if (error.name === 'AbortError') {
+            console.log('Fetch abortado por el usuario');
+            mostrarLoaderPago(false);
+            mostrarToast("Proceso de pago cancelado", "info");
+        } else {
+            console.error(error);
+            mostrarLoaderPago(false);
+            mostrarToast("Error: " + (error.message || "No se pudo conectar con el banco."), "error");
+        }
+    } finally {
+        abortController = null;
+        togglePagoButton(false);
     }
 }
 
@@ -1728,32 +1837,6 @@ async function cambiarEstadoPedido(id, nuevoEstado) {
 // =========================================================================
 // TOAST Y UTILIDADES
 // =========================================================================
-
-// Herramienta 1: Valida RUT chileno usando el algoritmo Módulo 11
-function validarRUT(rut) {
-    let valor = rut.replace(/\./g, '').replace(/-/g, '').trim();
-    if(valor.length < 8) return false;
-    let cuerpo = valor.slice(0, -1);
-    let dv = valor.slice(-1).toUpperCase();
-    if (!/^[0-9]+$/.test(cuerpo)) return false;
-    let suma = 0; let multiplo = 2;
-    for (let i = 1; i <= cuerpo.length; i++) {
-        let index = multiplo * valor.charAt(cuerpo.length - i);
-        suma = suma + index;
-        if (multiplo < 7) { multiplo = multiplo + 1; } else { multiplo = 2; }
-    }
-    let dvEsperado = 11 - (suma % 11);
-    dvEsperado = (dvEsperado == 11) ? 0 : dvEsperado;
-    dvEsperado = (dvEsperado == 10) ? "K" : dvEsperado;
-    return dv == dvEsperado;
-}
-
-// Herramienta 2: Valida que el teléfono sea chileno (+569 o 9 seguido de 8 números)
-function validarTelefono(telefono) {
-    const regex = /^(\+?56)?9\d{8}$/;
-    return regex.test(telefono.replace(/\s/g, ''));
-}
-
 function mostrarToast(msg, type = 'success') {
     const t = document.getElementById('toast-modal');
     const c = document.getElementById('toast-content');
