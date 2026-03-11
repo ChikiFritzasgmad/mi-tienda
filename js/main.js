@@ -45,6 +45,14 @@ const regionesYComunas = {
     "Magallanes": ["Punta Arenas", "Laguna Blanca", "Río Verde", "San Gregorio", "Cabo de Hornos", "Antártica", "Porvenir", "Primavera", "Timaukel", "Natales", "Torres del Paine"]
 };
 
+// ==========================================
+// NUEVAS VARIABLES: ENVÍOS Y CATEGORÍAS
+// ==========================================
+// Comunas céntricas de la RM (el resto de la RM se considerará "Afueras")
+const comunasCentroRM = ["Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura"];
+let configEnvio = { centro: 2500, afueras: 3500 }; // Valores por defecto, se sobrescriben con Supabase
+let categoriasDB = []; // Se llena dinámicamente desde Supabase
+
 // Variables de estado
 let db = []; 
 let adminDb = []; 
@@ -58,7 +66,7 @@ let lastSearch = '';
 
 let hasOpenedCartAutomatically = false; 
 let searchTimeout; 
-let costoEnvio = 2800; 
+let costoEnvio = 0; 
 let totalPagarFinal = 0;
 
 let currentUser = null;
@@ -71,7 +79,7 @@ let filtroAdminTexto = '';
 const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESin Foto%3C/text%3E%3C/svg%3E";
 
 // =========================================================================
-// EVENTOS INICIALES
+// EVENTOS INICIALES Y CARGA ASÍNCRONA
 // =========================================================================
 window.addEventListener('popstate', function(event) {
     // Si hay un pago en curso, lo cancelamos
@@ -129,7 +137,7 @@ window.addEventListener('popstate', function(event) {
     }
 });
 
-window.addEventListener('DOMContentLoaded', () => { 
+window.addEventListener('DOMContentLoaded', async () => { 
     // Ocultar loader si estaba visible (por ejemplo, al volver de Flow)
     const paymentLoader = document.getElementById('payment-loader-modal');
     if (paymentLoader && !paymentLoader.classList.contains('hidden')) {
@@ -137,11 +145,14 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('locked');
     }
     
+    // Cargar datos dinámicos antes de procesar el frontend
+    await cargarCategoriasBD();
+    await cargarConfiguracionEnviosBD();
+
     verificarSesion();
     cargarProductosPagina(1); 
     updateCartUI();
     initSwipeGestures();
-    generarMenuCategorias();
     cargarSelectoresRegion(); 
     
     // Preview de imagen en admin
@@ -158,6 +169,42 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// =========================================================================
+// FETCH CATEGORÍAS Y ENVÍOS DESDE SUPABASE
+// =========================================================================
+async function cargarCategoriasBD() {
+    try {
+        const { data, error } = await supabaseClient.from('categorias').select('*').order('nombre');
+        if (!error && data && data.length > 0) {
+            categoriasDB = data;
+        } else {
+            // Fallback por si la tabla aún no tiene datos o no la has creado
+            categoriasDB = [
+                { id: 1, nombre: "Hogar" }, { id: 2, nombre: "Electrónica y accesorios" },
+                { id: 3, nombre: "Belleza e Higiene" }, { id: 4, nombre: "Deportes y Outdoor" },
+                { id: 5, nombre: "Juguetes" }, { id: 6, nombre: "Ropa y Accesorios" },
+                { id: 7, nombre: "Vehiculos" }, { id: 8, nombre: "Otros" }
+            ];
+        }
+        generarMenuCategorias();
+        if (typeof actualizarSelectCategoriasAdmin === 'function') {
+            actualizarSelectCategoriasAdmin();
+        }
+    } catch (e) { console.error("Error cargando categorías:", e); }
+}
+
+async function cargarConfiguracionEnviosBD() {
+    try {
+        const { data, error } = await supabaseClient.from('configuracion').select('*').in('clave', ['envio_rm_centro', 'envio_rm_afueras']);
+        if (!error && data) {
+            data.forEach(item => {
+                if (item.clave === 'envio_rm_centro') configEnvio.centro = Number(item.valor);
+                if (item.clave === 'envio_rm_afueras') configEnvio.afueras = Number(item.valor);
+            });
+        }
+    } catch (e) { console.error("Error cargando configuración:", e); }
+}
 
 // =========================================================================
 // FUNCIONES DE REGIONES Y COMUNAS
@@ -192,6 +239,12 @@ function actualizarComunas(prefijo) {
         selectComuna.disabled = true;
     }
     actualizarOpcionEnvioSegunDireccion();
+}
+
+function esRegionMetropolitana(direccionOrRegion) {
+    if (!direccionOrRegion) return false;
+    const lower = direccionOrRegion.toLowerCase();
+    return lower.includes('metropolitana') || lower.includes('rm') || lower.includes('santiago');
 }
 
 // =========================================================================
@@ -364,6 +417,7 @@ function filtrar(cat, btnElement) {
 
 function generarMenuCategorias() {
     const nav = document.getElementById('nav-categorias');
+    if (!nav) return;
     nav.innerHTML = ''; 
     const btnTodas = document.createElement('button');
     
@@ -375,18 +429,12 @@ function generarMenuCategorias() {
     btnTodas.onclick = () => filtrar('todas', btnTodas);
     btnTodas.innerHTML = `<i class="fa fa-border-all text-beige group-hover:scale-110 transition w-5 text-center"></i> Todo`;
     nav.appendChild(btnTodas);
-    
-    const categoriasManuales = [
-        "Hogar", "Electrónica y accesorios", "Belleza e Higiene", 
-        "Deportes y Outdoor", "Juguetes", "Ropa y Accesorios", 
-        "Vehiculos", "Otros"
-    ];
 
-    categoriasManuales.forEach(cat => {
+    categoriasDB.forEach(cat => {
         const btn = document.createElement('button');
         btn.className = "w-full text-left px-5 py-3 rounded-xl hover:bg-gray-50 font-medium text-gray-600 flex items-center gap-3 transition-all group";
-        btn.onclick = () => filtrar(cat, btn);
-        btn.innerHTML = `<i class="fa fa-chevron-right text-gray-300 text-xs group-hover:text-beige transition"></i> ${cat}`;
+        btn.onclick = () => filtrar(cat.nombre, btn);
+        btn.innerHTML = `<i class="fa fa-chevron-right text-gray-300 text-xs group-hover:text-beige transition"></i> ${escapeHTML(cat.nombre)}`;
         nav.appendChild(btn);
     });
 }
@@ -396,6 +444,8 @@ function renderDestacados(lista) {
     const container = document.getElementById('hero-destacados-container');
     const section = document.getElementById('hero-section');
     
+    if (!container || !section) return;
+
     if (destacados.length === 0) {
         section.classList.add('hidden'); 
         return;
@@ -414,7 +464,6 @@ function renderDestacados(lista) {
         </div>
     `).join('');
 }
-
 // =========================================================================
 // SISTEMA DE USUARIOS Y PERFILES
 // =========================================================================
@@ -991,25 +1040,20 @@ async function cerrarSesion() {
 }
 
 // =========================================================================
-// LÓGICA DE ENVÍO
+// LÓGICA DE ENVÍO Y CÁLCULOS
 // =========================================================================
-function esRegionMetropolitana(direccionOrRegion) {
-    if (!direccionOrRegion) return false;
-    const lower = direccionOrRegion.toLowerCase();
-    return lower.includes('metropolitana') || lower.includes('rm') || lower.includes('santiago');
-}
-
 function actualizarOpcionEnvioSegunDireccion() {
     let esRM = false;
+    let esCentro = false;
     let comunaSeleccionada = '';
     
     const selectorRegRegion = document.getElementById('reg-region');
     const selectorEditRegion = document.getElementById('edit-region');
     
-    if (selectorEditRegion && selectorEditRegion.value && !document.getElementById('profile-edit').classList.contains('hidden')) {
+    if (selectorEditRegion && selectorEditRegion.value && !document.getElementById('profile-edit')?.classList.contains('hidden')) {
         esRM = esRegionMetropolitana(selectorEditRegion.value);
         comunaSeleccionada = document.getElementById('edit-comuna').value;
-    } else if (selectorRegRegion && selectorRegRegion.value && !document.getElementById('auth-register-view').classList.contains('hidden')) {
+    } else if (selectorRegRegion && selectorRegRegion.value && !document.getElementById('auth-register-view')?.classList.contains('hidden')) {
         esRM = esRegionMetropolitana(selectorRegRegion.value);
         comunaSeleccionada = document.getElementById('reg-comuna').value;
     } else if (userProfile) {
@@ -1018,7 +1062,12 @@ function actualizarOpcionEnvioSegunDireccion() {
     }
 
     if (esRM) {
-        costoEnvio = 3500;
+        if (comunasCentroRM.includes(comunaSeleccionada)) {
+            costoEnvio = configEnvio.centro;
+            esCentro = true;
+        } else {
+            costoEnvio = configEnvio.afueras;
+        }
     } else {
         costoEnvio = 0;
     }
@@ -1029,7 +1078,7 @@ function actualizarOpcionEnvioSegunDireccion() {
     if (envioMontoEl && envioLabelEl) {
         if (userProfile || (selectorRegRegion && selectorRegRegion.value)) {
             if (esRM) {
-                envioLabelEl.innerText = "Envío RM:";
+                envioLabelEl.innerText = esCentro ? "Envío RM (Centro):" : "Envío RM (Afueras):";
                 envioMontoEl.innerText = `+$${costoEnvio.toLocaleString()}`;
             } else {
                 envioLabelEl.innerText = "Envío a Regiones:";
@@ -1043,8 +1092,35 @@ function actualizarOpcionEnvioSegunDireccion() {
     calcularTotal();
 }
 
+function calcularTotal() {
+    let subtotal = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
+    let envio = 0;
+    
+    if (userProfile) {
+         envio = costoEnvio; 
+    }
+
+    totalPagarFinal = subtotal + envio;
+    
+    const subtotalFmt = `$${subtotal.toLocaleString()}`;
+    const domEls = ['mobile-total-sticky', 'desktop-floating-total', 'header-total', 'cart-subtotal'];
+    domEls.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.innerText = subtotalFmt;
+    });
+
+    const totalEl = document.getElementById('cart-total');
+    if(totalEl) totalEl.innerText = `$${totalPagarFinal.toLocaleString()}`;
+    
+    const headerTotal = document.getElementById('header-total');
+    if(headerTotal) {
+        if(cart.length > 0) headerTotal.classList.add('opacity-100'); 
+        else headerTotal.classList.remove('opacity-100');
+    }
+}
+
 // =========================================================================
-// CARRITO Y CHECKOUT
+// CARRITO DE COMPRAS
 // =========================================================================
 async function addToCart(id) {
     const p = db.find(x => x.id === id);
@@ -1199,30 +1275,6 @@ function updateCartUI() {
     calcularTotal();
 }
 
-function calcularTotal() {
-    let subtotal = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
-    
-    let envio = 0;
-    if (userProfile) {
-         envio = costoEnvio; 
-    }
-
-    totalPagarFinal = subtotal + envio;
-    
-    const subtotalFmt = `$${subtotal.toLocaleString()}`;
-    document.getElementById('mobile-total-sticky').innerText = subtotalFmt;
-    document.getElementById('desktop-floating-total').innerText = subtotalFmt;
-    document.getElementById('header-total').innerText = subtotalFmt;
-    
-    const subEl = document.getElementById('cart-subtotal');
-    if (subEl) subEl.innerText = subtotalFmt;
-
-    document.getElementById('cart-total').innerText = `$${totalPagarFinal.toLocaleString()}`;
-    
-    if(cart.length > 0) document.getElementById('header-total').classList.add('opacity-100'); 
-    else document.getElementById('header-total').classList.remove('opacity-100');
-}
-
 async function sincronizarCarritoConBD() {
     if (!currentUser) return;
     
@@ -1314,6 +1366,9 @@ async function syncCartToDB() {
     }
 }
 
+// =========================================================================
+// CHECKOUT Y PAGO CON FLOW
+// =========================================================================
 function mostrarLoaderPago(mostrar) {
     const loader = document.getElementById('payment-loader-modal');
     if (mostrar) {
@@ -1333,7 +1388,6 @@ function mostrarLoaderPago(mostrar) {
     }
 }
 
-// Control de doble clic en el botón de pagar
 function togglePagoButton(disabled) {
     const btnPagar = document.getElementById('btn-checkout');
     if (btnPagar) {
@@ -1353,7 +1407,6 @@ async function procesarCheckout() {
         return;
     }
 
-    // Crear un nuevo AbortController para esta operación
     abortController = new AbortController();
     const signal = abortController.signal;
 
@@ -1361,7 +1414,11 @@ async function procesarCheckout() {
     togglePagoButton(true);
 
     try {
-        let tipoEnvioCalculado = esRegionMetropolitana(userProfile.region || userProfile.direccion_defecto) ? "rm" : "regiones";
+        let esCentro = comunasCentroRM.includes(userProfile.comuna);
+        let tipoEnvioCalculado = esRegionMetropolitana(userProfile.region || userProfile.direccion_defecto) 
+            ? (esCentro ? "rm_centro" : "rm_afueras") 
+            : "regiones";
+
         let tipoDocTexto = "Boleta";
         for (const r of document.getElementsByName('tipo_doc')) { if (r.checked) tipoDocTexto = r.value; }
 
@@ -1385,10 +1442,9 @@ async function procesarCheckout() {
                 'Authorization': `Bearer ${session.access_token}`
             },
             body: JSON.stringify(payload),
-            signal // asociamos la señal para poder abortar
+            signal 
         });
 
-        // Si la petición fue abortada, no continuamos
         if (signal.aborted) {
             console.log('Pago cancelado por el usuario');
             mostrarLoaderPago(false);
@@ -1403,7 +1459,6 @@ async function procesarCheckout() {
         if (!response.ok) throw new Error(result.error || 'Error al comunicarse con Flow');
         if (result.error) throw new Error(result.error);
 
-        // Antes de redirigir, verificamos nuevamente que no se haya cancelado
         if (signal.aborted) {
             mostrarLoaderPago(false);
             mostrarToast("Proceso de pago cancelado", "info");
@@ -1412,22 +1467,17 @@ async function procesarCheckout() {
             return;
         }
 
-        // Guardar el ID de la orden pendiente
         localStorage.setItem('papajose_pending_order', result.order_id);
 
-        // Vaciar carrito en BD y localStorage
         await supabaseClient.from('cart_items').delete().eq('user_id', currentUser.id);
         cart = [];
         localStorage.removeItem('papajose_cart');
         updateCartUI();
 
         forceCloseCart();
-
-        // Redirigir a Flow
         window.location.href = result.url;
 
     } catch (error) {
-        // Si el error es por aborto, no mostramos mensaje de error
         if (error.name === 'AbortError') {
             console.log('Fetch abortado por el usuario');
             mostrarLoaderPago(false);
@@ -1442,7 +1492,6 @@ async function procesarCheckout() {
         togglePagoButton(false);
     }
 }
-
 // =========================================================================
 // TARJETAS Y MODAL DE PRODUCTO
 // =========================================================================
@@ -1515,7 +1564,7 @@ function closeProductModal() {
 }
 
 // =========================================================================
-// ADMINISTRADOR
+// ADMINISTRADOR (Con pestañas de Categorías y Envíos)
 // =========================================================================
 function openAdminModal() {
     history.pushState({modal: 'admin'}, null, "");
@@ -1538,35 +1587,127 @@ function switchAdminTab(tab) {
         return;
     }
     
-    document.getElementById('admin-productos-view').classList.toggle('hidden', tab !== 'productos');
-    document.getElementById('admin-nuevo-view').classList.toggle('hidden', tab !== 'nuevo');
-    document.getElementById('admin-pedidos-view').classList.toggle('hidden', tab !== 'pedidos');
+    // Ocultar/Mostrar Vistas dinámicamente
+    ['productos', 'nuevo', 'pedidos', 'categorias', 'envios'].forEach(v => {
+        const el = document.getElementById(`admin-${v}-view`);
+        if(el) el.classList.toggle('hidden', tab !== v);
+    });
     
-    const tabs = ['productos', 'nuevo', 'pedidos'];
+    // Estilos de botones de Pestañas
+    const tabs = ['productos', 'nuevo', 'pedidos', 'categorias', 'envios'];
     tabs.forEach(t => {
         const btn = document.getElementById(`tab-${t}`);
-        if (t === tab) {
-            btn.classList.add('text-beige', 'border-beige');
-            btn.classList.remove('text-gray-500');
-        } else {
-            btn.classList.remove('text-beige', 'border-beige');
-            btn.classList.add('text-gray-500');
+        if(btn) {
+            if (t === tab) {
+                btn.classList.add('text-beige', 'border-beige');
+                btn.classList.remove('text-gray-500');
+            } else {
+                btn.classList.remove('text-beige', 'border-beige');
+                btn.classList.add('text-gray-500');
+            }
         }
     });
 
     if (tab === 'pedidos') cargarPedidosLogistica();
+    if (tab === 'categorias') renderListaCategoriasAdmin();
+    if (tab === 'envios') renderConfiguracionEnviosAdmin();
 }
 
-function cancelarEdicion() {
-    document.getElementById('producto-form').reset();
-    document.getElementById('producto-id').value = '';
-    document.getElementById('imagen-actual').classList.add('hidden');
-    document.getElementById('btn-guardar-producto').innerText = 'Crear Producto';
-    document.getElementById('form-titulo').innerText = 'Agregar Nuevo Producto';
-    productoEnEdicion = null;
-    switchAdminTab('productos');
+// -------------------------------------
+// LÓGICA DE CATEGORÍAS (ADMIN)
+// -------------------------------------
+function actualizarSelectCategoriasAdmin() {
+    const select = document.getElementById('producto-categoria');
+    const filterContainer = document.getElementById('admin-category-filters');
+    
+    if(select) {
+        select.innerHTML = '<option value="">Selecciona Categoría...</option>' + 
+            categoriasDB.map(c => `<option value="${escapeHTML(c.nombre)}">${escapeHTML(c.nombre)}</option>`).join('');
+    }
+    
+    if(filterContainer) {
+        filterContainer.innerHTML = '<button onclick="filtrarAdminPorCategoria(\'\')" class="bg-white text-gray-700 px-3 py-1 rounded-lg text-xs font-bold border hover:bg-gray-50">Todas</button>' +
+            categoriasDB.map(c => `<button onclick="filtrarAdminPorCategoria('${escapeHTML(c.nombre)}')" class="bg-white text-gray-700 px-3 py-1 rounded-lg text-xs font-bold border hover:bg-gray-50" data-categoria="${escapeHTML(c.nombre)}">${escapeHTML(c.nombre)}</button>`).join('');
+    }
 }
 
+function renderListaCategoriasAdmin() {
+    const container = document.getElementById('admin-categorias-list');
+    if(!container) return; // Si aún no has agregado el HTML de esta vista, esto evita errores
+    
+    if(categoriasDB.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">No hay categorías. Crea una.</p>';
+        return;
+    }
+    container.innerHTML = categoriasDB.map(c => `
+        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center justify-between mb-2">
+            <span class="font-bold text-sm text-gray-800">${escapeHTML(c.nombre)}</span>
+            <button onclick="eliminarCategoriaBD(${c.id}, '${escapeHTML(c.nombre)}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fa fa-trash"></i> Eliminar</button>
+        </div>
+    `).join('');
+}
+
+async function guardarCategoriaNueva(e) {
+    if(e) e.preventDefault();
+    const input = document.getElementById('nueva-categoria-nombre');
+    if(!input) return;
+    const nombre = input.value.trim();
+    if(!nombre) { mostrarToast("El nombre no puede estar vacío", "error"); return; }
+    
+    const { error } = await supabaseClient.from('categorias').insert({ nombre });
+    if(error) { mostrarToast("Error al guardar categoría", "error"); return; }
+    
+    mostrarToast("Categoría agregada exitosamente");
+    input.value = '';
+    await cargarCategoriasBD(); 
+    renderListaCategoriasAdmin();
+}
+
+async function eliminarCategoriaBD(id, nombre) {
+    if(!confirm(`¿Estás seguro de eliminar la categoría "${nombre}"? Los productos seguirán existiendo, pero sin esta categoría.`)) return;
+    const { error } = await supabaseClient.from('categorias').delete().eq('id', id);
+    if(error) { mostrarToast("Error al eliminar", "error"); return; }
+    
+    mostrarToast("Categoría eliminada", "success");
+    await cargarCategoriasBD();
+    renderListaCategoriasAdmin();
+}
+
+// -------------------------------------
+// LÓGICA DE ENVÍOS (ADMIN)
+// -------------------------------------
+function renderConfiguracionEnviosAdmin() {
+    const inputCentro = document.getElementById('admin-envio-centro');
+    const inputAfueras = document.getElementById('admin-envio-afueras');
+    if(inputCentro) inputCentro.value = configEnvio.centro;
+    if(inputAfueras) inputAfueras.value = configEnvio.afueras;
+}
+
+async function guardarConfiguracionEnvios(e) {
+    if(e) e.preventDefault();
+    const btn = document.getElementById('btn-guardar-envios');
+    if(btn) { btn.innerText = "Guardando..."; btn.disabled = true; }
+    
+    const valCentro = document.getElementById('admin-envio-centro')?.value;
+    const valAfueras = document.getElementById('admin-envio-afueras')?.value;
+    
+    try {
+        await supabaseClient.from('configuracion').upsert({ id: 1, clave: 'envio_rm_centro', valor: valCentro });
+        await supabaseClient.from('configuracion').upsert({ id: 2, clave: 'envio_rm_afueras', valor: valAfueras });
+        
+        await cargarConfiguracionEnviosBD();
+        actualizarOpcionEnvioSegunDireccion();
+        mostrarToast("Configuración de envíos actualizada", "success");
+    } catch(err) {
+        mostrarToast("Error al guardar envíos", "error");
+    } finally {
+        if(btn) { btn.innerText = "Guardar Precios"; btn.disabled = false; }
+    }
+}
+
+// -------------------------------------
+// LÓGICA DE PRODUCTOS (ADMIN)
+// -------------------------------------
 async function cargarProductosAdmin() {
     const { data, error } = await supabaseClient.from('products').select('*').order('id', { ascending: false });
     if (error) { mostrarToast("Error al cargar", "error"); return; }
@@ -1647,7 +1788,11 @@ function editarProducto(id) {
     document.getElementById('producto-sku').value = data.numero_producto || '';
     document.getElementById('producto-precio').value = data.precio;
     document.getElementById('producto-stock').value = data.stock;
+    
+    // Actualizar el select de categorías por si hubo cambios y luego seleccionar
+    actualizarSelectCategoriasAdmin();
     document.getElementById('producto-categoria').value = data.categoria || '';
+    
     document.getElementById('producto-desc').value = data.descripcion || '';
     document.getElementById('producto-imagen-url').value = data.foto || '';
     
@@ -1660,6 +1805,16 @@ function editarProducto(id) {
     document.getElementById('btn-guardar-producto').innerText = 'Guardar Cambios';
     document.getElementById('form-titulo').innerText = `Editar: ${escapeHTML(data.producto)}`;
     switchAdminTab('nuevo');
+}
+
+function cancelarEdicion() {
+    document.getElementById('producto-form').reset();
+    document.getElementById('producto-id').value = '';
+    document.getElementById('imagen-actual').classList.add('hidden');
+    document.getElementById('btn-guardar-producto').innerText = 'Crear Producto';
+    document.getElementById('form-titulo').innerText = 'Agregar Nuevo Producto';
+    productoEnEdicion = null;
+    switchAdminTab('productos');
 }
 
 async function guardarProducto(e) {
@@ -1727,7 +1882,7 @@ async function eliminarProducto(id) {
 }
 
 // =========================================================================
-// PEDIDOS EN ADMIN (optimizado)
+// PEDIDOS EN ADMIN
 // =========================================================================
 async function cargarPedidosLogistica() {
     const container = document.getElementById('admin-lista-pedidos');
