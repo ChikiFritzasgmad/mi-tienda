@@ -49,7 +49,7 @@ const regionesYComunas = {
 // NUEVAS VARIABLES: ENVÍOS Y CATEGORÍAS
 // ==========================================
 // Comunas céntricas de la RM (el resto de la RM se considerará "Afueras")
-const comunasCentroRM = ["Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura"];
+const comunasCentroRM = ["Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura","Puente Alto","San Bernardo"];
 let configEnvio = { centro: 2500, afueras: 3500 }; // Valores por defecto, se sobrescriben con Supabase
 let categoriasDB = []; // Se llena dinámicamente desde Supabase
 
