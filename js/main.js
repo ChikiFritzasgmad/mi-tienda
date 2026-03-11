@@ -58,7 +58,7 @@ let lastSearch = '';
 
 let hasOpenedCartAutomatically = false; 
 let searchTimeout; 
-let costoEnvio = 3500; 
+let costoEnvio = 2800; 
 let totalPagarFinal = 0;
 
 let currentUser = null;
