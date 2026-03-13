@@ -451,7 +451,11 @@ function renderDestacados(lista) {
         return;
     }
     section.classList.remove('hidden'); 
-    container.innerHTML = destacados.map(p => `
+    container.innerHTML = destacados.map(p => {
+        // AGREGADO: Botón de editar directo para admin en destacados
+        const adminEditBtn = (userProfile && userProfile.esAdmin) ? `<button onclick="event.stopPropagation(); editarProductoDesdeCatalogo(${p.id})" class="mt-2 w-full text-center bg-amber-100 text-amber-800 font-bold py-1.5 rounded-lg text-[10px] uppercase hover:bg-amber-200 transition"><i class="fa fa-pen"></i> Editar Admin</button>` : '';
+
+        return `
         <div class="slider-card bg-white rounded-2xl border border-gray-200 overflow-hidden relative h-full flex flex-col shadow-sm cursor-pointer hover:shadow-md transition-all" onclick="openProduct(${p.id})">
             <div class="relative h-48 md:h-56 bg-white p-2">
                 <img src="${escapeHTML(p.img)}" class="w-full h-full object-contain" alt="${escapeHTML(p.nombre)}" loading="lazy" width="200" height="200" onerror="this.onerror=null; this.src='${PLACEHOLDER_SVG}'; this.classList.add('img-placeholder')">
@@ -460,9 +464,10 @@ function renderDestacados(lista) {
             <div class="p-3 flex flex-col flex-1">
                 <h3 class="font-bold text-gray-800 text-xs md:text-sm mb-1 line-clamp-2">${escapeHTML(p.nombre)}</h3>
                 <span class="text-sm md:text-lg font-black text-gray-900 mt-auto">$${p.precio.toLocaleString()}</span>
+                ${adminEditBtn}
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 // =========================================================================
 // SISTEMA DE USUARIOS Y PERFILES
@@ -535,6 +540,12 @@ function actualizarBotonesUsuario() {
         icon.classList.replace('text-beige', 'text-gray-400');
         if(mobileTxt) mobileTxt.innerText = "Mi Cuenta";
         if(adminMenuItem) adminMenuItem.classList.add('hidden');
+    }
+
+    // Refrescar la vista de los productos si ya están cargados para mostrar/ocultar el botón de editar
+    if (db && db.length > 0) {
+        renderGrid(db, currentPage);
+        renderDestacados(db);
     }
 }
 
@@ -1500,6 +1511,12 @@ function cardHTML(p) {
     const btnText = p.disponible ? "Agregar" : "Agotado";
     const action = p.disponible ? `addToCart(${p.id})` : "";
     const imageClass = p.disponible ? "" : "no-stock";
+    
+    // Botón exclusivo para administradores
+    const adminEditBtn = (userProfile && userProfile.esAdmin) 
+        ? `<button onclick="event.stopPropagation(); editarProductoDesdeCatalogo(${p.id})" class="mt-2 w-full text-center bg-amber-100 text-amber-800 font-bold py-1.5 rounded-lg text-[10px] uppercase hover:bg-amber-200 transition border border-amber-200"><i class="fa fa-pen"></i> Editar (Admin)</button>` 
+        : '';
+
     return `
         <div class="bg-white rounded-2xl border border-gray-100 hover:border-beige/50 transition-all duration-300 group hover:shadow-lg relative flex flex-col h-full overflow-hidden shadow-sm">
             <div class="relative h-48 md:h-56 bg-white p-2 cursor-pointer" onclick="openProduct(${p.id})">
@@ -1511,9 +1528,12 @@ function cardHTML(p) {
                 <h4 class="font-medium text-gray-800 text-sm mb-1 leading-snug line-clamp-2 grow">${escapeHTML(p.nombre)}</h4>
                 <p class="text-[10px] text-gray-400 font-mono mb-2">SKU: ${escapeHTML(p.sku)}</p>
                 <p class="text-[10px] text-gray-500">Stock: <span class="font-bold ${p.stock <= 3 ? 'text-red-500' : 'text-green-600'}">${p.stock}</span></p>
-                <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
-                    <span class="font-black text-lg text-gray-900">$${p.precio.toLocaleString()}</span>
-                    <button onclick="${action}" class="text-xs font-bold px-3 py-2 rounded-lg transition uppercase ${btnClass}">${btnText}</button>
+                <div class="flex flex-col mt-auto pt-2 border-t border-gray-50">
+                    <div class="flex items-center justify-between">
+                        <span class="font-black text-lg text-gray-900">$${p.precio.toLocaleString()}</span>
+                        <button onclick="${action}" class="text-xs font-bold px-3 py-2 rounded-lg transition uppercase ${btnClass}">${btnText}</button>
+                    </div>
+                    ${adminEditBtn}
                 </div>
             </div>
         </div>`;
@@ -1526,6 +1546,12 @@ function openProduct(id) {
     const btnState = p.disponible ? '' : 'disabled class="opacity-50 cursor-not-allowed bg-gray-300"';
     const btnTxt = p.disponible ? 'Agregar al Pedido' : 'Agotado';
     const action = p.disponible ? `addToCart(${p.id}); closeProductModal()` : '';
+    
+    // Botón exclusivo para administradores dentro del modal
+    const adminEditBtnModal = (userProfile && userProfile.esAdmin) 
+        ? `<button onclick="editarProductoDesdeCatalogo(${p.id})" class="w-full bg-amber-100 text-amber-800 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-amber-200 transition shadow-sm text-sm mt-3 border border-amber-200"><i class="fa fa-pen"></i> Editar en Admin</button>` 
+        : '';
+
     document.getElementById('modal-content').innerHTML = `
         <div class="flex flex-col h-full relative">
             <div class="flex-1 overflow-y-auto p-6 md:p-8 modal-body-scroll">
@@ -1549,7 +1575,10 @@ function openProduct(id) {
                         <span class="text-[10px] text-gray-400 font-bold uppercase">Precio</span>
                         <span class="text-2xl md:text-3xl font-black text-gray-900">$${p.precio.toLocaleString()}</span>
                     </div>
-                    <button onclick="${action}" ${btnState} class="flex-1 md:flex-none md:w-1/2 bg-black text-white py-3 md:py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm truncate px-2">${btnTxt}</button>
+                    <div class="flex-1 md:flex-none md:w-1/2 flex flex-col">
+                        <button onclick="${action}" ${btnState} class="w-full bg-black text-white py-3 md:py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-beige transition shadow-lg text-sm truncate px-2">${btnTxt}</button>
+                        ${adminEditBtnModal}
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -1561,6 +1590,31 @@ function closeProductModal() {
     document.getElementById('product-modal').classList.add('hidden'); 
     document.body.classList.remove('locked'); 
     history.back(); 
+}
+
+// Función mágica para editar directo desde el catálogo
+async function editarProductoDesdeCatalogo(id) {
+    if (!userProfile?.esAdmin) return;
+    
+    // Si el modal de producto está abierto, lo cerramos
+    const modal = document.getElementById('product-modal');
+    if (!modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('locked');
+    }
+    
+    mostrarToast("Abriendo editor...", "info");
+    
+    // Abrimos el panel de administrador
+    openAdminModal();
+    
+    // Nos aseguramos de que la base de datos de admin esté cargada
+    if (adminDb.length === 0) {
+        await cargarProductosAdmin();
+    }
+    
+    // Llamamos a la función normal de edición
+    editarProducto(id);
 }
 
 // =========================================================================
@@ -1633,7 +1687,7 @@ function actualizarSelectCategoriasAdmin() {
 
 function renderListaCategoriasAdmin() {
     const container = document.getElementById('admin-categorias-list');
-    if(!container) return; // Si aún no has agregado el HTML de esta vista, esto evita errores
+    if(!container) return; 
     
     if(categoriasDB.length === 0) {
         container.innerHTML = '<p class="text-gray-500 text-sm">No hay categorías. Crea una.</p>';
